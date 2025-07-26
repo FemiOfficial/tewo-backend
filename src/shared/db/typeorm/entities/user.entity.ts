@@ -33,7 +33,19 @@ export class User {
   passwordHash: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  fullName: string;
+  twoFactorSecret: string;
+
+  @Column({ type: 'boolean', default: false })
+  isTwoFactorEnabled: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  isEmailVerified: boolean;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  firstName: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  lastName: string;
 
   @Column({ type: 'varchar', length: 50, default: 'member' })
   role: string;

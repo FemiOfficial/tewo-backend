@@ -15,6 +15,15 @@ import { Audit } from './audit.entity';
 import { PublicTrustPage } from './public-trust-page.entity';
 import { DocumentRequest } from './document-request.entity';
 import { AuditLog } from './audit-log.entity';
+import { OrganizationCountry } from './organization-country.entity';
+
+export enum OrganizationStatus {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  SUSPENDED = 'suspended',
+  INACTIVE = 'inactive',
+}
 
 @Entity('organizations')
 export class Organization {
@@ -24,9 +33,6 @@ export class Organization {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 2 })
-  countryCode: string;
-
   @Column({ type: 'varchar', length: 50, default: 'free_tier' })
   subscriptionPlan: string;
 
@@ -35,6 +41,12 @@ export class Organization {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ type: 'varchar', length: 50, default: OrganizationStatus.PENDING })
+  status: OrganizationStatus;
+
+  @Column({ type: 'uuid' })
+  ownerId: string;
 
   // Relations
   @OneToMany(() => User, (user) => user.organization)
@@ -72,4 +84,7 @@ export class Organization {
 
   @OneToMany(() => AuditLog, (log) => log.organization)
   auditLogs: AuditLog[];
+
+  @OneToMany(() => OrganizationCountry, (orgCountry) => orgCountry.organization)
+  organizationCountries: OrganizationCountry[];
 }

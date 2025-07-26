@@ -1,6 +1,12 @@
 // Core entities
-export { Organization } from './organization.entity';
+export { Organization, OrganizationStatus } from './organization.entity';
 export { User } from './user.entity';
+export { AccessCode } from './access-code.entity';
+export { ServiceCountry } from './service-countries.entity';
+export {
+  OrganizationCountry,
+  OrganizationCountryStatus,
+} from './organization-country.entity';
 
 // Master library entities
 export { Framework } from './framework.entity';
