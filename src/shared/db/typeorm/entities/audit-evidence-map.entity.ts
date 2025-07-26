@@ -1,0 +1,25 @@
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Audit } from './audit.entity';
+import { Evidence } from './evidence.entity';
+
+@Entity('audit_evidence_map')
+export class AuditEvidenceMap {
+  @PrimaryColumn({ type: 'uuid' })
+  auditId: string;
+
+  @PrimaryColumn({ type: 'uuid' })
+  evidenceId: string;
+
+  // Relations
+  @ManyToOne(() => Audit, (audit) => audit.evidenceMappings, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'audit_id' })
+  audit: Audit;
+
+  @ManyToOne(() => Evidence, (evidence) => evidence.auditMappings, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'evidence_id' })
+  evidence: Evidence;
+}
