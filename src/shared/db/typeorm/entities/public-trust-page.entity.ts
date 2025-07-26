@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 
 @Entity('public_trust_pages')
 export class PublicTrustPage {
@@ -13,7 +13,7 @@ export class PublicTrustPage {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'varchar', length: 100, unique: true })
   publicSlug: string;
@@ -28,9 +28,11 @@ export class PublicTrustPage {
   visibleContent: Record<string, any>;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.publicTrustPages, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @ManyToOne(
+    () => Organization,
+    (organization) => organization.publicTrustPages,
+    { onDelete: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 }

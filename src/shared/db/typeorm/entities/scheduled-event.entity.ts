@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { CompanyControl } from './company-control.entity';
+import { OrganizationControl } from './organization-control.entity';
 import { User } from './user.entity';
 import { EventOccurrence } from './event-occurrence.entity';
 
@@ -16,7 +16,7 @@ export class ScheduledEvent {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyControlId: string;
+  organizationControlId: string;
 
   @Column({ type: 'varchar', length: 255 })
   title: string;
@@ -38,12 +38,12 @@ export class ScheduledEvent {
 
   // Relations
   @ManyToOne(
-    () => CompanyControl,
-    (companyControl) => companyControl.scheduledEvents,
+    () => OrganizationControl,
+    (organizationControl) => organizationControl.scheduledEvents,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'company_control_id' })
-  companyControl: CompanyControl;
+  @JoinColumn({ name: 'organization_control_id' })
+  organizationControl: OrganizationControl;
 
   @ManyToOne(() => User, (user) => user.createdScheduledEvents)
   @JoinColumn({ name: 'created_by_user_id' })

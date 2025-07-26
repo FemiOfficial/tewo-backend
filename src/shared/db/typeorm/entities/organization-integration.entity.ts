@@ -6,16 +6,16 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 import { ScanResult } from './scan-result.entity';
 
-@Entity('company_integrations')
-export class CompanyIntegration {
+@Entity('organization_integrations')
+export class OrganizationIntegration {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'varchar', length: 50 })
   integrationType: string;
@@ -30,11 +30,11 @@ export class CompanyIntegration {
   lastSyncAt: Date;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.integrations, {
+  @ManyToOne(() => Organization, (organization) => organization.integrations, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @OneToMany(() => ScanResult, (scanResult) => scanResult.integration)
   scanResults: ScanResult[];

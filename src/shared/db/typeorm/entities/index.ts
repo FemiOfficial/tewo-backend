@@ -1,5 +1,5 @@
 // Core entities
-export { Company } from './company.entity';
+export { Organization } from './organization.entity';
 export { User } from './user.entity';
 
 // Master library entities
@@ -7,8 +7,8 @@ export { Framework } from './framework.entity';
 export { ControlCategory } from './control-category.entity';
 export { Control } from './control.entity';
 
-// Company-specific compliance entities
-export { CompanyControl } from './company-control.entity';
+// Organization-specific compliance entities
+export { OrganizationControl } from './organization-control.entity';
 export { ScheduledEvent } from './scheduled-event.entity';
 export { EventOccurrence } from './event-occurrence.entity';
 export { EventAttendee } from './event-attendee.entity';
@@ -16,7 +16,7 @@ export { Evidence } from './evidence.entity';
 export { AuditLog } from './audit-log.entity';
 
 // Integration and scanning entities
-export { CompanyIntegration } from './company-integration.entity';
+export { OrganizationIntegration } from './organization-integration.entity';
 export { ScanResult } from './scan-result.entity';
 
 // Policy and signature entities

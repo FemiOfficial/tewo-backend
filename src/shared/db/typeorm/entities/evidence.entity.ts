@@ -7,7 +7,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { CompanyControl } from './company-control.entity';
+import { OrganizationControl } from './organization-control.entity';
 import { EventOccurrence } from './event-occurrence.entity';
 import { User } from './user.entity';
 import { AuditEvidenceMap } from './audit-evidence-map.entity';
@@ -18,7 +18,7 @@ export class Evidence {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyControlId: string;
+  organizationControlId: string;
 
   @Column({ type: 'uuid', nullable: true })
   eventOccurrenceId: string;
@@ -43,12 +43,12 @@ export class Evidence {
 
   // Relations
   @ManyToOne(
-    () => CompanyControl,
-    (companyControl) => companyControl.evidence,
+    () => OrganizationControl,
+    (organizationControl) => organizationControl.evidence,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'company_control_id' })
-  companyControl: CompanyControl;
+  @JoinColumn({ name: 'organization_control_id' })
+  organizationControl: OrganizationControl;
 
   @ManyToOne(
     () => EventOccurrence,
@@ -62,6 +62,6 @@ export class Evidence {
   @JoinColumn({ name: 'uploaded_by_user_id' })
   uploadedByUser: User;
 
-  @OneToMany(() => AuditEvidenceMap, evidenceMap => evidenceMap.evidence)
+  @OneToMany(() => AuditEvidenceMap, (evidenceMap) => evidenceMap.evidence)
   auditMappings: AuditEvidenceMap[];
 }

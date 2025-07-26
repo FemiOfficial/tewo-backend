@@ -8,8 +8,8 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Company } from './company.entity';
-import { CompanyControl } from './company-control.entity';
+import { Organization } from './organization.entity';
+import { OrganizationControl } from './organization-control.entity';
 import { ScheduledEvent } from './scheduled-event.entity';
 import { EventOccurrence } from './event-occurrence.entity';
 import { EventAttendee } from './event-attendee.entity';
@@ -24,7 +24,7 @@ export class User {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
@@ -45,15 +45,17 @@ export class User {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.users, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @ManyToOne(() => Organization, (organization) => organization.users, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @OneToMany(
-    () => CompanyControl,
-    (companyControl) => companyControl.assignedUser,
+    () => OrganizationControl,
+    (organizationControl) => organizationControl.assignedUser,
   )
-  assignedControls: CompanyControl[];
+  assignedControls: OrganizationControl[];
 
   @OneToMany(() => ScheduledEvent, (event) => event.createdByUser)
   createdScheduledEvents: ScheduledEvent[];

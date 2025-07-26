@@ -7,20 +7,20 @@ import {
   OneToMany,
   Unique,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 import { Control } from './control.entity';
 import { User } from './user.entity';
 import { ScheduledEvent } from './scheduled-event.entity';
 import { Evidence } from './evidence.entity';
 
-@Entity('company_controls')
-@Unique(['companyId', 'controlId'])
-export class CompanyControl {
+@Entity('organization_controls')
+@Unique(['organizationId', 'controlId'])
+export class OrganizationControl {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'int' })
   controlId: number;
@@ -35,13 +35,15 @@ export class CompanyControl {
   assignedUserId: string;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.companyControls, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @ManyToOne(
+    () => Organization,
+    (organization) => organization.organizationControls,
+    { onDelete: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
-  @ManyToOne(() => Control, (control) => control.companyControls)
+  @ManyToOne(() => Control, (control) => control.organizationControls)
   @JoinColumn({ name: 'control_id' })
   control: Control;
 
@@ -49,9 +51,9 @@ export class CompanyControl {
   @JoinColumn({ name: 'assigned_user_id' })
   assignedUser: User;
 
-  @OneToMany(() => ScheduledEvent, (event) => event.companyControl)
+  @OneToMany(() => ScheduledEvent, (event) => event.organizationControl)
   scheduledEvents: ScheduledEvent[];
 
-  @OneToMany(() => Evidence, (evidence) => evidence.companyControl)
+  @OneToMany(() => Evidence, (evidence) => evidence.organizationControl)
   evidence: Evidence[];
 }

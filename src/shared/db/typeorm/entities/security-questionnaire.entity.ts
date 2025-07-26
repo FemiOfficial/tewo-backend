@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 
 @Entity('security_questionnaires')
 export class SecurityQuestionnaire {
@@ -14,7 +14,7 @@ export class SecurityQuestionnaire {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'text' })
   question: string;
@@ -26,9 +26,11 @@ export class SecurityQuestionnaire {
   createdAt: Date;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.securityQuestionnaires, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @ManyToOne(
+    () => Organization,
+    (organization) => organization.securityQuestionnaires,
+    { onDelete: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 }

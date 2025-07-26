@@ -7,8 +7,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { CompanyControl } from './company-control.entity';
-import { CompanyIntegration } from './company-integration.entity';
+import { OrganizationControl } from './organization-control.entity';
+import { OrganizationIntegration } from './organization-integration.entity';
 import { Policy } from './policy.entity';
 import { SecurityQuestionnaire } from './security-questionnaire.entity';
 import { Audit } from './audit.entity';
@@ -16,8 +16,8 @@ import { PublicTrustPage } from './public-trust-page.entity';
 import { DocumentRequest } from './document-request.entity';
 import { AuditLog } from './audit-log.entity';
 
-@Entity('companies')
-export class Company {
+@Entity('organizations')
+export class Organization {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -37,33 +37,39 @@ export class Company {
   updatedAt: Date;
 
   // Relations
-  @OneToMany(() => User, (user) => user.company)
+  @OneToMany(() => User, (user) => user.organization)
   users: User[];
 
-  @OneToMany(() => CompanyControl, (companyControl) => companyControl.company)
-  companyControls: CompanyControl[];
+  @OneToMany(
+    () => OrganizationControl,
+    (organizationControl) => organizationControl.organization,
+  )
+  organizationControls: OrganizationControl[];
 
-  @OneToMany(() => CompanyIntegration, (integration) => integration.company)
-  integrations: CompanyIntegration[];
+  @OneToMany(
+    () => OrganizationIntegration,
+    (integration) => integration.organization,
+  )
+  integrations: OrganizationIntegration[];
 
-  @OneToMany(() => Policy, (policy) => policy.company)
+  @OneToMany(() => Policy, (policy) => policy.organization)
   policies: Policy[];
 
   @OneToMany(
     () => SecurityQuestionnaire,
-    (questionnaire) => questionnaire.company,
+    (questionnaire) => questionnaire.organization,
   )
   securityQuestionnaires: SecurityQuestionnaire[];
 
-  @OneToMany(() => Audit, (audit) => audit.company)
+  @OneToMany(() => Audit, (audit) => audit.organization)
   audits: Audit[];
 
-  @OneToMany(() => PublicTrustPage, (trustPage) => trustPage.company)
+  @OneToMany(() => PublicTrustPage, (trustPage) => trustPage.organization)
   publicTrustPages: PublicTrustPage[];
 
-  @OneToMany(() => DocumentRequest, (request) => request.company)
+  @OneToMany(() => DocumentRequest, (request) => request.organization)
   documentRequests: DocumentRequest[];
 
-  @OneToMany(() => AuditLog, (log) => log.company)
+  @OneToMany(() => AuditLog, (log) => log.organization)
   auditLogs: AuditLog[];
 }

@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 import { User } from './user.entity';
 
 @Entity('document_requests')
@@ -15,7 +15,7 @@ export class DocumentRequest {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'varchar', length: 255 })
   requesterEmail: string;
@@ -36,11 +36,13 @@ export class DocumentRequest {
   createdAt: Date;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.documentRequests, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @ManyToOne(
+    () => Organization,
+    (organization) => organization.documentRequests,
+    { onDelete: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @ManyToOne(() => User, (user) => user.resolvedDocumentRequests)
   @JoinColumn({ name: 'resolved_by_user_id' })

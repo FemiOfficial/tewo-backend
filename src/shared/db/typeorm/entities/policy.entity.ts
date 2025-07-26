@@ -8,7 +8,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 import { PolicyControlMap } from './policy-control-map.entity';
 import { PolicySignature } from './policy-signature.entity';
 
@@ -18,7 +18,7 @@ export class Policy {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'varchar', length: 255 })
   title: string;
@@ -42,11 +42,11 @@ export class Policy {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.policies, {
+  @ManyToOne(() => Organization, (organization) => organization.policies, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @OneToMany(() => PolicyControlMap, (policyMap) => policyMap.policy)
   controlMappings: PolicyControlMap[];

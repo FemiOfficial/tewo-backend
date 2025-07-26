@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Framework } from './framework.entity';
 import { ControlCategory } from './control-category.entity';
-import { CompanyControl } from './company-control.entity';
+import { OrganizationControl } from './organization-control.entity';
 import { PolicyControlMap } from './policy-control-map.entity';
 
 @Entity('controls')
@@ -40,8 +40,11 @@ export class Control {
   @JoinColumn({ name: 'category_id' })
   category: ControlCategory;
 
-  @OneToMany(() => CompanyControl, (companyControl) => companyControl.control)
-  companyControls: CompanyControl[];
+  @OneToMany(
+    () => OrganizationControl,
+    (organizationControl) => organizationControl.control,
+  )
+  organizationControls: OrganizationControl[];
 
   @OneToMany(() => PolicyControlMap, (policyMap) => policyMap.control)
   policyMappings: PolicyControlMap[];

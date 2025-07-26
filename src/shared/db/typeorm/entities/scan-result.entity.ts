@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { CompanyIntegration } from './company-integration.entity';
+import { OrganizationIntegration } from './organization-integration.entity';
 
 @Entity('scan_results')
 export class ScanResult {
@@ -39,10 +39,10 @@ export class ScanResult {
 
   // Relations
   @ManyToOne(
-    () => CompanyIntegration,
+    () => OrganizationIntegration,
     (integration) => integration.scanResults,
     { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'integration_id' })
-  integration: CompanyIntegration;
+  integration: OrganizationIntegration;
 }

@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Company } from './company.entity';
+import { Organization } from './organization.entity';
 import { Framework } from './framework.entity';
 import { AuditEvidenceMap } from './audit-evidence-map.entity';
 
@@ -16,7 +16,7 @@ export class Audit {
   id: string;
 
   @Column({ type: 'uuid' })
-  companyId: string;
+  organizationId: string;
 
   @Column({ type: 'int' })
   frameworkId: number;
@@ -34,11 +34,11 @@ export class Audit {
   endDate: Date;
 
   // Relations
-  @ManyToOne(() => Company, (company) => company.audits, {
+  @ManyToOne(() => Organization, (organization) => organization.audits, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'company_id' })
-  company: Company;
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @ManyToOne(() => Framework, (framework) => framework.audits)
   @JoinColumn({ name: 'framework_id' })
