@@ -3,6 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { OrganizationStatus } from '../../shared/db';
 
+export type TokenUserRoles = {
+  id: string;
+  name: string;
+  permissions: string[];
+}[];
+
 export type TokenPayload = {
   organization: {
     id: string;
@@ -19,6 +25,7 @@ export type TokenPayload = {
   user: {
     id: string;
     email: string;
+    roles: TokenUserRoles[];
   };
 };
 

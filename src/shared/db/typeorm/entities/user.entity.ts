@@ -17,6 +17,7 @@ import { Evidence } from './evidence.entity';
 import { AuditLog } from './audit-log.entity';
 import { PolicySignature } from './policy-signature.entity';
 import { DocumentRequest } from './document-request.entity';
+import { UserRoles } from './user-roles.entity';
 
 @Entity('users')
 export class User {
@@ -47,9 +48,6 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: true })
   lastName: string;
 
-  @Column({ type: 'varchar', length: 50, default: 'member' })
-  role: string;
-
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
@@ -62,6 +60,14 @@ export class User {
   })
   @JoinColumn({ name: 'organization_id' })
   organization: Organization;
+
+  @OneToMany(() => UserRoles, (userRole) => userRole.user)
+  userRoles: UserRoles[];
+
+  // Computed property to get roles
+  get roles() {
+    return this.userRoles?.map((userRole) => userRole.role) || [];
+  }
 
   @OneToMany(
     () => OrganizationControl,

@@ -20,7 +20,7 @@ export class Permission {
   module: string;
 
   @Column({ type: 'jsonb' })
-  key: string[];
+  keys: string[];
 
   @Column({ type: 'boolean', default: true })
   scope: boolean;

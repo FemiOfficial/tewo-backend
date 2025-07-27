@@ -9,6 +9,11 @@ import {
 } from 'typeorm';
 import { Permission } from './permissions.entity';
 
+export enum RoleType {
+  CUSTOM = 'custom',
+  DEFAULT = 'default',
+}
+
 @Entity()
 export class Role {
   @PrimaryGeneratedColumn('uuid')
@@ -16,6 +21,9 @@ export class Role {
 
   @Column({ type: 'varchar', length: 255 })
   name: string;
+
+  @Column({ type: 'varchar', length: 255, default: RoleType.DEFAULT })
+  type: RoleType;
 
   @Column({ type: 'varchar', length: 255 })
   description: string;
