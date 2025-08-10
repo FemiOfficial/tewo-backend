@@ -43,11 +43,11 @@ export class EventOccurrence {
     (scheduledEvent) => scheduledEvent.eventOccurrences,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'scheduled_event_id' })
+  @JoinColumn({ name: 'scheduledEventId' })
   scheduledEvent: ScheduledEvent;
 
   @ManyToOne(() => User, (user) => user.completedEventOccurrences)
-  @JoinColumn({ name: 'completed_by_user_id' })
+  @JoinColumn({ name: 'completedByUserId' })
   completedByUser: User;
 
   @OneToMany(() => EventAttendee, (attendee) => attendee.eventOccurrence)

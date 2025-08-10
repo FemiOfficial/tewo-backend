@@ -31,6 +31,6 @@ export class SecurityQuestionnaire {
     (organization) => organization.securityQuestionnaires,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 }

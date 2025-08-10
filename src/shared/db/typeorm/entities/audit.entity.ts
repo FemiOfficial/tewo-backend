@@ -37,11 +37,11 @@ export class Audit {
   @ManyToOne(() => Organization, (organization) => organization.audits, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @ManyToOne(() => Framework, (framework) => framework.audits)
-  @JoinColumn({ name: 'framework_id' })
+  @JoinColumn({ name: 'frameworkId' })
   framework: Framework;
 
   @OneToMany(() => AuditEvidenceMap, (evidenceMap) => evidenceMap.audit)

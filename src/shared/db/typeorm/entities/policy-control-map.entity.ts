@@ -14,12 +14,12 @@ export class PolicyControlMap {
   @ManyToOne(() => Policy, (policy) => policy.controlMappings, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'policy_id' })
+  @JoinColumn({ name: 'policyId' })
   policy: Policy;
 
   @ManyToOne(() => Control, (control) => control.policyMappings, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'control_id' })
+  @JoinColumn({ name: 'controlId' })
   control: Control;
 }

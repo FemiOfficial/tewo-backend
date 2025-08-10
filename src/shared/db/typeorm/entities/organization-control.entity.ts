@@ -40,15 +40,15 @@ export class OrganizationControl {
     (organization) => organization.organizationControls,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @ManyToOne(() => Control, (control) => control.organizationControls)
-  @JoinColumn({ name: 'control_id' })
+  @JoinColumn({ name: 'controlId' })
   control: Control;
 
   @ManyToOne(() => User, (user) => user.assignedControls)
-  @JoinColumn({ name: 'assigned_user_id' })
+  @JoinColumn({ name: 'assignedUserId' })
   assignedUser: User;
 
   @OneToMany(() => ScheduledEvent, (event) => event.organizationControl)

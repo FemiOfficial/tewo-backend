@@ -47,7 +47,7 @@ export class Evidence {
     (organizationControl) => organizationControl.evidence,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_control_id' })
+  @JoinColumn({ name: 'organizationControlId' })
   organizationControl: OrganizationControl;
 
   @ManyToOne(
@@ -55,11 +55,11 @@ export class Evidence {
     (eventOccurrence) => eventOccurrence.evidence,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'event_occurrence_id' })
+  @JoinColumn({ name: 'eventOccurrenceId' })
   eventOccurrence: EventOccurrence;
 
   @ManyToOne(() => User, (user) => user.uploadedEvidence)
-  @JoinColumn({ name: 'uploaded_by_user_id' })
+  @JoinColumn({ name: 'uploadedByUserId' })
   uploadedByUser: User;
 
   @OneToMany(() => AuditEvidenceMap, (evidenceMap) => evidenceMap.evidence)

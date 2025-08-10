@@ -13,15 +13,24 @@ export class OrganizationService {
     const organizationCountries = await this.organizationCountryRepository.find(
       {
         where: { organizationId, isActive: true },
-        relations: ['serviceCountry'],
+        relations: ['serviceCountry', 'organization'],
       },
     );
 
     return organizationCountries.map((oc) => ({
-      countryCode: oc.serviceCountry.code,
-      countryName: oc.serviceCountry.name,
-      status: oc.status,
-      isActive: oc.isActive,
+      organization: {
+        id: oc.organization.id,
+        name: oc.organization.name,
+        subscriptionPlan: oc.organization.subscriptionPlan,
+        status: oc.organization.status,
+      },
+      country: {
+        code: oc.serviceCountry.code,
+        name: oc.serviceCountry.name,
+        currency: oc.serviceCountry.currency,
+        status: oc.status,
+        isActive: oc.isActive,
+      },
     }));
   }
 }

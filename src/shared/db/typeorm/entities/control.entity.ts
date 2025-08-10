@@ -33,11 +33,11 @@ export class Control {
 
   // Relations
   @ManyToOne(() => Framework, (framework) => framework.controls)
-  @JoinColumn({ name: 'framework_id' })
+  @JoinColumn({ name: 'frameworkId' })
   framework: Framework;
 
   @ManyToOne(() => ControlCategory, (category) => category.controls)
-  @JoinColumn({ name: 'category_id' })
+  @JoinColumn({ name: 'categoryId' })
   category: ControlCategory;
 
   @OneToMany(

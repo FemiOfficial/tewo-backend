@@ -14,12 +14,12 @@ export class AuditEvidenceMap {
   @ManyToOne(() => Audit, (audit) => audit.evidenceMappings, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'audit_id' })
+  @JoinColumn({ name: 'auditId' })
   audit: Audit;
 
   @ManyToOne(() => Evidence, (evidence) => evidence.auditMappings, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'evidence_id' })
+  @JoinColumn({ name: 'evidenceId' })
   evidence: Evidence;
 }

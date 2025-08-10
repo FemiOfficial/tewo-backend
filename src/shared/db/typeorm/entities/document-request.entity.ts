@@ -41,10 +41,10 @@ export class DocumentRequest {
     (organization) => organization.documentRequests,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @ManyToOne(() => User, (user) => user.resolvedDocumentRequests)
-  @JoinColumn({ name: 'resolved_by_user_id' })
+  @JoinColumn({ name: 'resolvedByUserId' })
   resolvedByUser: User;
 }

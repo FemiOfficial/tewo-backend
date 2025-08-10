@@ -10,4 +10,9 @@ export class UsersController {
   async signup(@Body() signUpDto: SignUpDto) {
     return this.usersService.signup(signUpDto);
   }
+
+  @Post('signup/verify-email')
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.usersService.verifyEmail(verifyEmailDto);
+  }
 }

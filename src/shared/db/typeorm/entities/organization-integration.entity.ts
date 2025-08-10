@@ -33,7 +33,7 @@ export class OrganizationIntegration {
   @ManyToOne(() => Organization, (organization) => organization.integrations, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @OneToMany(() => ScanResult, (scanResult) => scanResult.integration)

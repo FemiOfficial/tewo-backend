@@ -31,7 +31,7 @@ export class User {
   email: string;
 
   @Column({ type: 'varchar', length: 255 })
-  passwordHash: string;
+  password: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   twoFactorSecret: string;
@@ -58,7 +58,7 @@ export class User {
   @ManyToOne(() => Organization, (organization) => organization.users, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @OneToMany(() => UserRoles, (userRole) => userRole.user)

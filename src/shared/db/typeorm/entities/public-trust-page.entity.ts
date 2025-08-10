@@ -33,6 +33,6 @@ export class PublicTrustPage {
     (organization) => organization.publicTrustPages,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 }

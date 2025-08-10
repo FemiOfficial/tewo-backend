@@ -43,6 +43,6 @@ export class ScanResult {
     (integration) => integration.scanResults,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'integration_id' })
+  @JoinColumn({ name: 'integrationId' })
   integration: OrganizationIntegration;
 }

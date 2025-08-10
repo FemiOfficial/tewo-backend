@@ -42,11 +42,11 @@ export class ScheduledEvent {
     (organizationControl) => organizationControl.scheduledEvents,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_control_id' })
+  @JoinColumn({ name: 'organizationControlId' })
   organizationControl: OrganizationControl;
 
   @ManyToOne(() => User, (user) => user.createdScheduledEvents)
-  @JoinColumn({ name: 'created_by_user_id' })
+  @JoinColumn({ name: 'createdByUserId' })
   createdByUser: User;
 
   @OneToMany(() => EventOccurrence, (occurrence) => occurrence.scheduledEvent)

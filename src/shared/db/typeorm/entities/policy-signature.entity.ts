@@ -29,10 +29,10 @@ export class PolicySignature {
   @ManyToOne(() => Policy, (policy) => policy.signatures, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'policy_id' })
+  @JoinColumn({ name: 'policyId' })
   policy: Policy;
 
   @ManyToOne(() => User, (user) => user.policySignatures)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 }

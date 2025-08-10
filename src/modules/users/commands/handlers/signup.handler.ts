@@ -1,8 +1,10 @@
+import * as bcrypt from 'bcrypt';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from '../impl/signup.command';
 import { DataSource, Repository, QueryRunner } from 'typeorm';
 import {
   AccessCode,
+  AccessCodeType,
   Organization,
   OrganizationCountry,
   OrganizationCountryStatus,
@@ -18,7 +20,7 @@ import {
 } from '../../../token/token.service';
 import { BadRequestException } from '@nestjs/common';
 import { SignUpDto } from 'src/modules/users/dto/user.dto';
-import { SignUpResponse } from '../../dto/types';
+import { AuthResponse } from '../../dto/types';
 
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
@@ -34,14 +36,16 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     private readonly dataSource: DataSource,
   ) {}
 
-  async execute(command: SignUpCommand): Promise<SignUpResponse> {
-    const { firstName, lastName, countryCode, email, code } = command.signUpDto;
+  async execute(command: SignUpCommand): Promise<AuthResponse> {
+    const { firstName, lastName, countryCode, email, code, password } =
+      command.signUpDto;
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      await this.assertUserEmail(email);
       const accessCode = await this.assertSetupAccessCode(code, email);
       const serviceCountry = await this.assertCountryCode(countryCode);
 
@@ -49,6 +53,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
         firstName,
         lastName,
         email,
+        password: bcrypt.hashSync(password, 10),
       });
       const savedUser = await queryRunner.manager.save(user);
 
@@ -61,11 +66,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
       );
 
       // Assign user role
-      const userRoles = await this.assignUserRole(
-        savedUser,
-        'owner',
-        queryRunner,
-      );
+      await this.assignUserRole(savedUser, 'owner', queryRunner);
 
       // Mark access code as used
       await queryRunner.manager.update(
@@ -74,38 +75,15 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
         { isUsed: true },
       );
 
-      const tokenPayload = await this.generateTokenPayload(
-        savedOrganization,
-        savedUser,
-        userRoles,
-      );
-      const token = await this.tokenService.signToken(tokenPayload);
-
+      await this.sendVerifyEmailNotification(email);
       await queryRunner.commitTransaction();
 
       return {
-        success: true,
+        requiresEmailVerification: true,
+        requiresMFA: false,
         data: {
-          organization: {
-            id: savedOrganization.id,
-            name: savedOrganization.name,
-            subscriptionPlan: savedOrganization.subscriptionPlan,
-            status: savedOrganization.status,
-          },
-          user: {
-            id: savedUser.id,
-            email: savedUser.email,
-            firstName: savedUser.firstName,
-            lastName: savedUser.lastName,
-          },
-          serviceCountries: [
-            {
-              code: serviceCountry.code,
-              currency: serviceCountry.currency,
-              isActive: serviceCountry.isActive,
-            },
-          ],
-          token,
+          organization: savedOrganization.id,
+          user: savedUser.id,
         },
       };
     } catch (error) {
@@ -206,6 +184,18 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     };
   }
 
+  private async assertUserEmail(email: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+    });
+
+    if (user) {
+      throw new BadRequestException('User with this email already exists');
+    }
+
+    return false;
+  }
+
   private async assertCountryCode(
     countryCode: string,
   ): Promise<ServiceCountry> {
@@ -226,6 +216,22 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     }
 
     return serviceCountry;
+  }
+
+  private async sendVerifyEmailNotification(
+    email: string,
+  ): Promise<AccessCode> {
+    const accessCode = this.accessCodeRepository.create({
+      email: email,
+      type: AccessCodeType.VERIFY_EMAIL,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    });
+
+    await this.accessCodeRepository.save(accessCode);
+
+    // TODO: Send email notification
+
+    return accessCode;
   }
 
   private async assertSetupAccessCode(

@@ -45,7 +45,7 @@ export class Policy {
   @ManyToOne(() => Organization, (organization) => organization.policies, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @OneToMany(() => PolicyControlMap, (policyMap) => policyMap.policy)

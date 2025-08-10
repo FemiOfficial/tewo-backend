@@ -4,7 +4,7 @@ export { User } from './user.entity';
 export { Role } from './role.entity';
 export { Permission } from './permissions.entity';
 export { UserRoles } from './user-roles.entity';
-export { AccessCode } from './access-code.entity';
+export { AccessCode, AccessCodeType } from './access-code.entity';
 export { ServiceCountry } from './service-countries.entity';
 export {
   OrganizationCountry,

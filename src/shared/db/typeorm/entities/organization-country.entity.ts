@@ -45,7 +45,7 @@ export class OrganizationCountry {
     (organization) => organization.organizationCountries,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @ManyToOne(
@@ -53,6 +53,6 @@ export class OrganizationCountry {
     (serviceCountry) => serviceCountry.organizationCountries,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'service_country_id' })
+  @JoinColumn({ name: 'serviceCountryId' })
   serviceCountry: ServiceCountry;
 }

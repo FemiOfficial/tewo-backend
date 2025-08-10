@@ -1,23 +1,8 @@
-export type SignUpResponse = {
-  success: boolean;
+export type AuthResponse = {
+  requiresEmailVerification: boolean;
+  requiresMFA: boolean;
   data: {
-    organization: {
-      id: string;
-      name: string;
-      subscriptionPlan: string;
-      status: string;
-    };
-    user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-    };
-    serviceCountries: {
-      code: string;
-      currency: string;
-      isActive: boolean;
-    }[];
-    token: string;
+    organization: string;
+    user: string;
   };
 };

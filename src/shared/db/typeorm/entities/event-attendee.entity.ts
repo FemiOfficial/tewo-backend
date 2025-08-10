@@ -16,12 +16,12 @@ export class EventAttendee {
     (eventOccurrence) => eventOccurrence.attendees,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'event_occurrence_id' })
+  @JoinColumn({ name: 'eventOccurrenceId' })
   eventOccurrence: EventOccurrence;
 
   @ManyToOne(() => User, (user) => user.eventAttendances, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 }

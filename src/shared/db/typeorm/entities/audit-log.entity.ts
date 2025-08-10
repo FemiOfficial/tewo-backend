@@ -36,10 +36,10 @@ export class AuditLog {
   @ManyToOne(() => Organization, (organization) => organization.auditLogs, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @ManyToOne(() => User, (user) => user.auditLogs)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 }
