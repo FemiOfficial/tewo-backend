@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { SignUpCommand } from './commands/impl/signup.command';
-import { EmployeeInviteDto, SignUpDto, VerifyEmailDto } from './dto/user.dto';
+import {
+  EmployeeInviteDto,
+  SignInDto,
+  SignUpDto,
+  VerifyEmailDto,
+} from './dto/user.dto';
 import { AuthResponse } from './dto/types';
 import { VerifyEmailCommand } from './commands/impl/verify-email.command';
 import { EmployeeInviteCommand } from './commands/impl/employee-invite.command';
 import { AcceptInviteCommand } from './commands/impl/accpet-invite.command';
+import { SignInCommand } from './commands/impl/signin-command';
 
 @Injectable()
 export class UsersService {
