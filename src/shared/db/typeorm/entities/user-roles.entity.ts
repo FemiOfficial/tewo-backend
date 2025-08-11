@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Role } from './role.entity';
+import { Organization } from './organization.entity';
 
 @Entity('user_roles')
 export class UserRoles {
@@ -21,6 +22,9 @@ export class UserRoles {
   @Column({ type: 'uuid' })
   roleId: string;
 
+  @Column({ type: 'uuid' })
+  organizationId: string;
+
   @ManyToOne(() => User, (user) => user.userRoles)
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -28,6 +32,10 @@ export class UserRoles {
   @ManyToOne(() => Role)
   @JoinColumn({ name: 'roleId' })
   role: Role;
+
+  @ManyToOne(() => Organization, (organization) => organization.users)
+  @JoinColumn({ name: 'organizationId' })
+  organization: Organization;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

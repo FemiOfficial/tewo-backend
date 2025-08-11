@@ -5,6 +5,7 @@ import { EmployeeInviteDto, SignUpDto, VerifyEmailDto } from './dto/user.dto';
 import { AuthResponse } from './dto/types';
 import { VerifyEmailCommand } from './commands/impl/verify-email.command';
 import { EmployeeInviteCommand } from './commands/impl/employee-invite.command';
+import { AcceptInviteCommand } from './commands/impl/accpet-invite.command';
 
 @Injectable()
 export class UsersService {
@@ -27,5 +28,13 @@ export class UsersService {
     return await this.commandBus.execute(
       new EmployeeInviteCommand(employeeInviteDto, organization),
     );
+  }
+
+  async acceptInvite(accessCode: string): Promise<AuthResponse> {
+    return await this.commandBus.execute(new AcceptInviteCommand(accessCode));
+  }
+
+  async signIn(signInDto: SignInDto): Promise<AuthResponse> {
+    return await this.commandBus.execute(new SignInCommand(signInDto));
   }
 }

@@ -19,6 +19,11 @@ import { PolicySignature } from './policy-signature.entity';
 import { DocumentRequest } from './document-request.entity';
 import { UserRoles } from './user-roles.entity';
 
+export enum MFA_METHOD {
+  EMAIL = 'email',
+  AUTHENTICATOR = 'authenticator',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -34,10 +39,15 @@ export class User {
   password: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  twoFactorSecret: string;
+  mfaSecret: string | null;
 
-  @Column({ type: 'boolean', default: false })
-  isTwoFactorEnabled: boolean;
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    default: MFA_METHOD.EMAIL,
+  })
+  mfaMethod: MFA_METHOD;
 
   @Column({ type: 'boolean', default: false })
   isEmailVerified: boolean;

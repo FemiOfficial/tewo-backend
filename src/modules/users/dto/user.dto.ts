@@ -6,6 +6,21 @@ import {
   IsOptional,
 } from 'class-validator';
 
+export class SignInDto {
+  @IsNotEmpty()
+  @IsString()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  password: string;
+
+  @IsOptional()
+  @IsString()
+  token?: string;
+}
+
 export class SignUpDto {
   @IsNotEmpty()
   @IsString()

@@ -6,10 +6,9 @@ import dayjs from 'dayjs';
 import {
   AccessCodeType,
   Invite,
-  User,
-  UserRoles,
   AccessCode,
   InviteStatus,
+  User,
 } from '../../../../shared/db/typeorm/entities';
 import { BadRequestException } from '@nestjs/common';
 
@@ -19,8 +18,6 @@ export class EmployeeInviteHandler
 {
   constructor(
     private readonly dataSource: DataSource,
-    private readonly userRepository: Repository<User>,
-    private readonly userRolesRepository: Repository<UserRoles>,
     private readonly inviteRepository: Repository<Invite>,
     private readonly accessCodeRepository: Repository<AccessCode>,
   ) {}
@@ -38,6 +35,18 @@ export class EmployeeInviteHandler
       const { email, firstName, lastName, role } = command.employeeInviteDto;
 
       const { organization } = command;
+
+      const existingUser = await queryRunner.manager.findOne(User, {
+        where: {
+          email,
+        },
+      });
+
+      if (existingUser) {
+        throw new BadRequestException(
+          'User already exists with this email. Please use a different email.',
+        );
+      }
 
       const exisitingInvite = await queryRunner.manager.findOne(Invite, {
         where: {

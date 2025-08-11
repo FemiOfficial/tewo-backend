@@ -13,10 +13,10 @@ import {
   User,
   UserRoles,
 } from '../../../../shared/db/typeorm/entities';
-import { TokenUserRoles } from '../../../token/token.service';
 import { BadRequestException } from '@nestjs/common';
 import { SignUpDto } from '../../dto/user.dto';
 import { AuthResponse } from '../../dto/types';
+import dayjs from 'dayjs';
 
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
@@ -122,7 +122,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     user: User,
     role: 'owner',
     queryRunner: QueryRunner,
-  ): Promise<TokenUserRoles[]> {
+  ): Promise<UserRoles> {
     const roleObject = await this.roleRepository.findOne({
       where: { name: role },
     });
@@ -136,22 +136,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
       roleId: roleObject.id,
     });
 
-    await queryRunner.manager.save(userRole);
-
-    const userRoles = await queryRunner.manager.find(UserRoles, {
-      where: { userId: user.id },
-      relations: ['role', 'user', 'role.permissions'],
-    });
-
-    const roles = userRoles.map((userRole) => ({
-      id: userRole.id,
-      name: userRole.role.name,
-      permissions: userRole.role.permissions
-        .map((permission) => permission.keys)
-        .flat(),
-    }));
-
-    return roles as unknown as TokenUserRoles[];
+    return queryRunner.manager.save(userRole);
   }
 
   private async assertUserEmail(
@@ -198,7 +183,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     const accessCode = this.accessCodeRepository.create({
       email: email,
       type: AccessCodeType.VERIFY_EMAIL,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      expiresAt: dayjs().add(1, 'day').toDate(),
     });
 
     await this.accessCodeRepository.save(accessCode);

@@ -17,6 +17,7 @@ import { DocumentRequest } from './document-request.entity';
 import { AuditLog } from './audit-log.entity';
 import { OrganizationCountry } from './organization-country.entity';
 import { Invite } from './invites.entity';
+import { UserRoles } from './user-roles.entity';
 
 export enum OrganizationStatus {
   ACTIVE = 'active',
@@ -52,6 +53,9 @@ export class Organization {
   // Relations
   @OneToMany(() => User, (user) => user.organization)
   users: User[];
+
+  @OneToMany(() => UserRoles, (userRole) => userRole.organization)
+  userRoles: UserRoles[];
 
   @OneToMany(
     () => OrganizationControl,
