@@ -13,13 +13,9 @@ import {
   User,
   UserRoles,
 } from '../../../../shared/db/typeorm/entities';
-import {
-  TokenPayload,
-  TokenService,
-  TokenUserRoles,
-} from '../../../token/token.service';
+import { TokenUserRoles } from '../../../token/token.service';
 import { BadRequestException } from '@nestjs/common';
-import { SignUpDto } from 'src/modules/users/dto/user.dto';
+import { SignUpDto } from '../../dto/user.dto';
 import { AuthResponse } from '../../dto/types';
 
 @CommandHandler(SignUpCommand)
@@ -30,9 +26,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     private readonly roleRepository: Repository<Role>,
     private readonly accessCodeRepository: Repository<AccessCode>,
     private readonly organizationRepository: Repository<Organization>,
-    private readonly serviceCountryRepository: Repository<ServiceCountry>,
     private readonly organizationCountryRepository: Repository<OrganizationCountry>,
-    private readonly tokenService: TokenService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -45,9 +39,16 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     await queryRunner.startTransaction();
 
     try {
-      await this.assertUserEmail(email);
-      const accessCode = await this.assertSetupAccessCode(code, email);
-      const serviceCountry = await this.assertCountryCode(countryCode);
+      await this.assertUserEmail(email, queryRunner);
+      const accessCode = await this.assertSetupAccessCode(
+        code,
+        email,
+        queryRunner,
+      );
+      const serviceCountry = await this.assertCountryCode(
+        countryCode,
+        queryRunner,
+      );
 
       const user = this.userRepository.create({
         firstName,
@@ -153,39 +154,11 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     return roles as unknown as TokenUserRoles[];
   }
 
-  private async generateTokenPayload(
-    organization: Organization,
-    user: User,
-    userRoles: TokenUserRoles[],
-  ): Promise<TokenPayload> {
-    const serviceCountries = await this.organizationCountryRepository.find({
-      where: { organizationId: organization.id, isActive: true },
-      relations: ['serviceCountry'],
-    });
-
-    return {
-      organization: {
-        id: organization.id,
-        name: organization.name,
-        subscriptionPlan: organization.subscriptionPlan,
-        status: organization.status,
-        serviceCountries: serviceCountries.map((sc) => ({
-          id: sc.serviceCountry.id,
-          code: sc.serviceCountry.code,
-          currency: sc.serviceCountry.currency,
-          isActive: sc.isActive,
-        })),
-      },
-      user: {
-        id: user.id,
-        email: user.email,
-        roles: userRoles,
-      },
-    };
-  }
-
-  private async assertUserEmail(email: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({
+  private async assertUserEmail(
+    email: string,
+    queryRunner: QueryRunner,
+  ): Promise<boolean> {
+    const user = await queryRunner.manager.findOne(User, {
       where: { email: email },
     });
 
@@ -198,8 +171,9 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
 
   private async assertCountryCode(
     countryCode: string,
+    queryRunner: QueryRunner,
   ): Promise<ServiceCountry> {
-    const serviceCountry = await this.serviceCountryRepository.findOne({
+    const serviceCountry = await queryRunner.manager.findOne(ServiceCountry, {
       where: { code: countryCode },
     });
 
@@ -237,8 +211,9 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
   private async assertSetupAccessCode(
     code: string,
     email: string,
+    queryRunner: QueryRunner,
   ): Promise<AccessCode> {
-    const accessCode = await this.accessCodeRepository.findOne({
+    const accessCode = await queryRunner.manager.findOne(AccessCode, {
       where: {
         code: code,
         email: email,

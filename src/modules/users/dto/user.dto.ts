@@ -52,7 +52,7 @@ export class VerifyEmailDto {
   code: string;
 }
 
-export class SendEmployeeInviteDto {
+export class EmployeeInviteDto {
   @IsNotEmpty()
   @IsString()
   email: string;

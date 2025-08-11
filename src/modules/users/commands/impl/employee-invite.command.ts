@@ -1,8 +1,8 @@
-import { SendEmployeeInviteDto } from '../../dto/user.dto';
+import { EmployeeInviteDto } from '../../dto/user.dto';
 
-export class SendEmployeeInviteCommand {
+export class EmployeeInviteCommand {
   constructor(
-    public readonly sendEmployeeInviteDto: SendEmployeeInviteDto,
+    public readonly employeeInviteDto: EmployeeInviteDto,
     public readonly organization: string,
   ) {}
 }

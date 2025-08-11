@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
 import { Framework } from './framework.entity';
@@ -32,6 +34,12 @@ export class Audit {
 
   @Column({ type: 'date', nullable: true })
   endDate: Date;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(() => Organization, (organization) => organization.audits, {

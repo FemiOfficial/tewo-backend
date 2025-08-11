@@ -16,6 +16,7 @@ import { PublicTrustPage } from './public-trust-page.entity';
 import { DocumentRequest } from './document-request.entity';
 import { AuditLog } from './audit-log.entity';
 import { OrganizationCountry } from './organization-country.entity';
+import { Invite } from './invites.entity';
 
 export enum OrganizationStatus {
   ACTIVE = 'active',
@@ -84,6 +85,9 @@ export class Organization {
 
   @OneToMany(() => AuditLog, (log) => log.organization)
   auditLogs: AuditLog[];
+
+  @OneToMany(() => Invite, (invite) => invite.organization)
+  invites: Invite[];
 
   @OneToMany(() => OrganizationCountry, (orgCountry) => orgCountry.organization)
   organizationCountries: OrganizationCountry[];

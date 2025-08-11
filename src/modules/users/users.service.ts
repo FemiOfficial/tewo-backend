@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { SignUpCommand } from './commands/impl/signup.command';
-import {
-  SendEmployeeInviteDto,
-  SignUpDto,
-  VerifyEmailDto,
-} from './dto/user.dto';
+import { EmployeeInviteDto, SignUpDto, VerifyEmailDto } from './dto/user.dto';
 import { AuthResponse } from './dto/types';
 import { VerifyEmailCommand } from './commands/impl/verify-email.command';
+import { EmployeeInviteCommand } from './commands/impl/employee-invite.command';
 
 @Injectable()
 export class UsersService {
@@ -24,10 +21,11 @@ export class UsersService {
   }
 
   async sendEmployeeInvite(
-    sendEmployeeInviteDto: SendEmployeeInviteDto,
-  ): Promise<AuthResponse> {
+    employeeInviteDto: EmployeeInviteDto,
+    organization: string,
+  ): Promise<{ message: string; error: boolean }> {
     return await this.commandBus.execute(
-      new SendEmployeeInviteCommand(sendEmployeeInviteDto),
+      new EmployeeInviteCommand(employeeInviteDto, organization),
     );
   }
 }

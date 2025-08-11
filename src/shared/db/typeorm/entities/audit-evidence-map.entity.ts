@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Audit } from './audit.entity';
 import { Evidence } from './evidence.entity';
 
@@ -22,4 +29,10 @@ export class AuditEvidenceMap {
   })
   @JoinColumn({ name: 'evidenceId' })
   evidence: Evidence;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 }
