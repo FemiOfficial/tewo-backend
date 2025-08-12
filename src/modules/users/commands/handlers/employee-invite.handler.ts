@@ -3,7 +3,7 @@ import { EmployeeInviteCommand } from '../impl/employee-invite.command';
 import { createId } from '@paralleldrive/cuid2';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 import {
   AccessCodeType,
   Invite,

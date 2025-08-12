@@ -1,7 +1,7 @@
 // Core entities
 export { Organization, OrganizationStatus } from './organization.entity';
 export { User } from './user.entity';
-export { Role } from './role.entity';
+export { Role, RoleType } from './role.entity';
 export { Permission } from './permissions.entity';
 export { UserRoles } from './user-roles.entity';
 export { AccessCode, AccessCodeType } from './access-code.entity';

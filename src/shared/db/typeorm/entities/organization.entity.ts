@@ -47,7 +47,7 @@ export class Organization {
   @Column({ type: 'varchar', length: 50, default: OrganizationStatus.PENDING })
   status: OrganizationStatus;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   ownerId: string;
 
   // Relations
