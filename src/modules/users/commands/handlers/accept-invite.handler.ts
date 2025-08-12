@@ -1,6 +1,7 @@
-import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AcceptInviteCommand } from '../impl/accpet-invite.command';
 import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { AccessCode } from 'src/shared/db/typeorm/entities/access-code.entity';
 import { AccessCodeType } from 'src/shared/db/typeorm/entities/access-code.entity';
 import { BadRequestException } from '@nestjs/common';
@@ -18,9 +19,11 @@ export class AcceptInviteHandler
   implements ICommandHandler<AcceptInviteCommand>
 {
   constructor(
-    private readonly dataSource: DataSource,
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserRoles)
     private readonly userRolesRepository: Repository<UserRoles>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async execute(command: AcceptInviteCommand): Promise<AuthResponse> {

@@ -1,7 +1,8 @@
-import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EmployeeInviteCommand } from '../impl/employee-invite.command';
 import { createId } from '@paralleldrive/cuid2';
 import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import {
   AccessCodeType,
@@ -18,7 +19,9 @@ export class EmployeeInviteHandler
 {
   constructor(
     private readonly dataSource: DataSource,
+    @InjectRepository(Invite)
     private readonly inviteRepository: Repository<Invite>,
+    @InjectRepository(AccessCode)
     private readonly accessCodeRepository: Repository<AccessCode>,
   ) {}
 

@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from '../impl/signup.command';
 import { DataSource, Repository, QueryRunner } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   AccessCode,
   AccessCodeType,
@@ -21,11 +22,17 @@ import dayjs from 'dayjs';
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
   constructor(
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserRoles)
     private readonly userRolesRepository: Repository<UserRoles>,
+    @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(AccessCode)
     private readonly accessCodeRepository: Repository<AccessCode>,
+    @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
+    @InjectRepository(OrganizationCountry)
     private readonly organizationCountryRepository: Repository<OrganizationCountry>,
     private readonly dataSource: DataSource,
   ) {}
