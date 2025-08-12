@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Control } from './control.entity';
 import { Audit } from './audit.entity';
 
@@ -15,6 +22,12 @@ export class Framework {
 
   @Column({ type: 'varchar', length: 2 })
   region: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @OneToMany(() => Control, (control) => control.framework)

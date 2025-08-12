@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { join } from 'path';
 
-const sqlUrl = process.env.SQL_URL || process.env.DATABASE_URL;
+const sqlUrl = process.env.DATABASE_URL;
 
 if (!sqlUrl) throw new Error('invalid sql url var');
 

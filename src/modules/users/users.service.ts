@@ -30,9 +30,10 @@ export class UsersService {
   async sendEmployeeInvite(
     employeeInviteDto: EmployeeInviteDto,
     organization: string,
+    invitedBy: string,
   ): Promise<{ message: string; error: boolean }> {
     return await this.commandBus.execute(
-      new EmployeeInviteCommand(employeeInviteDto, organization),
+      new EmployeeInviteCommand(employeeInviteDto, organization, invitedBy),
     );
   }
 

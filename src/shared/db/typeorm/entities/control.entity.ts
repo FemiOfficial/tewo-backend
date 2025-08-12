@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Framework } from './framework.entity';
 import { ControlCategory } from './control-category.entity';
@@ -30,6 +32,12 @@ export class Control {
 
   @Column({ type: 'text' })
   description: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(() => Framework, (framework) => framework.controls)

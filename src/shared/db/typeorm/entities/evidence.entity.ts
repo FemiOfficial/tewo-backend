@@ -6,6 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  UpdateDateColumn,
 } from 'typeorm';
 import { OrganizationControl } from './organization-control.entity';
 import { EventOccurrence } from './event-occurrence.entity';
@@ -40,6 +41,9 @@ export class Evidence {
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(

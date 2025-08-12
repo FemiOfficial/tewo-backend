@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Policy } from './policy.entity';
 import { Control } from './control.entity';
 
@@ -9,6 +16,12 @@ export class PolicyControlMap {
 
   @PrimaryColumn({ type: 'int' })
   controlId: number;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(() => Policy, (policy) => policy.controlMappings, {

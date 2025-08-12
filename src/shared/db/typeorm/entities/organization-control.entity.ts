@@ -6,6 +6,8 @@ import {
   JoinColumn,
   OneToMany,
   Unique,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
 import { Control } from './control.entity';
@@ -33,6 +35,12 @@ export class OrganizationControl {
 
   @Column({ type: 'uuid', nullable: true })
   assignedUserId: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(

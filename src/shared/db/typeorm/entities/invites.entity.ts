@@ -4,6 +4,8 @@ import {
   Column,
   JoinColumn,
   ManyToOne,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
 import { Role } from './role.entity';
@@ -48,10 +50,10 @@ export class Invite {
   @Column()
   expiresAt: Date;
 
-  @Column({ type: 'timestamptz' })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @Column({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
   @ManyToOne(() => Organization, (organization) => organization.invites)

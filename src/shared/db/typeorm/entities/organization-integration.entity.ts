@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
 import { ScanResult } from './scan-result.entity';
@@ -28,6 +30,12 @@ export class OrganizationIntegration {
 
   @Column({ type: 'timestamptz', nullable: true })
   lastSyncAt: Date;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(() => Organization, (organization) => organization.integrations, {

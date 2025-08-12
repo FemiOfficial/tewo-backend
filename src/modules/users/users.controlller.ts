@@ -30,10 +30,12 @@ export class UsersController {
   async invite(
     @Body() employeeInviteDto: EmployeeInviteDto,
     @Query('organization') organization: string,
+    @Query('invitedBy') invitedBy: string,
   ) {
     return this.usersService.sendEmployeeInvite(
       employeeInviteDto,
       organization,
+      invitedBy,
     );
   }
 

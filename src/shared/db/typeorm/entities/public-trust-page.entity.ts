@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
 
@@ -26,6 +28,12 @@ export class PublicTrustPage {
 
   @Column({ type: 'jsonb', nullable: true })
   visibleContent: Record<string, any>;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(
