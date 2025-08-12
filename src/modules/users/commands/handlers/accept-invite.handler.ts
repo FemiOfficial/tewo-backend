@@ -73,7 +73,7 @@ export class AcceptInviteHandler
       });
 
       const userRoles = this.userRolesRepository.create({
-        roleId: invite.role,
+        roleId: invite.roleId,
         userId: user.id,
         organizationId: invite.organizationId,
       });

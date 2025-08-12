@@ -34,7 +34,7 @@ export class EmployeeInviteHandler
     try {
       const { email, firstName, lastName, role } = command.employeeInviteDto;
 
-      const { organization } = command;
+      const { organization, invitedBy } = command;
 
       const existingUser = await queryRunner.manager.findOne(User, {
         where: {
@@ -111,7 +111,8 @@ export class EmployeeInviteHandler
           firstName,
           lastName,
           organizationId: organization,
-          role,
+          roleId: role,
+          invitedById: invitedBy,
           status: InviteStatus.PENDING,
           expiresAt: inviteExpiresAt,
         }),
