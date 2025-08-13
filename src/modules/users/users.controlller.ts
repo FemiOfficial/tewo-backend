@@ -1,4 +1,12 @@
-import { Body, Controller, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
   EmployeeInviteDto,
@@ -6,12 +14,14 @@ import {
   SignUpDto,
   VerifyEmailDto,
 } from './dto/user.dto';
+import { AuthInterceptor } from '../../shared/interceptors/auth.interceptor';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('signup')
+  @UseInterceptors(AuthInterceptor)
   async signup(@Body() signUpDto: SignUpDto) {
     return this.usersService.signup(signUpDto);
   }
@@ -22,6 +32,7 @@ export class UsersController {
   }
 
   @Post('signin')
+  @UseInterceptors(AuthInterceptor)
   async signin(@Body() signInDto: SignInDto) {
     return this.usersService.signIn(signInDto);
   }

@@ -53,8 +53,6 @@ gulp.task('revert:migration', function (done) {
 gulp.task('run:migration', function (done) {
   const dbUrl = process.env.DATABASE_URL;
 
-  console.log('dbUrl', dbUrl);
-
   exec(
     `SQL_URL=${dbUrl} npm run typeorm -- -d ./typeorm.config.ts migration:run`,
     (err, stdout, stderr) => {

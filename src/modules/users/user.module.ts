@@ -15,6 +15,8 @@ import {
   ServiceCountry,
   Invite,
 } from '../../shared/db/typeorm/entities';
+import { TokenService } from '../token/token.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -35,6 +37,6 @@ import {
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService, ...UserCommandHandlers],
+  providers: [UsersService, ...UserCommandHandlers, TokenService, JwtService],
 })
 export class UserModule {}
