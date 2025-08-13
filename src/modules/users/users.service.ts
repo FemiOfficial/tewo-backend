@@ -18,16 +18,7 @@ export class UsersService {
   constructor(private readonly commandBus: CommandBus) {}
 
   async signup(signUpDto: SignUpDto): Promise<AuthResponse> {
-    // return await this.commandBus.execute(new SignUpCommand(signUpDto));
-
-    return {
-      requiresEmailVerification: true,
-      requiresMFA: false,
-      data: {
-        organization: '6b21d413-f5ef-4efa-8cc0-979cb5042df2',
-        user: '31a7fea6-bebc-4068-bc71-d0ab639ea80c',
-      },
-    };
+    return await this.commandBus.execute(new SignUpCommand(signUpDto));
   }
 
   async verifyEmail(verifyEmailDto: VerifyEmailDto): Promise<AuthResponse> {

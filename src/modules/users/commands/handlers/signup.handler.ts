@@ -97,7 +97,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
 
       return {
         requiresEmailVerification: true,
-        requiresMFA: false,
+        requiresMFA: false, // TODO: Change to true when MFA is enabled
         data: {
           organization: savedOrganization.id,
           user: savedUser.id,
