@@ -2,12 +2,14 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   UpdateDateColumn,
   CreateDateColumn,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
 } from 'typeorm';
-import { Control } from './control.entity';
-import { Audit } from './audit.entity';
+import { ControlCategory } from './control-category.entity';
+import { OrganizationFrameworks } from './organization-frameworks.entity';
 
 @Entity('frameworks')
 export class Framework {
@@ -20,8 +22,8 @@ export class Framework {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   shortCode: string;
 
-  @Column({ type: 'varchar', length: 2 })
-  region: string;
+  @Column({ type: 'jsonb', default: [] })
+  region: string[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
@@ -30,9 +32,16 @@ export class Framework {
   updatedAt: Date;
 
   // Relations
-  @OneToMany(() => Control, (control) => control.framework)
-  controls: Control[];
+  @ManyToMany(
+    () => ControlCategory,
+    (controlCategory) => controlCategory.frameworks,
+  )
+  @JoinTable({ name: 'control_categories_frameworks_map' })
+  controlCategories: ControlCategory[];
 
-  @OneToMany(() => Audit, (audit) => audit.framework)
-  audits: Audit[];
+  @OneToMany(
+    () => OrganizationFrameworks,
+    (orgFramework) => orgFramework.framework,
+  )
+  organizationFrameworks: OrganizationFrameworks[];
 }

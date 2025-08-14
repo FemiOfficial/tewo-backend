@@ -1,9 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Body,
+  Get,
+  Injectable,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { OrganizationService } from './organization.service';
+import { SelectOrganizationFrameworkDto } from './dto/organization.dto';
+import { AuthGuard, AuthenticatedRequest } from '../token/guard/jwt.guard';
 
 @Injectable()
+@UseGuards(AuthGuard)
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
+
+  @Post('frameworks')
+  selectOrganizationFramework(
+    @Body() selectOrganizationFrameworkDto: SelectOrganizationFrameworkDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.organizationService.selectOrganizationFramework(
+      selectOrganizationFrameworkDto,
+      req.organization.id,
+    );
+  }
+
+  @Get('frameworks/org')
+  getOrgFrameworks(@Req() req: AuthenticatedRequest) {
+    return this.organizationService.getOrgFrameworks(req.organization.id);
+  }
+
+  @Get('frameworks')
+  getFrameAllWorks() {
+    return this.organizationService.getFrameAllWorks();
+  }
+
+  @Get('controls/categories')
+  getOrganizationControlCategories(@Req() req: AuthenticatedRequest) {
+    return this.organizationService.getOrganizationControlCategories(
+      req.organization.id,
+    );
+  }
+
+  @Get('controls/categories/:categoryId')
+  getOrganizationControls(
+    @Param('categoryId') categoryId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.organizationService.getOrganizationControls(
+      req.organization.id,
+      categoryId,
+    );
+  }
+
+  
 
   // // endpoints here
   // // - get controls (show those in todo e.t.c)

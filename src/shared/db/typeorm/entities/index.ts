@@ -11,6 +11,7 @@ export {
   OrganizationCountry,
   OrganizationCountryStatus,
 } from './organization-country.entity';
+export { OrganizationFrameworks } from './organization-frameworks.entity';
 
 // Master library entities
 export { Framework } from './framework.entity';

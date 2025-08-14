@@ -9,7 +9,9 @@ const argv = require('minimist');
 
 gulp.task('generate:migration', function (done) {
   const args = argv(process.argv.slice(2));
+  console.log(args);
   const { name } = args;
+  console.log(name);
   const dbUrl = process.env.DATABASE_URL;
 
   exec(

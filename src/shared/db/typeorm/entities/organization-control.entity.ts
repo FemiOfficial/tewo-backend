@@ -14,6 +14,7 @@ import { Control } from './control.entity';
 import { User } from './user.entity';
 import { ScheduledEvent } from './scheduled-event.entity';
 import { Evidence } from './evidence.entity';
+import { ControlCategory } from './control-category.entity';
 
 @Entity('organization_controls')
 @Unique(['organizationId', 'controlId'])
@@ -26,6 +27,9 @@ export class OrganizationControl {
 
   @Column({ type: 'int' })
   controlId: number;
+
+  @Column({ type: 'int' })
+  categoryId: number;
 
   @Column({ type: 'varchar', length: 50, default: 'to_do' })
   status: string;
@@ -54,6 +58,10 @@ export class OrganizationControl {
   @ManyToOne(() => Control, (control) => control.organizationControls)
   @JoinColumn({ name: 'controlId' })
   control: Control;
+
+  @ManyToOne(() => ControlCategory)
+  @JoinColumn({ name: 'categoryId' })
+  category: ControlCategory;
 
   @ManyToOne(() => User, (user) => user.assignedControls)
   @JoinColumn({ name: 'assignedUserId' })
