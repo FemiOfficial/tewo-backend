@@ -1,71 +1,74 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class IntitialDBSchemas1755033968871 implements MigrationInterface {
-  name = 'IntitialDBSchemas1755033968871';
+export class MigrationSchemas implements MigrationInterface {
+  name = 'MigrationSchemas1755213753425';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "scheduled_events" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationControlId" uuid NOT NULL, "title" character varying(255) NOT NULL, "description" text, "scheduleType" character varying(50) NOT NULL, "startDate" date NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "createdByUserId" uuid NOT NULL, CONSTRAINT "PK_5ab29293642d5d17f11fda15c90" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "scheduled_events" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationControlId" uuid NOT NULL, "title" character varying(255) NOT NULL, "description" text, "scheduleType" character varying(50) NOT NULL, "startDate" date NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "createdByUserId" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_5ab29293642d5d17f11fda15c90" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "event_attendees" ("eventOccurrenceId" uuid NOT NULL, "userId" uuid NOT NULL, CONSTRAINT "PK_48a4d90df652044d27fc393b41e" PRIMARY KEY ("eventOccurrenceId", "userId"))`,
+      `CREATE TABLE "event_attendees" ("eventOccurrenceId" uuid NOT NULL, "userId" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_48a4d90df652044d27fc393b41e" PRIMARY KEY ("eventOccurrenceId", "userId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "event_occurrences" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "scheduledEventId" uuid NOT NULL, "dueDate" date NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'scheduled', "meetingMinutesUrl" text, "calendarInviteId" character varying(255), "completedAt" TIMESTAMP WITH TIME ZONE, "completedByUserId" uuid, CONSTRAINT "PK_43048141833ab7f9c7fc8c47887" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "event_occurrences" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "scheduledEventId" uuid NOT NULL, "dueDate" date NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'scheduled', "meetingMinutesUrl" text, "calendarInviteId" character varying(255), "completedAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "completedByUserId" uuid, CONSTRAINT "PK_43048141833ab7f9c7fc8c47887" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "evidence" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationControlId" uuid NOT NULL, "eventOccurrenceId" uuid, "uploadedByUserId" uuid NOT NULL, "fileName" character varying(255), "storageUrl" text, "evidenceType" character varying(50) NOT NULL, "metadata" jsonb, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_b864cb5d49854f89917fc0b44b9" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "evidence" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationControlId" uuid NOT NULL, "eventOccurrenceId" uuid, "uploadedByUserId" uuid NOT NULL, "fileName" character varying(255), "storageUrl" text, "evidenceType" character varying(50) NOT NULL, "metadata" jsonb, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_b864cb5d49854f89917fc0b44b9" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "audit_evidence_map" ("auditId" uuid NOT NULL, "evidenceId" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_776ce97bdb19931c5bc68d0b0e3" PRIMARY KEY ("auditId", "evidenceId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "audits" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "frameworkId" integer NOT NULL, "name" character varying(255) NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'in_progress', "startDate" date, "endDate" date, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_b2d7a2089999197dc7024820f28" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "audits" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "organizationFrameworkId" uuid NOT NULL, "name" character varying(255) NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'draft', "startDate" date, "endDate" date, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_b2d7a2089999197dc7024820f28" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "frameworks" ("id" SERIAL NOT NULL, "name" character varying(255) NOT NULL, "shortCode" character varying(20), "region" character varying(2) NOT NULL, CONSTRAINT "UQ_dfaedaffdb18492a02a1f367ac4" UNIQUE ("name"), CONSTRAINT "UQ_f0957a1223e9cff5e5f6c5910cf" UNIQUE ("shortCode"), CONSTRAINT "PK_23e178ce62668c9ce2036b7a3c2" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "organization_frameworks" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "frameworkId" integer NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_5438b973669bcc8edb969941782" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "frameworks" ("id" SERIAL NOT NULL, "name" character varying(255) NOT NULL, "shortCode" character varying(20), "region" jsonb NOT NULL DEFAULT '[]', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_dfaedaffdb18492a02a1f367ac4" UNIQUE ("name"), CONSTRAINT "UQ_f0957a1223e9cff5e5f6c5910cf" UNIQUE ("shortCode"), CONSTRAINT "PK_23e178ce62668c9ce2036b7a3c2" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "control_categories" ("id" SERIAL NOT NULL, "name" character varying(100) NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_3c6ceca3fa17cf9e86f8d7ea123" UNIQUE ("name"), CONSTRAINT "PK_3b91f65662db5fb2d3233484007" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "policy_signatures" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "policyId" uuid NOT NULL, "userId" uuid NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'pending', "signedAt" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_1213ceea8e68f1c3fc89f475b94" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "policy_signatures" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "policyId" uuid NOT NULL, "userId" uuid NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'pending', "signedAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_1213ceea8e68f1c3fc89f475b94" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "policies" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "title" character varying(255) NOT NULL, "content" text, "isCustom" boolean NOT NULL DEFAULT false, "version" integer NOT NULL DEFAULT '1', "status" character varying(50) NOT NULL DEFAULT 'draft', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_603e09f183df0108d8695c57e28" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "policy_control_map" ("policyId" uuid NOT NULL, "controlId" integer NOT NULL, CONSTRAINT "PK_7748a95f6b12876aead02d254f3" PRIMARY KEY ("policyId", "controlId"))`,
+      `CREATE TABLE "policy_control_map" ("policyId" uuid NOT NULL, "controlId" integer NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_7748a95f6b12876aead02d254f3" PRIMARY KEY ("policyId", "controlId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "controls" ("id" SERIAL NOT NULL, "frameworkId" integer NOT NULL, "categoryId" integer NOT NULL, "controlIdString" character varying(50), "title" character varying(255) NOT NULL, "description" text NOT NULL, CONSTRAINT "PK_caab9cdc105919cae31de77f61e" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "controls" ("id" SERIAL NOT NULL, "categoryId" integer NOT NULL, "controlIdString" character varying(50), "title" character varying(255) NOT NULL, "description" text NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_caab9cdc105919cae31de77f61e" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "organization_controls" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "controlId" integer NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'to_do', "notes" text, "assignedUserId" uuid, CONSTRAINT "UQ_692cfa837727ac2007d17aa0f4f" UNIQUE ("organizationId", "controlId"), CONSTRAINT "PK_10ffaa36e5199995b9c205f849c" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "organization_controls" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "controlId" integer NOT NULL, "categoryId" integer NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'to_do', "notes" text, "assignedUserId" uuid, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_692cfa837727ac2007d17aa0f4f" UNIQUE ("organizationId", "controlId"), CONSTRAINT "PK_10ffaa36e5199995b9c205f849c" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "scan_results" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "integrationId" uuid NOT NULL, "vulnerabilityId" character varying(255), "description" text, "severity" character varying(50), "filePath" text, "status" character varying(50) NOT NULL DEFAULT 'open', "aiRemediationSuggestion" text, "detectedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_57c295805246213318de81826f9" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "scan_results" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "integrationId" uuid NOT NULL, "vulnerabilityId" character varying(255), "description" text, "severity" character varying(50), "filePath" text, "status" character varying(50) NOT NULL DEFAULT 'open', "aiRemediationSuggestion" text, "detectedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_57c295805246213318de81826f9" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "organization_integrations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "integrationType" character varying(50) NOT NULL, "encryptedCredentials" text NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'disconnected', "lastSyncAt" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_5abc5a509e1ed4dd30abc1f2604" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "organization_integrations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "integrationType" character varying(50) NOT NULL, "encryptedCredentials" text NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'disconnected', "lastSyncAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_5abc5a509e1ed4dd30abc1f2604" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "security_questionnaires" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "question" text NOT NULL, "answer" text NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_c2ede3cf0b89fa809a72ffb366d" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "security_questionnaires" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "question" text NOT NULL, "answer" text NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_c2ede3cf0b89fa809a72ffb366d" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "public_trust_pages" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "publicSlug" character varying(100) NOT NULL, "isActive" boolean NOT NULL DEFAULT false, "passwordHash" character varying(255), "visibleContent" jsonb, CONSTRAINT "UQ_b68760e12274e268249e4be9130" UNIQUE ("publicSlug"), CONSTRAINT "PK_da28f87d5b5cc0df7462f719357" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "public_trust_pages" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "publicSlug" character varying(100) NOT NULL, "isActive" boolean NOT NULL DEFAULT false, "passwordHash" character varying(255), "visibleContent" jsonb, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_b68760e12274e268249e4be9130" UNIQUE ("publicSlug"), CONSTRAINT "PK_da28f87d5b5cc0df7462f719357" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "document_requests" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "requesterEmail" character varying(255) NOT NULL, "requestedDocumentName" character varying(255) NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'pending_approval', "resolutionNotes" text, "resolvedByUserId" uuid, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_43076ee267e48f196b68ce008e6" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "document_requests" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "requesterEmail" character varying(255) NOT NULL, "requestedDocumentName" character varying(255) NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'pending_approval', "resolutionNotes" text, "resolvedByUserId" uuid, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_43076ee267e48f196b68ce008e6" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "audit_logs" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "userId" uuid, "actionType" character varying(100) NOT NULL, "targetEntityId" uuid, "details" jsonb, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_1bb179d048bbc581caa3b013439" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "service_countries" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "code" character varying(255) NOT NULL, "currency" character varying(255) NOT NULL, "currencyCode" character varying(255) NOT NULL, "currencySymbol" character varying(255) NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL, "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_ed4961e20b1a74242beccf6b8de" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "service_countries" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "code" character varying(255) NOT NULL, "currency" character varying(255) NOT NULL, "currencyCode" character varying(255) NOT NULL, "currencySymbol" character varying(255) NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_ed4961e20b1a74242beccf6b8de" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "organization_countries" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "serviceCountryId" uuid NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "status" character varying(50) NOT NULL DEFAULT 'primary', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_325a3b7067206c1b72faadd272e" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "organization_countries" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "serviceCountryId" uuid NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "status" character varying(50) NOT NULL DEFAULT 'primary', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_325a3b7067206c1b72faadd272e" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "permission" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "module" character varying(255) NOT NULL, "keys" jsonb NOT NULL, "scope" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_3b8b97af9d9d8807e41e6f48362" PRIMARY KEY ("id"))`,
@@ -74,19 +77,31 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `CREATE TABLE "role" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "type" character varying(255) NOT NULL DEFAULT 'default', "description" character varying(255) NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_b36bcfe02fc8de3c57a8b2391c2" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "invites" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "email" character varying(255) NOT NULL, "firstName" character varying(255) NOT NULL, "lastName" character varying(255) NOT NULL, "organizationId" uuid NOT NULL, "roleId" uuid NOT NULL, "invitedById" uuid NOT NULL, "status" character varying(255) NOT NULL DEFAULT 'pending', "expiresAt" TIMESTAMP NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL, "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_aa52e96b44a714372f4dd31a0af" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "organizations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "subscriptionPlan" character varying(50) NOT NULL DEFAULT 'free_tier', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "status" character varying(50) NOT NULL DEFAULT 'pending', "ownerId" uuid NOT NULL, CONSTRAINT "PK_6b031fcd0863e3f6b44230163f9" PRIMARY KEY ("id"))`,
-    );
-    await queryRunner.query(
-      `CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "email" character varying(255) NOT NULL, "password" character varying(255) NOT NULL, "mfaSecret" character varying(255), "mfaMethod" character varying(255) NOT NULL DEFAULT 'email', "isEmailVerified" boolean NOT NULL DEFAULT false, "firstName" character varying(255), "lastName" character varying(255), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "invites" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "email" character varying(255) NOT NULL, "firstName" character varying(255) NOT NULL, "lastName" character varying(255) NOT NULL, "organizationId" uuid NOT NULL, "roleId" uuid NOT NULL, "invitedById" uuid NOT NULL, "status" character varying(255) NOT NULL DEFAULT 'pending', "expiresAt" TIMESTAMP NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_aa52e96b44a714372f4dd31a0af" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "user_roles" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "roleId" uuid NOT NULL, "organizationId" uuid NOT NULL, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_8acd5cf26ebd158416f477de799" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
+      `CREATE TABLE "organizations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(255) NOT NULL, "subscriptionPlan" character varying(50) NOT NULL DEFAULT 'free_tier', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "status" character varying(50) NOT NULL DEFAULT 'pending', "ownerId" uuid, CONSTRAINT "PK_6b031fcd0863e3f6b44230163f9" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "users" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "organizationId" uuid NOT NULL, "email" character varying(255) NOT NULL, "password" character varying(255) NOT NULL, "mfaSecret" character varying(255), "mfaMethod" character varying(255) NOT NULL DEFAULT 'email', "isEmailVerified" boolean NOT NULL DEFAULT false, "firstName" character varying(255), "lastName" character varying(255), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "system_integrations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(50) NOT NULL, "key" character varying(50) NOT NULL, "category" character varying(50) NOT NULL, "description" character varying(255) NOT NULL, "status" character varying(50) NOT NULL DEFAULT 'active', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "UQ_0e83e82091880487ed0090f1c24" UNIQUE ("name"), CONSTRAINT "UQ_27a77598791fe99ef3c6fc36b1b" UNIQUE ("key"), CONSTRAINT "PK_906ed1d97f84b3cad4e6b09a3a2" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
       `CREATE TABLE "access_codes" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "code" character varying(255) NOT NULL, "type" character varying(255) NOT NULL, "email" character varying(255) NOT NULL, "organization" character varying(255), "isUsed" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "expiresAt" date NOT NULL, CONSTRAINT "PK_702e128569c0cdfeb9cea561cdb" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "control_categories_frameworks_map" ("frameworksId" integer NOT NULL, "controlCategoriesId" integer NOT NULL, CONSTRAINT "PK_81036804b71d3cec73022a0835a" PRIMARY KEY ("frameworksId", "controlCategoriesId"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_171ad0163ddcf5f1af4835d610" ON "control_categories_frameworks_map" ("frameworksId") `,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_35721ac1e59d3b60613789690d" ON "control_categories_frameworks_map" ("controlCategoriesId") `,
     );
     await queryRunner.query(
       `CREATE TABLE "role_permissions" ("roleId" uuid NOT NULL, "permissionId" uuid NOT NULL, CONSTRAINT "PK_d430a02aad006d8a70f3acd7d03" PRIMARY KEY ("roleId", "permissionId"))`,
@@ -134,7 +149,13 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `ALTER TABLE "audits" ADD CONSTRAINT "FK_59f6393ca7a2c7643fe0368a4d2" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "audits" ADD CONSTRAINT "FK_314b932d31c60b010830ab9ae4a" FOREIGN KEY ("frameworkId") REFERENCES "frameworks"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "audits" ADD CONSTRAINT "FK_9823f3386d1e32bdc6436acba96" FOREIGN KEY ("organizationFrameworkId") REFERENCES "organization_frameworks"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "organization_frameworks" ADD CONSTRAINT "FK_2c587d8b42095cb04bdd71ba1c3" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "organization_frameworks" ADD CONSTRAINT "FK_09453de6aad99a9522749691a57" FOREIGN KEY ("frameworkId") REFERENCES "frameworks"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "policy_signatures" ADD CONSTRAINT "FK_79dbe67ee9548f967db66f99122" FOREIGN KEY ("policyId") REFERENCES "policies"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
@@ -152,9 +173,6 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `ALTER TABLE "policy_control_map" ADD CONSTRAINT "FK_ccba10ee81a849165912e20d6ff" FOREIGN KEY ("controlId") REFERENCES "controls"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "controls" ADD CONSTRAINT "FK_098075cc81132317a8f469badfa" FOREIGN KEY ("frameworkId") REFERENCES "frameworks"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "controls" ADD CONSTRAINT "FK_bb9f0f07b9310346c6a68887f94" FOREIGN KEY ("categoryId") REFERENCES "control_categories"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -162,6 +180,9 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "organization_controls" ADD CONSTRAINT "FK_f86914c7f81333fbbc932b16e5d" FOREIGN KEY ("controlId") REFERENCES "controls"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "organization_controls" ADD CONSTRAINT "FK_392c3d73fe750b94b9c6432c8f5" FOREIGN KEY ("categoryId") REFERENCES "control_categories"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "organization_controls" ADD CONSTRAINT "FK_eb4f2ebc3d6907c35d2bddb1f92" FOREIGN KEY ("assignedUserId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -206,9 +227,6 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `ALTER TABLE "invites" ADD CONSTRAINT "FK_512a5c477fc936b04516d7a2d57" FOREIGN KEY ("invitedById") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "users" ADD CONSTRAINT "FK_f3d6aea8fcca58182b2e80ce979" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "user_roles" ADD CONSTRAINT "FK_472b25323af01488f1f66a06b67" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
@@ -216,6 +234,15 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "user_roles" ADD CONSTRAINT "FK_9197fafc733c4bf1e9adba816ce" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD CONSTRAINT "FK_f3d6aea8fcca58182b2e80ce979" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "control_categories_frameworks_map" ADD CONSTRAINT "FK_171ad0163ddcf5f1af4835d6105" FOREIGN KEY ("frameworksId") REFERENCES "frameworks"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "control_categories_frameworks_map" ADD CONSTRAINT "FK_35721ac1e59d3b60613789690d5" FOREIGN KEY ("controlCategoriesId") REFERENCES "control_categories"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "role_permissions" ADD CONSTRAINT "FK_b4599f8b8f548d35850afa2d12c" FOREIGN KEY ("roleId") REFERENCES "role"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
@@ -233,6 +260,15 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `ALTER TABLE "role_permissions" DROP CONSTRAINT "FK_b4599f8b8f548d35850afa2d12c"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "control_categories_frameworks_map" DROP CONSTRAINT "FK_35721ac1e59d3b60613789690d5"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "control_categories_frameworks_map" DROP CONSTRAINT "FK_171ad0163ddcf5f1af4835d6105"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "users" DROP CONSTRAINT "FK_f3d6aea8fcca58182b2e80ce979"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "user_roles" DROP CONSTRAINT "FK_9197fafc733c4bf1e9adba816ce"`,
     );
     await queryRunner.query(
@@ -240,9 +276,6 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "user_roles" DROP CONSTRAINT "FK_472b25323af01488f1f66a06b67"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "users" DROP CONSTRAINT "FK_f3d6aea8fcca58182b2e80ce979"`,
     );
     await queryRunner.query(
       `ALTER TABLE "invites" DROP CONSTRAINT "FK_512a5c477fc936b04516d7a2d57"`,
@@ -287,6 +320,9 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `ALTER TABLE "organization_controls" DROP CONSTRAINT "FK_eb4f2ebc3d6907c35d2bddb1f92"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "organization_controls" DROP CONSTRAINT "FK_392c3d73fe750b94b9c6432c8f5"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "organization_controls" DROP CONSTRAINT "FK_f86914c7f81333fbbc932b16e5d"`,
     );
     await queryRunner.query(
@@ -294,9 +330,6 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "controls" DROP CONSTRAINT "FK_bb9f0f07b9310346c6a68887f94"`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "controls" DROP CONSTRAINT "FK_098075cc81132317a8f469badfa"`,
     );
     await queryRunner.query(
       `ALTER TABLE "policy_control_map" DROP CONSTRAINT "FK_ccba10ee81a849165912e20d6ff"`,
@@ -314,7 +347,13 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `ALTER TABLE "policy_signatures" DROP CONSTRAINT "FK_79dbe67ee9548f967db66f99122"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "audits" DROP CONSTRAINT "FK_314b932d31c60b010830ab9ae4a"`,
+      `ALTER TABLE "organization_frameworks" DROP CONSTRAINT "FK_09453de6aad99a9522749691a57"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "organization_frameworks" DROP CONSTRAINT "FK_2c587d8b42095cb04bdd71ba1c3"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "audits" DROP CONSTRAINT "FK_9823f3386d1e32bdc6436acba96"`,
     );
     await queryRunner.query(
       `ALTER TABLE "audits" DROP CONSTRAINT "FK_59f6393ca7a2c7643fe0368a4d2"`,
@@ -359,10 +398,18 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
       `DROP INDEX "public"."IDX_b4599f8b8f548d35850afa2d12"`,
     );
     await queryRunner.query(`DROP TABLE "role_permissions"`);
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_35721ac1e59d3b60613789690d"`,
+    );
+    await queryRunner.query(
+      `DROP INDEX "public"."IDX_171ad0163ddcf5f1af4835d610"`,
+    );
+    await queryRunner.query(`DROP TABLE "control_categories_frameworks_map"`);
     await queryRunner.query(`DROP TABLE "access_codes"`);
-    await queryRunner.query(`DROP TABLE "user_roles"`);
+    await queryRunner.query(`DROP TABLE "system_integrations"`);
     await queryRunner.query(`DROP TABLE "users"`);
     await queryRunner.query(`DROP TABLE "organizations"`);
+    await queryRunner.query(`DROP TABLE "user_roles"`);
     await queryRunner.query(`DROP TABLE "invites"`);
     await queryRunner.query(`DROP TABLE "role"`);
     await queryRunner.query(`DROP TABLE "permission"`);
@@ -381,6 +428,7 @@ export class IntitialDBSchemas1755033968871 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "policy_signatures"`);
     await queryRunner.query(`DROP TABLE "control_categories"`);
     await queryRunner.query(`DROP TABLE "frameworks"`);
+    await queryRunner.query(`DROP TABLE "organization_frameworks"`);
     await queryRunner.query(`DROP TABLE "audits"`);
     await queryRunner.query(`DROP TABLE "audit_evidence_map"`);
     await queryRunner.query(`DROP TABLE "evidence"`);

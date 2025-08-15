@@ -29,6 +29,10 @@ export { AuditLog } from './audit-log.entity';
 // Integration and scanning entities
 export { OrganizationIntegration } from './organization-integration.entity';
 export { ScanResult } from './scan-result.entity';
+export {
+  SystemIntegration,
+  SystemIntegrationCategory,
+} from './system-integrations.entity';
 
 // Policy and signature entities
 export { Policy } from './policy.entity';

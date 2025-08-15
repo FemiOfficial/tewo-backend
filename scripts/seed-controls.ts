@@ -12,8 +12,8 @@ async function seedControlsCategoriesFrameworks() {
     console.log('✅ Database connection established');
 
     // Delete existing records to avoid conflicts
-    await deleteExistingRecords(dataSource);
-    console.log('🗑️  Existing records deleted');
+    // await deleteExistingRecords(dataSource);
+    // console.log('🗑️  Existing records deleted');
 
     // Create frameworks first
     const frameworks = await createFrameworks(dataSource);
