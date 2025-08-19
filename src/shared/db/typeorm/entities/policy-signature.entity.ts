@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Policy } from './policy.entity';
 import { User } from './user.entity';
@@ -24,6 +26,12 @@ export class PolicySignature {
 
   @Column({ type: 'timestamptz', nullable: true })
   signedAt: Date;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(() => Policy, (policy) => policy.signatures, {

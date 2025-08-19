@@ -5,12 +5,14 @@ import { SignInCommand } from '../impl/signin-command';
 import { CommandHandler } from '@nestjs/cqrs';
 import { AuthResponse } from '../../dto/types';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../../../shared/db/typeorm/entities';
 import bcrypt from 'bcrypt';
 
 @CommandHandler(SignInCommand)
 export class SignInHandler implements ICommandHandler<SignInCommand> {
   constructor(
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}

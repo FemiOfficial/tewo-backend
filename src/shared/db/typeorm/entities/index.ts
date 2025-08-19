@@ -1,7 +1,7 @@
 // Core entities
 export { Organization, OrganizationStatus } from './organization.entity';
 export { User } from './user.entity';
-export { Role } from './role.entity';
+export { Role, RoleType } from './role.entity';
 export { Permission } from './permissions.entity';
 export { UserRoles } from './user-roles.entity';
 export { AccessCode, AccessCodeType } from './access-code.entity';
@@ -11,6 +11,7 @@ export {
   OrganizationCountry,
   OrganizationCountryStatus,
 } from './organization-country.entity';
+export { OrganizationFrameworks } from './organization-frameworks.entity';
 
 // Master library entities
 export { Framework } from './framework.entity';
@@ -28,6 +29,10 @@ export { AuditLog } from './audit-log.entity';
 // Integration and scanning entities
 export { OrganizationIntegration } from './organization-integration.entity';
 export { ScanResult } from './scan-result.entity';
+export {
+  SystemIntegration,
+  SystemIntegrationCategory,
+} from './system-integrations.entity';
 
 // Policy and signature entities
 export { Policy } from './policy.entity';

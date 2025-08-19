@@ -5,8 +5,9 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
-import { Framework } from './framework.entity';
 import { ControlCategory } from './control-category.entity';
 import { OrganizationControl } from './organization-control.entity';
 import { PolicyControlMap } from './policy-control-map.entity';
@@ -15,9 +16,6 @@ import { PolicyControlMap } from './policy-control-map.entity';
 export class Control {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: 'int' })
-  frameworkId: number;
 
   @Column({ type: 'int' })
   categoryId: number;
@@ -31,10 +29,11 @@ export class Control {
   @Column({ type: 'text' })
   description: string;
 
-  // Relations
-  @ManyToOne(() => Framework, (framework) => framework.controls)
-  @JoinColumn({ name: 'frameworkId' })
-  framework: Framework;
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToOne(() => ControlCategory, (category) => category.controls)
   @JoinColumn({ name: 'categoryId' })

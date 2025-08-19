@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { OrganizationControl } from './organization-control.entity';
 import { User } from './user.entity';
@@ -35,6 +37,12 @@ export class ScheduledEvent {
 
   @Column({ type: 'uuid' })
   createdByUserId: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   // Relations
   @ManyToOne(

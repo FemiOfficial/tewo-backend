@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from './shared/db/typeorm/typeorm.module';
 import { CqrsModule } from '@nestjs/cqrs';
-import { UsersController, UsersService } from './modules/users';
+import { UserModule } from './modules/users/user.module';
 
 @Module({
   imports: [
@@ -13,8 +13,9 @@ import { UsersController, UsersService } from './modules/users';
       isGlobal: true,
     }),
     TypeOrmModule,
+    UserModule,
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

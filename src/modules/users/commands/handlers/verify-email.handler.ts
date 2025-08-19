@@ -1,18 +1,21 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { VerifyEmailCommand } from '../impl/verify-email.command';
 import { Repository } from 'typeorm';
-import { User } from 'src/shared/db/typeorm/entities';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
+  User,
   AccessCode,
   AccessCodeType,
-} from 'src/shared/db/typeorm/entities/access-code.entity';
+} from '../../../../shared/db/typeorm/entities';
 import { BadRequestException } from '@nestjs/common';
 import { AuthResponse } from '../../dto/types';
 
 @CommandHandler(VerifyEmailCommand)
 export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
   constructor(
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(AccessCode)
     private readonly accessCodeRepository: Repository<AccessCode>,
   ) {}
 

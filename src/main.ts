@@ -43,8 +43,6 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));
 
-  // app.useGlobalInterceptors(new TransformInterceptor());
-
   await app.listen(process.env.PORT ?? 3000);
 }
 

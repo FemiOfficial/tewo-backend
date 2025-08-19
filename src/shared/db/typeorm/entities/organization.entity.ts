@@ -18,6 +18,7 @@ import { AuditLog } from './audit-log.entity';
 import { OrganizationCountry } from './organization-country.entity';
 import { Invite } from './invites.entity';
 import { UserRoles } from './user-roles.entity';
+import { OrganizationFrameworks } from './organization-frameworks.entity';
 
 export enum OrganizationStatus {
   ACTIVE = 'active',
@@ -47,7 +48,7 @@ export class Organization {
   @Column({ type: 'varchar', length: 50, default: OrganizationStatus.PENDING })
   status: OrganizationStatus;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   ownerId: string;
 
   // Relations
@@ -95,4 +96,10 @@ export class Organization {
 
   @OneToMany(() => OrganizationCountry, (orgCountry) => orgCountry.organization)
   organizationCountries: OrganizationCountry[];
+
+  @OneToMany(
+    () => OrganizationFrameworks,
+    (orgFramework) => orgFramework.organization,
+  )
+  organizationFrameworks: OrganizationFrameworks[];
 }

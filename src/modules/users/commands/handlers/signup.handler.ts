@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from '../impl/signup.command';
 import { DataSource, Repository, QueryRunner } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   AccessCode,
   AccessCodeType,
@@ -16,16 +17,23 @@ import {
 import { BadRequestException } from '@nestjs/common';
 import { SignUpDto } from '../../dto/user.dto';
 import { AuthResponse } from '../../dto/types';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
+import { createId } from '@paralleldrive/cuid2';
 
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
   constructor(
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserRoles)
     private readonly userRolesRepository: Repository<UserRoles>,
+    @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(AccessCode)
     private readonly accessCodeRepository: Repository<AccessCode>,
+    @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
+    @InjectRepository(OrganizationCountry)
     private readonly organizationCountryRepository: Repository<OrganizationCountry>,
     private readonly dataSource: DataSource,
   ) {}
@@ -50,24 +58,32 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
         queryRunner,
       );
 
-      const user = this.userRepository.create({
-        firstName,
-        lastName,
-        email,
-        password: bcrypt.hashSync(password, 10),
-      });
-      const savedUser = await queryRunner.manager.save(user);
-
       // Create organization
       const savedOrganization = await this.createUserOrganization(
-        savedUser,
+        // savedUser,
         command.signUpDto,
         serviceCountry,
         queryRunner,
       );
 
+      const user = this.userRepository.create({
+        firstName,
+        lastName,
+        email,
+        password: bcrypt.hashSync(password, 10),
+        organizationId: savedOrganization.id,
+      });
+      const savedUser = await queryRunner.manager.save(user);
+
       // Assign user role
       await this.assignUserRole(savedUser, 'owner', queryRunner);
+      await queryRunner.manager.update(
+        Organization,
+        {
+          id: savedOrganization.id,
+        },
+        { ownerId: savedUser.id },
+      );
 
       // Mark access code as used
       await queryRunner.manager.update(
@@ -81,7 +97,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
 
       return {
         requiresEmailVerification: true,
-        requiresMFA: false,
+        requiresMFA: false, // TODO: Change to true when MFA is enabled
         data: {
           organization: savedOrganization.id,
           user: savedUser.id,
@@ -96,7 +112,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
   }
 
   private async createUserOrganization(
-    user: User,
+    // user: User,
     signUpDto: SignUpDto,
     serviceCountry: ServiceCountry,
     queryRunner: QueryRunner,
@@ -104,7 +120,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     const organization = this.organizationRepository.create({
       name: signUpDto.organizationName,
       subscriptionPlan: 'free_tier',
-      ownerId: user.id,
+      // ownerId: user.id,
     });
     const savedOrganization = await queryRunner.manager.save(organization);
 
@@ -134,6 +150,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     const userRole = this.userRolesRepository.create({
       userId: user.id,
       roleId: roleObject.id,
+      organizationId: user.organizationId,
     });
 
     return queryRunner.manager.save(userRole);
@@ -183,6 +200,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     const accessCode = this.accessCodeRepository.create({
       email: email,
       type: AccessCodeType.VERIFY_EMAIL,
+      code: createId(),
       expiresAt: dayjs().add(1, 'day').toDate(),
     });
 

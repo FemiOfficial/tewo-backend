@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ScheduledEvent } from './scheduled-event.entity';
 import { User } from './user.entity';
@@ -33,6 +35,12 @@ export class EventOccurrence {
 
   @Column({ type: 'timestamptz', nullable: true })
   completedAt: Date;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   @Column({ type: 'uuid', nullable: true })
   completedByUserId: string;

@@ -1,12 +1,27 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { SignUpDto } from './dto/user.dto';
+import {
+  EmployeeInviteDto,
+  SignInDto,
+  SignUpDto,
+  VerifyEmailDto,
+} from './dto/user.dto';
+import { AuthInterceptor } from '../../shared/interceptors/auth.interceptor';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('signup')
+  @UseInterceptors(AuthInterceptor)
   async signup(@Body() signUpDto: SignUpDto) {
     return this.usersService.signup(signUpDto);
   }
@@ -14,5 +29,29 @@ export class UsersController {
   @Post('signup/verify-email')
   async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
     return this.usersService.verifyEmail(verifyEmailDto);
+  }
+
+  @Post('signin')
+  @UseInterceptors(AuthInterceptor)
+  async signin(@Body() signInDto: SignInDto) {
+    return this.usersService.signIn(signInDto);
+  }
+
+  @Post('invite')
+  async invite(
+    @Body() employeeInviteDto: EmployeeInviteDto,
+    @Query('organization') organization: string,
+    @Query('invitedBy') invitedBy: string,
+  ) {
+    return this.usersService.sendEmployeeInvite(
+      employeeInviteDto,
+      organization,
+      invitedBy,
+    );
+  }
+
+  @Put('accept-invite/:accessCode')
+  async acceptInvite(@Param('accessCode') accessCode: string) {
+    return this.usersService.acceptInvite(accessCode);
   }
 }

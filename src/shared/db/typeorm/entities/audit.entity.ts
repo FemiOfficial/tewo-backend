@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
-import { Framework } from './framework.entity';
 import { AuditEvidenceMap } from './audit-evidence-map.entity';
+import { OrganizationFrameworks } from './organization-frameworks.entity';
 
 @Entity('audits')
 export class Audit {
@@ -21,12 +21,12 @@ export class Audit {
   organizationId: string;
 
   @Column({ type: 'int' })
-  frameworkId: number;
+  organizationFrameworkId: number;
 
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 50, default: 'in_progress' })
+  @Column({ type: 'varchar', length: 50, default: 'draft' })
   status: string;
 
   @Column({ type: 'date', nullable: true })
@@ -48,9 +48,13 @@ export class Audit {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @ManyToOne(() => Framework, (framework) => framework.audits)
-  @JoinColumn({ name: 'frameworkId' })
-  framework: Framework;
+  @ManyToOne(
+    () => OrganizationFrameworks,
+    (orgFramework) => orgFramework.audits,
+    { onDelete: 'CASCADE' },
+  )
+  @JoinColumn({ name: 'organizationFrameworkId' })
+  organizationFramework: OrganizationFrameworks;
 
   @OneToMany(() => AuditEvidenceMap, (evidenceMap) => evidenceMap.audit)
   evidenceMappings: AuditEvidenceMap[];

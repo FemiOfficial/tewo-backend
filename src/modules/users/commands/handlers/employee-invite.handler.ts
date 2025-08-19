@@ -1,8 +1,9 @@
-import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EmployeeInviteCommand } from '../impl/employee-invite.command';
 import { createId } from '@paralleldrive/cuid2';
 import { DataSource, Repository } from 'typeorm';
-import dayjs from 'dayjs';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as dayjs from 'dayjs';
 import {
   AccessCodeType,
   Invite,
@@ -18,7 +19,9 @@ export class EmployeeInviteHandler
 {
   constructor(
     private readonly dataSource: DataSource,
+    @InjectRepository(Invite)
     private readonly inviteRepository: Repository<Invite>,
+    @InjectRepository(AccessCode)
     private readonly accessCodeRepository: Repository<AccessCode>,
   ) {}
 
@@ -34,7 +37,7 @@ export class EmployeeInviteHandler
     try {
       const { email, firstName, lastName, role } = command.employeeInviteDto;
 
-      const { organization } = command;
+      const { organization, invitedBy } = command;
 
       const existingUser = await queryRunner.manager.findOne(User, {
         where: {
@@ -111,7 +114,8 @@ export class EmployeeInviteHandler
           firstName,
           lastName,
           organizationId: organization,
-          role,
+          roleId: role,
+          invitedById: invitedBy,
           status: InviteStatus.PENDING,
           expiresAt: inviteExpiresAt,
         }),
