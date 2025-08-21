@@ -74,8 +74,8 @@ export class OrganizationService {
     const result = frameworks.map((orgFramework: OrganizationFrameworks) => {
       return {
         id: orgFramework.id,
-        name: orgFramework!.framework.name,
-        shortCode: orgFramework!.framework.shortCode,
+        name: orgFramework.framework.name,
+        shortCode: orgFramework.framework.shortCode,
       };
     });
 

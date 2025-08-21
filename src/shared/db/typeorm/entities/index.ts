@@ -45,3 +45,6 @@ export { Audit } from './audit.entity';
 export { AuditEvidenceMap } from './audit-evidence-map.entity';
 export { PublicTrustPage } from './public-trust-page.entity';
 export { DocumentRequest } from './document-request.entity';
+
+// Control Wizard entities
+export * from './control-wizard';

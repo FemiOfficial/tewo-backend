@@ -1,0 +1,118 @@
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsArray,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { AllowedCharacters, UniqueArray } from 'src/shared/validators';
+import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
+
+export class CategorySpecificConfigDto {
+  // Security & Incidents Management
+  @IsOptional()
+  @IsArray()
+  @UniqueArray({ message: 'Incident severity levels must be unique' })
+  incidentSeverityLevels?: string[];
+
+  @IsOptional()
+  @IsObject()
+  responseTimeframes?: Record<string, number>;
+
+  // Risk Management
+  @IsOptional()
+  @IsArray()
+  riskAssessmentCriteria?: string[];
+
+  @IsOptional()
+  @IsString()
+  riskScoringMethod?: string;
+
+  // IT & Operational Security
+  @IsOptional()
+  @IsArray()
+  securityControls?: string[];
+
+  @IsOptional()
+  @IsArray()
+  operationalProcedures?: string[];
+
+  // Information Management
+  @IsOptional()
+  @IsArray()
+  dataClassificationLevels?: string[];
+
+  @IsOptional()
+  @IsObject()
+  retentionPolicies?: Record<string, number>;
+
+  // Governance
+  @IsOptional()
+  @IsArray()
+  policyReviewCycles?: string[];
+
+  @IsOptional()
+  @IsArray()
+  complianceCheckpoints?: string[];
+
+  // Data Privacy
+  @IsOptional()
+  @IsBoolean()
+  privacyImpactAssessment?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  dataSubjectRights?: string[];
+
+  // Access Controls
+  @IsOptional()
+  @IsArray()
+  accessReviewIntervals?: string[];
+
+  @IsOptional()
+  @IsArray()
+  automationCapabilities?: string[];
+
+  @IsOptional()
+  @IsArray()
+  systemIntegrations?: string[];
+}
+
+export class CreateControlWizardDto {
+  @IsNotEmpty()
+  @IsString()
+  defaultControlWizardId: string;
+
+  @IsOptional()
+  @IsEnum(ControlWizardMode)
+  mode: ControlWizardMode;
+
+  @IsBoolean()
+  @IsOptional()
+  isRecurring: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  requiresApproval: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  requiresEvidence: boolean;
+
+  @IsOptional()
+  @IsString()
+  @AllowedCharacters(/^[a-zA-Z0-9\s\-_\.]+$/, {
+    message: 'Title contains invalid characters',
+  })
+  title: string;
+
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @IsOptional()
+  @IsObject()
+  categorySpecificConfig: CategorySpecificConfigDto;
+}

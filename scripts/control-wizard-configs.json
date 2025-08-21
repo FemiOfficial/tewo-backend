@@ -1,0 +1,539 @@
+{
+  "dataPrivacyWizards": [{
+      "title": "GDPR Compliance & Data Protection",
+      "description": "Comprehensive GDPR compliance framework with automated data subject rights management",
+      "type": "system_defined",
+      "status": "active",
+      "mode": "hybrid",
+      "isRecurring": true,
+      "requiresApproval": true,
+      "requiresEvidence": true,
+      "generatesReport": true,
+      "categorySpecificConfig": {
+        "privacyImpactAssessment": true,
+        "dataSubjectRights": [
+          "Right to Access",
+          "Right to Rectification",
+          "Right to Erasure",
+          "Right to Portability",
+          "Right to Object",
+          "Right to Restriction"
+        ]
+      },
+      "metadata": {
+        "tags": ["GDPR", "EU", "Data Protection", "Privacy"],
+        "complianceLevel": "Full",
+        "riskLevel": "High"
+      },
+      "schedule": {
+        "interval": "quarterly",
+        "method": "hybrid",
+        "startDate": "2024-01-01",
+        "preferredTime": "09:00:00",
+        "scheduleConfig": {
+          "dayOfMonth": 1,
+          "monthOfYear": 1
+        }
+      },
+      "form": {
+        "type": "assessment",
+        "title": "GDPR Compliance Assessment",
+        "description": "Quarterly assessment of GDPR compliance status",
+        "config": {
+          "allowPartialSave": true,
+          "requireCompletion": true,
+          "scoringEnabled": true,
+          "passingScore": 80
+        },
+        "fields": [{
+            "fieldKey": "data_inventory",
+            "label": "Data Inventory Status",
+            "description": "Is your data inventory up to date?",
+            "type": "select",
+            "options": {
+              "choices": ["Yes", "Partial", "No", "Not Started"],
+              "default": "Partial"
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 1,
+            "scoring": {
+              "points": 25,
+              "weight": 1
+            }
+          },
+          {
+            "fieldKey": "consent_management",
+            "label": "Consent Management",
+            "description": "How do you manage user consent?",
+            "type": "multi_select",
+            "options": {
+              "choices": [
+                "Explicit consent collection",
+                "Consent withdrawal mechanism",
+                "Consent audit trail",
+                "Granular consent options"
+              ],
+              "default": ["Explicit consent collection"]
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 2,
+            "scoring": {
+              "points": 20,
+              "weight": 1
+            }
+          },
+          {
+            "fieldKey": "data_subject_requests",
+            "label": "Data Subject Request Handling",
+            "description": "How do you handle data subject requests?",
+            "type": "textarea",
+            "options": {
+              "placeholder": "Describe your process for handling access, rectification, and erasure requests..."
+            },
+            "validation": {
+              "rules": ["required"],
+              "minLength": 50
+            },
+            "isRequired": true,
+            "order": 3,
+            "scoring": {
+              "points": 30,
+              "weight": 1
+            }
+          }
+        ]
+      },
+      "document": {
+        "type": "policy",
+        "title": "Data Protection Policy",
+        "description": "Comprehensive data protection policy aligned with GDPR requirements",
+        "status": "draft",
+        "config": {
+          "requireApproval": true,
+          "autoExpiry": true,
+          "expiryDays": 365,
+          "versioningEnabled": true,
+          "maxVersions": 10,
+          "allowComments": true,
+          "allowAnnotations": true,
+          "retentionPolicy": {
+            "activeRetention": 365,
+            "archivalRetention": 2555
+          }
+        },
+        "metadata": {
+          "tags": ["Policy", "GDPR", "Data Protection"],
+          "department": "Legal & Compliance",
+          "owner": "Data Protection Officer",
+          "classification": "Confidential"
+        }
+      },
+      "approval": {
+        "type": "sequential",
+        "config": {
+          "requireComments": true,
+          "allowDelegation": true,
+          "autoEscalation": true,
+          "escalationHours": 48,
+          "reminderIntervals": [24, 48, 72],
+          "maxRevisions": 3
+        },
+        "escalationConfig": {
+          "escalationLevels": [{
+            "level": 1,
+            "timeframe": 24
+          }]
+        }
+      },
+      "report": {
+        "type": "compliance_report",
+        "title": "GDPR Compliance Report",
+        "description": "Quarterly GDPR compliance status report",
+        "config": {
+          "formats": ["pdf", "excel"],
+          "includeCharts": true,
+          "includeTables": true,
+          "includeAttachments": true,
+          "maxFileSize": 10485760,
+          "customTemplates": ["GDPR_Compliance_Template"]
+        },
+        "contentConfig": {
+          "sections": [{
+              "title": "Executive Summary",
+              "type": "summary",
+              "required": true
+            },
+            {
+              "title": "Compliance Score",
+              "type": "metrics",
+              "required": true
+            },
+            {
+              "title": "Risk Assessment",
+              "type": "assessment",
+              "required": true
+            },
+            {
+              "title": "Action Items",
+              "type": "actions",
+              "required": true
+            }
+          ],
+          "filters": [{
+            "field": "date_range",
+            "type": "date_range",
+            "defaultValue": "last_quarter"
+          }],
+          "sorting": [{
+            "field": "priority",
+            "direction": "desc"
+          }]
+        },
+        "distributionConfig": {
+          "subjectTemplate": "GDPR Compliance Report - {quarter} {year}",
+          "bodyTemplate": "Please find attached the GDPR compliance report for {quarter} {year}.",
+          "autoSend": true,
+          "sendOnCompletion": true
+        }
+      }
+    },
+    {
+      "title": "Data Privacy Impact Assessment (DPIA)",
+      "description": "Systematic assessment of data processing activities and privacy risks",
+      "type": "custom",
+      "status": "active",
+      "mode": "workflow",
+      "isRecurring": false,
+      "requiresApproval": true,
+      "requiresEvidence": true,
+      "generatesReport": true,
+      "categorySpecificConfig": {
+        "privacyImpactAssessment": true,
+        "dataSubjectRights": [
+          "Right to Access",
+          "Right to Rectification",
+          "Right to Erasure"
+        ]
+      },
+      "metadata": {
+        "tags": ["DPIA", "Privacy", "Risk Assessment"],
+        "complianceLevel": "Standard",
+        "riskLevel": "Medium"
+      },
+      "form": {
+        "type": "questionnaire",
+        "title": "DPIA Assessment Questionnaire",
+        "description": "Comprehensive questionnaire for privacy impact assessment",
+        "config": {
+          "allowPartialSave": true,
+          "requireCompletion": true,
+          "scoringEnabled": true,
+          "passingScore": 70
+        },
+        "fields": [{
+            "fieldKey": "processing_purpose",
+            "label": "Purpose of Data Processing",
+            "description": "What is the primary purpose of this data processing activity?",
+            "type": "textarea",
+            "options": {
+              "placeholder": "Describe the business purpose and legal basis for processing..."
+            },
+            "validation": {
+              "rules": ["required"],
+              "minLength": 100
+            },
+            "isRequired": true,
+            "order": 1,
+            "scoring": {
+              "points": 20,
+              "weight": 1
+            }
+          },
+          {
+            "fieldKey": "data_categories",
+            "label": "Categories of Personal Data",
+            "description": "What types of personal data are being processed?",
+            "type": "multi_select",
+            "options": {
+              "choices": [
+                "Basic identifiers (name, email, phone)",
+                "Financial information",
+                "Health data",
+                "Biometric data",
+                "Location data",
+                "Behavioral data",
+                "Special category data"
+              ]
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 2,
+            "scoring": {
+              "points": 15,
+              "weight": 1
+            }
+          },
+          {
+            "fieldKey": "risk_level",
+            "label": "Perceived Risk Level",
+            "description": "What is your initial assessment of the privacy risk level?",
+            "type": "select",
+            "options": {
+              "choices": ["Low", "Medium", "High", "Very High"],
+              "default": "Medium"
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 3,
+            "scoring": {
+              "points": 25,
+              "weight": 1
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "accessControlWizards": [{
+      "title": "GitHub Access Management & Review",
+      "description": "Automated access review and management for GitHub repositories and teams",
+      "type": "custom",
+      "status": "active",
+      "mode": "automated",
+      "isRecurring": true,
+      "requiresApproval": false,
+      "requiresEvidence": true,
+      "generatesReport": true,
+      "categorySpecificConfig": {
+        "accessReviewIntervals": ["quarterly", "monthly"],
+        "systemIntegrations": ["github_db_uuid"],
+        "automationCapabilities": [
+          "auto-disable-inactive-users",
+          "auto-notify-managers",
+          "auto-generate-reports",
+          "auto-escalate-exceptions"
+        ]
+      },
+      "metadata": {
+        "tags": ["GitHub", "Access Control", "Automation", "Code Repository"],
+        "integrationType": "GitHub",
+        "automationLevel": "High"
+      },
+      "schedule": {
+        "interval": "quarterly",
+        "method": "automated",
+        "startDate": "2024-01-01",
+        "preferredTime": "02:00:00",
+        "scheduleConfig": {
+          "dayOfMonth": 1,
+          "monthOfYear": 1
+        }
+      },
+      "form": {
+        "type": "checklist",
+        "title": "GitHub Access Review Checklist",
+        "description": "Manual review checklist for GitHub access exceptions",
+        "config": {
+          "allowPartialSave": false,
+          "requireCompletion": true,
+          "scoringEnabled": false
+        },
+        "fields": [{
+            "fieldKey": "repository_access",
+            "label": "Repository Access Review",
+            "description": "Review and validate repository access permissions",
+            "type": "boolean",
+            "options": {
+              "default": false
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 1
+          },
+          {
+            "fieldKey": "team_membership",
+            "label": "Team Membership Validation",
+            "description": "Validate team membership and roles",
+            "type": "boolean",
+            "options": {
+              "default": false
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 2
+          },
+          {
+            "fieldKey": "exception_notes",
+            "label": "Exception Notes",
+            "description": "Document any exceptions or special cases",
+            "type": "textarea",
+            "options": {
+              "placeholder": "Document any exceptions, business justification, and approval details..."
+            },
+            "validation": {
+              "rules": ["required"],
+              "minLength": 20
+            },
+            "isRequired": true,
+            "order": 3
+          }
+        ]
+      },
+      "report": {
+        "type": "access_review",
+        "title": "GitHub Access Review Report",
+        "description": "Quarterly access review report for GitHub repositories",
+        "config": {
+          "formats": ["pdf", "excel", "csv"],
+          "includeCharts": true,
+          "includeTables": true,
+          "includeAttachments": true,
+          "maxFileSize": 5242880,
+          "customTemplates": ["GitHub_Access_Review_Template"]
+        },
+        "contentConfig": {
+          "sections": [{
+              "title": "Access Summary",
+              "type": "summary",
+              "required": true
+            },
+            {
+              "title": "User Access Matrix",
+              "type": "matrix",
+              "required": true
+            },
+            {
+              "title": "Exception Report",
+              "type": "exceptions",
+              "required": true
+            },
+            {
+              "title": "Recommendations",
+              "type": "recommendations",
+              "required": true
+            }
+          ],
+          "filters": [{
+              "field": "review_period",
+              "type": "date_range",
+              "defaultValue": "last_quarter"
+            },
+            {
+              "field": "access_level",
+              "type": "date_range",
+              "defaultValue": "all"
+            }
+          ],
+          "sorting": [{
+            "field": "last_access",
+            "direction": "desc"
+          }]
+        },
+        "distributionConfig": {
+          "subjectTemplate": "GitHub Access Review Report - {quarter} {year}",
+          "bodyTemplate": "Please find attached the GitHub access review report for {quarter} {year}.",
+          "autoSend": true,
+          "sendOnCompletion": true
+        }
+      }
+    },
+    {
+      "title": "Cloud Access Control & Monitoring",
+      "description": "Comprehensive access control management across AWS, Azure, and GCP",
+      "type": "custom",
+      "status": "active",
+      "mode": "hybrid",
+      "isRecurring": true,
+      "requiresApproval": true,
+      "requiresEvidence": true,
+      "generatesReport": true,
+      "categorySpecificConfig": {
+        "accessReviewIntervals": ["monthly", "quarterly"],
+        "systemIntegrations": ["aws_db_uuid", "azure_db_uuid", "gcp_db_uuid"],
+        "automationCapabilities": [
+          "cross-cloud-access-sync",
+          "privileged-access-management",
+          "access-pattern-analysis",
+          "anomaly-detection"
+        ]
+      },
+      "metadata": {
+        "tags": ["AWS",  "Access Control"],
+        "integrationType": "Multi-Cloud",
+        "automationLevel": "Medium"
+      },
+      "schedule": {
+        "interval": "monthly",
+        "method": "hybrid",
+        "startDate": "2024-01-01",
+        "preferredTime": "03:00:00",
+        "scheduleConfig": {
+          "dayOfMonth": 1
+        }
+      },
+      "form": {
+        "type": "audit_form",
+        "title": "Multi-Cloud Access Audit",
+        "description": "Monthly audit form for multi-cloud access controls",
+        "config": {
+          "allowPartialSave": true,
+          "requireCompletion": true,
+          "scoringEnabled": true,
+          "passingScore": 85
+        },
+        "fields": [
+          {
+            "fieldKey": "aws_access_review",
+            "label": "AWS Access Review Status",
+            "description": "Has AWS access been reviewed this month?",
+            "type": "select",
+            "options": {
+              "choices": ["Completed", "In Progress", "Not Started", "Issues Found"],
+              "default": "Not Started"
+            },
+            "validation": {
+              "rules": ["required"]
+            },
+            "isRequired": true,
+            "order": 1,
+            "scoring": {
+              "points": 25,
+              "weight": 1
+            }
+          }
+        ]
+      },
+      "approval": {
+        "type": "parallel",
+        "config": {
+          "requireComments": true,
+          "allowDelegation": true,
+          "autoEscalation": true,
+          "escalationHours": 24,
+          "reminderIntervals": [12, 24],
+          "maxRevisions": 2
+        },
+        "escalationConfig": {
+          "escalationLevels": [{
+            "level": 1,
+            "timeframe": 24
+          }]
+        }
+      }
+    }
+  ]
+}

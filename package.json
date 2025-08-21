@@ -25,7 +25,8 @@
     "migration:revert": "gulp revert:migration",
     "seed:roles": "ts-node -r tsconfig-paths/register scripts/seed-roles-permissions.ts",
     "seed:controls": "ts-node -r tsconfig-paths/register scripts/seed-controls.ts",
-    "seed:integrations": "ts-node -r tsconfig-paths/register scripts/seed-system-integrations.ts"
+    "seed:integrations": "ts-node -r tsconfig-paths/register scripts/seed-system-integrations.ts",
+    "seed:wizards": "ts-node -r tsconfig-paths/register scripts/seed-control-wizards.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

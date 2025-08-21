@@ -55,8 +55,6 @@ export class OrganizationController {
     );
   }
 
-  
-
   // // endpoints here
   // // - get controls (show those in todo e.t.c)
   // -
