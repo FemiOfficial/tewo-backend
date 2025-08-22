@@ -60,12 +60,12 @@ export class ControlWizardDocument {
     expiryDays?: number;
     versioningEnabled: boolean;
     maxVersions?: number;
-    allowComments: boolean;
-    allowAnnotations: boolean;
-    retentionPolicy?: {
-      activeRetention: number; // days
-      archivalRetention: number; // days
-    };
+    // allowComments: boolean;
+    // allowAnnotations: boolean;
+    // retentionPolicy?: {
+    //   activeRetention: number; // days
+    //   archivalRetention: number; // days
+    // };
   };
 
   @Column({ type: 'jsonb', nullable: true })

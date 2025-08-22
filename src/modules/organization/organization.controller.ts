@@ -1,5 +1,6 @@
 import {
   Body,
+  Controller,
   Get,
   Injectable,
   Param,
@@ -13,6 +14,7 @@ import { AuthGuard, AuthenticatedRequest } from '../token/guard/jwt.guard';
 
 @Injectable()
 @UseGuards(AuthGuard)
+@Controller('organization')
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 

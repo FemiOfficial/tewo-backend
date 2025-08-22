@@ -15,6 +15,7 @@ import {
   SystemIntegrationCategory,
   ControlWizardForm,
   ControlWizardFormField,
+  ControlWizardDocument,
 } from '../../../shared/db/typeorm/entities';
 
 import { CreateControlWizardDto } from './dto/org-control.dto';
@@ -25,6 +26,7 @@ import {
 } from './dto/forms/forms.dto';
 
 import dayjs from 'dayjs';
+import { UpsertControlWizardDocumentDto } from './dto/document/document.dto';
 
 @Injectable()
 export class OrgControlService {
@@ -41,6 +43,8 @@ export class OrgControlService {
     private readonly controlWizardFormRepository: Repository<ControlWizardForm>,
     @InjectRepository(ControlWizardFormField)
     private readonly controlWizardFormFieldRepository: Repository<ControlWizardFormField>,
+    @InjectRepository(ControlWizardDocument)
+    private readonly controlWizardDocumentRepository: Repository<ControlWizardDocument>,
   ) {}
 
   async getSystemIntegrations(category: SystemIntegrationCategory) {
@@ -131,6 +135,76 @@ export class OrgControlService {
     }
 
     return controlWizardForms;
+  }
+
+  async getControlWizardFormFields(
+    controlWizardId: string,
+    formId: string,
+    isDefault = true,
+    organizationId?: string,
+  ) {
+    const controlWizardFormFields =
+      await this.controlWizardFormFieldRepository.find({
+        where: {
+          formId,
+          controlWizardId,
+          ...(isDefault && {
+            controlWizard: {
+              organizationId,
+            },
+          }),
+        },
+        relations: ['controlWizard', 'form'],
+      });
+
+    if (!controlWizardFormFields) {
+      throw new BadRequestException('Control wizard form field not found');
+    }
+
+    if (
+      !isDefault &&
+      controlWizardFormFields.some(
+        (field) => field.form.controlWizard?.organizationId !== organizationId,
+      )
+    ) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
+
+    return controlWizardFormFields;
+  }
+
+  async getControlWizardDocuments(
+    controlWizardId: string,
+    isDefault = true,
+    organizationId?: string,
+  ) {
+    const controlWizardDocuments =
+      await this.controlWizardDocumentRepository.find({
+        where: {
+          controlWizardId,
+          ...(isDefault && {
+            controlWizard: {
+              organizationId,
+            },
+          }),
+        },
+        relations: ['controlWizard', 'versions'],
+      });
+
+    if (!controlWizardDocuments) {
+      throw new BadRequestException('Control wizard document not found');
+    }
+
+    if (
+      !isDefault &&
+      controlWizardDocuments.some(
+        (document) => document.controlWizard?.organizationId !== organizationId,
+      )
+    ) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
+
+    return controlWizardDocuments;
   }
 
   async createControlWizard(
@@ -360,6 +434,58 @@ export class OrgControlService {
       return updatedField;
     }
   }
+
+  async upsertControlWizardDocument(
+    organizationId: string,
+    controlWizardId: string,
+    payload: UpsertControlWizardDocumentDto,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: {
+        id: controlWizardId,
+        organizationId,
+        type: ControlWizardType.CUSTOM,
+      },
+    });
+
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
+
+    const document = {
+      ...(payload.isNew && { controlWizardId }),
+      title: payload.title,
+      description: payload.description,
+      type: payload.type,
+      documentConfig: payload.documentConfig,
+    };
+
+    if (payload.isNew) {
+      const newDocument = this.controlWizardDocumentRepository.create(document);
+      await this.controlWizardDocumentRepository.save(newDocument);
+    } else {
+      const updateResult = await this.controlWizardDocumentRepository.update(
+        { id: payload.documentId },
+        document,
+      );
+
+      if (updateResult.affected === 0) {
+        throw new InternalServerErrorException(
+          'Failed to update control wizard document',
+        );
+      }
+
+      const updatedDocument =
+        await this.controlWizardDocumentRepository.findOne({
+          where: { id: payload.documentId },
+          relations: ['controlWizard', 'versions'],
+        });
+
+      return updatedDocument;
+    }
+  }
+
+
   // generate control wizards for organization => simply map default wizards specific to the organization
   // update control wizard by category
   // update control form setting

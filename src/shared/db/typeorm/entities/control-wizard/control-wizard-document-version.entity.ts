@@ -10,6 +10,12 @@ import {
 import { ControlWizardDocument } from './control-wizard-document.entity';
 import { User } from '../user.entity';
 
+export enum DocumentChangeLogImpact {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+}
+
 @Entity('control_wizard_document_versions')
 export class ControlWizardDocumentVersion {
   @PrimaryGeneratedColumn('uuid')
@@ -28,7 +34,7 @@ export class ControlWizardDocumentVersion {
   description: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
-  filePath: string;
+  fileLocation: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   fileType: string;
@@ -43,7 +49,7 @@ export class ControlWizardDocumentVersion {
   changeLog: {
     changes: string[];
     reason: string;
-    impact: 'low' | 'medium' | 'high';
+    impact: DocumentChangeLogImpact;
   };
 
   @Column({ type: 'uuid' })
