@@ -56,7 +56,7 @@ export class OrgControlService {
 
   // get control wizard by category
   async getControlWizardByCategory(
-    categoryId: number,
+    categoryId: string,
     isDefault = false,
     organizationId?: string,
   ) {
@@ -484,7 +484,6 @@ export class OrgControlService {
       return updatedDocument;
     }
   }
-
 
   // generate control wizards for organization => simply map default wizards specific to the organization
   // update control wizard by category
