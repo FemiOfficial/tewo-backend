@@ -1,13 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SetupControlWizardCommand } from '../impl/setup-control-wizard.command';
 import { OrgControlService } from '../../org-control/org-control.service';
-import { DataSource, IsNull } from 'typeorm';
+import { DataSource } from 'typeorm';
 import {
   ControlWizard,
   ControlWizardType,
 } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
 import { BadRequestException } from '@nestjs/common';
-import { OrganizationControl } from 'src/shared/db/typeorm/entities/organization-control.entity';
 import { ControlWizardSchedule } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-schedule.entity';
 import { ControlWizardApproval } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-approval.entity';
 
@@ -77,7 +76,7 @@ export class SetupControlWizardHandler
         frameworkId: defaultControlWizard.frameworkId,
         title: defaultControlWizard.title,
         description: defaultControlWizard.description,
-        type: defaultControlWizard.type,
+        type: ControlWizardType.CUSTOM,
         status: defaultControlWizard.status,
         mode: defaultControlWizard.mode,
         isRecurring: defaultControlWizard.isRecurring,
@@ -86,7 +85,6 @@ export class SetupControlWizardHandler
         generatesReport: defaultControlWizard.generatesReport,
         categorySpecificConfig: defaultControlWizard.categorySpecificConfig,
         metadata: defaultControlWizard.metadata,
-        type: ControlWizardType.CUSTOM,
       });
 
       // create the control wizard schedule

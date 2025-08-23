@@ -62,7 +62,7 @@ export class OrgControlService {
   ) {
     const controlWizard = await this.controlWizardRepository.findOne({
       where: {
-        categoryId,
+        categoryId: parseInt(categoryId),
         type: isDefault ? ControlWizardType.DEFAULT : ControlWizardType.CUSTOM,
         organizationId: isDefault ? IsNull() : organizationId,
       },
@@ -147,7 +147,9 @@ export class OrgControlService {
       await this.controlWizardFormFieldRepository.find({
         where: {
           formId,
-          controlWizardId,
+          form: {
+            controlWizardId,
+          },
           ...(isDefault && {
             controlWizard: {
               organizationId,

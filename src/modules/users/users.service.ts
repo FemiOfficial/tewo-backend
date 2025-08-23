@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { SignUpCommand } from './commands/impl/signup.command';
 import {
@@ -12,10 +12,70 @@ import { VerifyEmailCommand } from './commands/impl/verify-email.command';
 import { EmployeeInviteCommand } from './commands/impl/employee-invite.command';
 import { AcceptInviteCommand } from './commands/impl/accpet-invite.command';
 import { SignInCommand } from './commands/impl/signin-command';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import {
+  AccessCode,
+  AccessCodeType,
+  User,
+} from '../../shared/db/typeorm/entities';
+import dayjs from 'dayjs';
+import speakeasy from 'speakeasy';
 @Injectable()
 export class UsersService {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(AccessCode)
+    private readonly accessCodeRepository: Repository<AccessCode>,
+  ) {}
+
+  async addUserWaitlistAccessCode(email: string) {
+    const userEmailAlreadyAdded = await this.userRepository.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (userEmailAlreadyAdded) {
+      throw new BadRequestException(
+        'This email is already taken by an exisiting user',
+      );
+    }
+
+    const userCodeAlreadySent = await this.accessCodeRepository.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (userCodeAlreadySent) {
+      throw new BadRequestException(
+        'This email has already been sent an access code',
+      );
+    }
+
+    const secret = speakeasy.generateSecret();
+    const code = speakeasy.totp({
+      secret: secret.ascii,
+      encoding: 'ascii',
+      digits: 6,
+    });
+
+    const accessCode = this.accessCodeRepository.create({
+      email,
+      code,
+      secret: secret.ascii,
+      expiresAt: dayjs().add(1, 'day').toDate(),
+      isUsed: false,
+      type: AccessCodeType.SIGNUP,
+    });
+
+    await this.accessCodeRepository.save(accessCode);
+
+    return { message: 'Waitlist access code has been sent to you email' };
+  }
 
   async signup(signUpDto: SignUpDto): Promise<AuthResponse> {
     return await this.commandBus.execute(new SignUpCommand(signUpDto));

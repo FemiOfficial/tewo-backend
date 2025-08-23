@@ -17,7 +17,7 @@ import {
 import { BadRequestException } from '@nestjs/common';
 import { SignUpDto } from '../../dto/user.dto';
 import { AuthResponse } from '../../dto/types';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { createId } from '@paralleldrive/cuid2';
 
 @CommandHandler(SignUpCommand)

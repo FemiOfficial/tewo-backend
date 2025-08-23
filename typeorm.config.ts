@@ -11,7 +11,7 @@ export default new DataSource({
   url: sqlUrl,
   logging: true,
   entities: [
-    join(__dirname, 'src/shared/db/typeorm/entities/*.entity{.ts,.js}'),
+    join(__dirname, 'src/shared/db/typeorm/entities/**/*.entity{.ts,.js}'),
   ],
   migrations: [join(__dirname, 'src/shared/db/typeorm/migrations/*.ts')],
   synchronize: false,

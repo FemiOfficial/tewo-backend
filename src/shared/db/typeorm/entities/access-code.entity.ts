@@ -22,6 +22,9 @@ export class AccessCode {
   code: string;
 
   @Column({ type: 'varchar', length: 255 })
+  secret: string;
+
+  @Column({ type: 'varchar', length: 255 })
   type: AccessCodeType;
 
   @Column({ type: 'varchar', length: 255 })
@@ -33,12 +36,12 @@ export class AccessCode {
   @Column({ type: 'boolean', default: false })
   isUsed: boolean;
 
+  @Column({ type: 'date', nullable: true })
+  expiresAt: Date;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
-
-  @Column({ type: 'date' })
-  expiresAt: Date;
 }

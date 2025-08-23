@@ -15,10 +15,16 @@ import {
   VerifyEmailDto,
 } from './dto/user.dto';
 import { AuthInterceptor } from '../../shared/interceptors/auth.interceptor';
+import { AddUserWaitlistAccessCodeDto } from './dto/waitlist.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('add-waitlist')
+  async addUserWaitlistAccessCode(@Body() body: AddUserWaitlistAccessCodeDto) {
+    return this.usersService.addUserWaitlistAccessCode(body.email);
+  }
 
   @Post('signup')
   @UseInterceptors(AuthInterceptor)

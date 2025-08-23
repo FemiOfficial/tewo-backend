@@ -19,7 +19,5 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "typeRoots": ["./custom_types", "./node_modules/@types"],
-    "resolveJsonModule": true,
-    "esModuleInterop": true
   }
 }
