@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AccessCode } from 'src/shared/db/typeorm/entities/access-code.entity';
 import { AccessCodeType } from 'src/shared/db/typeorm/entities/access-code.entity';
 import { BadRequestException } from '@nestjs/common';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import {
   UserRoles,
   User,

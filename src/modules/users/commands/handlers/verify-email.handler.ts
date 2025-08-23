@@ -9,6 +9,7 @@ import {
 } from '../../../../shared/db/typeorm/entities';
 import { BadRequestException } from '@nestjs/common';
 import { AuthResponse } from '../../dto/types';
+import * as speakeasy from 'speakeasy';
 
 @CommandHandler(VerifyEmailCommand)
 export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
@@ -43,18 +44,24 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
       throw new BadRequestException('Invalid access code');
     }
 
-    if (accessCode.expiresAt < new Date()) {
-      throw new BadRequestException('Access code has expired');
+    const isValid = speakeasy.totp.verify({
+      secret: accessCode.secret,
+      encoding: 'ascii',
+      token: code,
+      window: 10,
+    });
+
+    if (!isValid) {
+      throw new BadRequestException('Invalid verification code');
     }
 
-    await this.userRepository.update(accessCode.email, {
+    await this.userRepository.update(accessCode.id, {
       isEmailVerified: true,
       updatedAt: new Date(),
     });
 
     await this.accessCodeRepository.update(accessCode.id, {
       isUsed: true,
-      updatedAt: new Date(),
     });
 
     return {

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { SignUpCommand } from './commands/impl/signup.command';
 import {
@@ -19,16 +19,22 @@ import {
   AccessCodeType,
   User,
 } from '../../shared/db/typeorm/entities';
-import dayjs from 'dayjs';
-import speakeasy from 'speakeasy';
+import {
+  createHmacForString,
+  generateRandomDigits,
+} from '../../shared/utils/index';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private readonly commandBus: CommandBus,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(AccessCode)
     private readonly accessCodeRepository: Repository<AccessCode>,
+    private readonly configService: ConfigService,
   ) {}
 
   async addUserWaitlistAccessCode(email: string) {
@@ -56,26 +62,25 @@ export class UsersService {
       );
     }
 
-    const secret = speakeasy.generateSecret();
-    const code = speakeasy.totp({
-      secret: secret.ascii,
-      encoding: 'ascii',
-      digits: 6,
-    });
+    const code = generateRandomDigits(6);
+    const secret = createHmacForString(code.toString());
+    const __IS_DEV__ =
+      this.configService.getOrThrow('NODE_ENV') === 'development';
 
-    //TODO:  send code to user here
-
+    this.logger.log(`Access code: ${code}`);
     const accessCode = this.accessCodeRepository.create({
       email,
-      secret: secret.ascii,
-      expiresAt: dayjs().add(1, 'day').toDate(),
+      secret,
+      code: __IS_DEV__ ? code.toString() : undefined,
       isUsed: false,
       type: AccessCodeType.SIGNUP,
     });
 
+    //TODO:  send code to user here
+
     await this.accessCodeRepository.save(accessCode);
 
-    return { message: 'Waitlist access code has been sent to you email' };
+    return { message: 'Waitlist access code has been sent to your email' };
   }
 
   async signup(signUpDto: SignUpDto): Promise<AuthResponse> {

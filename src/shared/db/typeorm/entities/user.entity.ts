@@ -64,6 +64,11 @@ export class User {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
+  @Column({ type: 'jsonb', nullable: true })
+  metadata: {
+    refreshToken?: string;
+  };
+
   // Relations
   @ManyToOne(() => Organization, (organization) => organization.users, {
     onDelete: 'CASCADE',

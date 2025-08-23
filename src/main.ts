@@ -1,28 +1,24 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationError, ValidationPipe } from '@nestjs/common';
+import { ConsoleLogger, ValidationError, ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import { AllExceptionsFilter } from './shared';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: new ConsoleLogger({
+      json: true,
+      timestamp: true,
+    }),
+  });
   const httpAdapterHost = app.get(HttpAdapterHost);
-  // app.useLogger(app.get(LoggerService));
 
   app.enableCors();
 
   app.use(helmet());
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
-
-  // app.setGlobalPrefix('core');
-
-  // app.enableVersioning({
-  //   type: VersioningType.URI,
-  //   prefix: 'v',
-  //   defaultVersion: '1',
-  // });
 
   // validate dtos
   app.useGlobalPipes(

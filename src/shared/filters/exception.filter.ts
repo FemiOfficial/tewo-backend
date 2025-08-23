@@ -40,6 +40,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // In certain situations `httpAdapter` might not be available in the
     // constructor method, thus we should resolve it here.
     const { httpAdapter } = this.httpAdapterHost;
+    console.log('exception: ', exception);
 
     const ctx = host.switchToHttp();
 
@@ -49,21 +50,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let errorCode =
-      exception instanceof HttpException
-        ? 'bad_request'
-        : 'internal_server_error';
+      statusCode === Number(HttpStatus.INTERNAL_SERVER_ERROR)
+        ? 'internal_server_error'
+        : 'bad_request';
 
     let errorMessage = 'Request Could not be Processed';
     let errorDetails: Record<string, any> | string = {};
 
     if (exception instanceof HttpException || exception instanceof Error) {
-      errorCode = 'bad_request';
       errorMessage = exception.message;
-
-      if (exception instanceof Error) statusCode = 400;
 
       if (exception instanceof HttpException)
         errorDetails = exception.getResponse();
+
+      if (
+        isInternalErrMessage(errorMessage) ||
+        statusCode === Number(HttpStatus.INTERNAL_SERVER_ERROR)
+      ) {
+        errorMessage = defaultErrorMessage;
+      }
     } else if (
       exception instanceof Array &&
       exception[0] instanceof ValidationError
@@ -99,31 +104,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       errorCode = 'bad_request';
     } else {
       console.log(exception);
-      this.logger.error(exception);
-    }
-
-    if (errorDetails && typeof errorDetails === 'object') {
-      if (errorDetails.message) {
-        errorMessage = errorDetails.message as string;
-        errorDetails.message = undefined;
-      }
-      if (errorDetails.statusCode) errorDetails.statusCode = undefined;
-    }
-
-    if (errorMessage && isInternalErrMessage(errorMessage)) {
-      console.log(exception);
-
-      this.logger.error(exception);
-
-      errorMessage = defaultErrorMessage;
-
-      errorDetails = { isClientError: true };
-    }
-
-    if (
-      process.env.NODE_ENV === 'development' ||
-      errorMessage === defaultErrorMessage
-    ) {
       this.logger.error(exception);
     }
 

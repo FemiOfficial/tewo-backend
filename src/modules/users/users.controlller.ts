@@ -36,6 +36,7 @@ export class UsersController {
   }
 
   @Post('signup/verify-email')
+  @UseInterceptors(AuthInterceptor)
   async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
     return this.usersService.verifyEmail(verifyEmailDto);
   }

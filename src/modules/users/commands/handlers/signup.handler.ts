@@ -17,8 +17,9 @@ import {
 import { BadRequestException } from '@nestjs/common';
 import { SignUpDto } from '../../dto/user.dto';
 import { AuthResponse } from '../../dto/types';
-import dayjs from 'dayjs';
-import { createId } from '@paralleldrive/cuid2';
+import { createHmacForString } from 'src/shared/utils';
+import * as speakeasy from 'speakeasy';
+import { ConfigService } from '@nestjs/config';
 
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
@@ -36,6 +37,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     @InjectRepository(OrganizationCountry)
     private readonly organizationCountryRepository: Repository<OrganizationCountry>,
     private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
   ) {}
 
   async execute(command: SignUpCommand): Promise<AuthResponse> {
@@ -74,6 +76,12 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
         organizationId: savedOrganization.id,
       });
       const savedUser = await queryRunner.manager.save(user);
+
+      await queryRunner.manager.update(
+        AccessCode,
+        { email: email, type: AccessCodeType.SIGNUP },
+        { isUsed: true },
+      );
 
       // Assign user role
       await this.assignUserRole(savedUser, 'owner', queryRunner);
@@ -197,11 +205,21 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
   private async sendVerifyEmailNotification(
     email: string,
   ): Promise<AccessCode> {
+    const secret = speakeasy.generateSecret();
+    const code = speakeasy.totp({
+      secret: secret.ascii,
+      encoding: 'ascii',
+      digits: 6,
+    });
+
+    const __IS_DEV__ =
+      this.configService.getOrThrow('NODE_ENV') === 'development';
+
     const accessCode = this.accessCodeRepository.create({
       email: email,
       type: AccessCodeType.VERIFY_EMAIL,
-      code: createId(),
-      expiresAt: dayjs().add(1, 'day').toDate(),
+      code: __IS_DEV__ ? code : undefined,
+      secret: secret.ascii,
     });
 
     await this.accessCodeRepository.save(accessCode);
@@ -218,8 +236,8 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
   ): Promise<AccessCode> {
     const accessCode = await queryRunner.manager.findOne(AccessCode, {
       where: {
-        code: code,
         email: email,
+        type: AccessCodeType.SIGNUP,
       },
     });
 
@@ -229,15 +247,17 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
       );
     }
 
-    if (accessCode.expiresAt < new Date()) {
-      throw new BadRequestException(
-        'Access code has expired, please contact our support team to request access',
-      );
-    }
-
     if (accessCode.isUsed) {
       throw new BadRequestException(
         'Access code has already been used, please contact our support team to request access',
+      );
+    }
+
+    const isValid = createHmacForString(code) === accessCode.secret;
+
+    if (!isValid) {
+      throw new BadRequestException(
+        'Invalid waitlist access code, please try again',
       );
     }
 

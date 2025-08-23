@@ -4,10 +4,10 @@ import {
   Injectable,
   InternalServerErrorException,
   NestInterceptor,
+  Logger,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 import { TokenPayload, TokenService } from '../../modules/token/token.service';
-import { Repository } from 'typeorm';
 import {
   Organization,
   OrganizationCountry,
@@ -16,15 +16,21 @@ import {
 } from '../db/typeorm/entities';
 import { AuthAPIResponse, AuthResponse } from 'src/modules/users';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CookieOptions, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { Repository } from 'typeorm';
+import { init } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class AuthInterceptor implements NestInterceptor {
+  private readonly logger = new Logger(AuthInterceptor.name);
   constructor(
     private readonly tokenService: TokenService,
     @InjectRepository(Organization)
     private organisationRepository: Repository<Organization>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
@@ -32,9 +38,18 @@ export class AuthInterceptor implements NestInterceptor {
         async (
           response: AuthResponse,
         ): Promise<AuthAPIResponse | AuthResponse> => {
-          console.log(response);
+          const __IS_DEV__ =
+            this.configService.getOrThrow('NODE_ENV') === 'development';
+          const cookieOptions: CookieOptions = {
+            httpOnly: true,
+            sameSite: __IS_DEV__ ? 'lax' : 'strict',
+            secure: !__IS_DEV__,
+            maxAge: 1000 * 60 * 60 * 24 * 1, // 1 day
+            path: '/',
+          };
           const { requiresEmailVerification, requiresMFA, data } = response;
           const { organization, user } = data;
+          const httpResponse = context.switchToHttp().getResponse<Response>();
 
           const [organizationObj, userObj] = await Promise.all([
             this.getOrganization(organization),
@@ -48,10 +63,22 @@ export class AuthInterceptor implements NestInterceptor {
           }
 
           const tokenPayload = this.getAuthPayload(organizationObj, userObj);
+          httpResponse.statusCode = 201;
 
           if (!requiresMFA && !requiresEmailVerification) {
             // generate the token here
             const { token } = await this.generateToken(tokenPayload);
+            const refreshToken = init({ length: 24 })();
+
+            await this.userRepository.update(userObj.id, {
+              metadata: {
+                refreshToken,
+              },
+            });
+
+            httpResponse.cookie('access_token', token, cookieOptions);
+            httpResponse.cookie('refresh_token', refreshToken, cookieOptions);
+            httpResponse.statusCode = 200;
 
             return {
               ...response,
