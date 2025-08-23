@@ -18,7 +18,7 @@ export class AccessCode {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   code: string;
 
   @Column({ type: 'varchar', length: 255 })

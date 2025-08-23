@@ -5,6 +5,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -16,11 +17,13 @@ import {
 } from './dto/user.dto';
 import { AuthInterceptor } from '../../shared/interceptors/auth.interceptor';
 import { AddUserWaitlistAccessCodeDto } from './dto/waitlist.dto';
+import { InternalGuard } from '../token/guard/internal.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(InternalGuard)
   @Post('add-waitlist')
   async addUserWaitlistAccessCode(@Body() body: AddUserWaitlistAccessCodeDto) {
     return this.usersService.addUserWaitlistAccessCode(body.email);

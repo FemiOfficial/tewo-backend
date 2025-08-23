@@ -63,9 +63,10 @@ export class UsersService {
       digits: 6,
     });
 
+    //TODO:  send code to user here
+
     const accessCode = this.accessCodeRepository.create({
       email,
-      code,
       secret: secret.ascii,
       expiresAt: dayjs().add(1, 'day').toDate(),
       isUsed: false,
