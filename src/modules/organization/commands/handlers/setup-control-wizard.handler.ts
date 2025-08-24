@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SetupControlWizardCommand } from '../impl/setup-control-wizard.command';
-import { OrgControlService } from '../../org-control/org-control.service';
+import { OrgControlService } from '../../services/org-control.service';
 import { DataSource } from 'typeorm';
 import {
   ControlWizard,

@@ -18,15 +18,15 @@ import {
   ControlWizardDocument,
 } from '../../../shared/db/typeorm/entities';
 
-import { CreateControlWizardDto } from './dto/org-control.dto';
-import { UpsertControlWizardScheduleDto } from './dto/schedules/schedules.dto';
+import { CreateControlWizardDto } from '../dto/org-controls';
+import { UpsertControlWizardScheduleDto } from '../dto/org-controls/schedules/schedules.dto';
 import {
   UpsertControlWizardFormDto,
   UpsertControlWizardFormFieldDto,
-} from './dto/forms/forms.dto';
+} from '../dto/org-controls/forms/forms.dto';
 
 import dayjs from 'dayjs';
-import { UpsertControlWizardDocumentDto } from './dto/document/document.dto';
+import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/document.dto';
 
 @Injectable()
 export class OrgControlService {
@@ -47,9 +47,26 @@ export class OrgControlService {
     private readonly controlWizardDocumentRepository: Repository<ControlWizardDocument>,
   ) {}
 
+  async getSystemIntegrationCategories(
+    active?: boolean,
+  ): Promise<SystemIntegrationCategory[]> {
+    if (!active) return Object.values(SystemIntegrationCategory);
+
+    // Use query builder to get unique categories
+    const categories = await this.systemIntegrationRepository
+      .createQueryBuilder('integration')
+      .select('DISTINCT integration.category', 'category')
+      .where('integration.status = :status', { status: 'active' })
+      .getRawMany();
+
+    return categories.map(
+      (result: { category: SystemIntegrationCategory }) => result.category,
+    );
+  }
+
   async getSystemIntegrations(category: SystemIntegrationCategory) {
     const systemIntegrations = await this.systemIntegrationRepository.find({
-      where: { category },
+      where: { category, status: 'active' },
     });
     return systemIntegrations;
   }

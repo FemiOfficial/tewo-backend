@@ -30,10 +30,13 @@
     "seed:countries": "ts-node -r tsconfig-paths/register scripts/seed-service-countries.ts"
   },
   "dependencies": {
+    "@apollo/server": "^4.12.2",
+    "@nestjs/apollo": "^13.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/cqrs": "^11.0.3",
+    "@nestjs/graphql": "^13.1.0",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
@@ -45,6 +48,7 @@
     "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "graphql": "^16.11.0",
     "gulp": "^5.0.1",
     "helmet": "^8.1.0",
     "pg": "^8.16.3",

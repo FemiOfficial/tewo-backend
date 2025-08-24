@@ -8,16 +8,16 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService } from '../users.service';
 import {
   EmployeeInviteDto,
   SignInDto,
   SignUpDto,
   VerifyEmailDto,
-} from './dto/user.dto';
-import { AuthInterceptor } from '../../shared/interceptors/auth.interceptor';
-import { AddUserWaitlistAccessCodeDto } from './dto/waitlist.dto';
-import { InternalGuard } from '../token/guard/internal.guard';
+} from '../dto/user.dto';
+import { AuthInterceptor } from '../../../shared/interceptors/auth.interceptor';
+import { AddUserWaitlistAccessCodeDto } from '../dto/waitlist.dto';
+import { InternalGuard } from '../../token/guard/internal.guard';
 
 @Controller('users')
 export class UsersController {

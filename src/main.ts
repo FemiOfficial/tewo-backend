@@ -8,7 +8,7 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
-      json: true,
+      // json: true,
       timestamp: true,
     }),
   });
@@ -16,7 +16,17 @@ async function bootstrap() {
 
   app.enableCors();
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        },
+      },
+    }),
+  );
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
 

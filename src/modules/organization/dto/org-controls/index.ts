@@ -9,6 +9,27 @@ import {
 } from 'class-validator';
 import { AllowedCharacters, UniqueArray } from 'src/shared/validators';
 import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
+import { Field, InputType } from '@nestjs/graphql';
+import { Expose } from 'class-transformer';
+import { SystemIntegrationCategory } from 'src/shared/db/typeorm/entities';
+
+@InputType()
+export class GetAutomationIntegrationsInputDto {
+  @Field({ nullable: true })
+  @IsEnum(SystemIntegrationCategory)
+  @IsOptional()
+  @Expose()
+  category: SystemIntegrationCategory;
+}
+
+@InputType()
+export class GetAutomationIntegrationCategoriesInputDto {
+  @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  @Expose()
+  active?: boolean;
+}
 
 export class CategorySpecificConfigDto {
   // Security & Incidents Management
@@ -103,7 +124,7 @@ export class CreateControlWizardDto {
 
   @IsOptional()
   @IsString()
-  @AllowedCharacters(/^[a-zA-Z0-9\s\-_\.]+$/, {
+  @AllowedCharacters(/^[a-zA-Z0-9\s\-_.]+$/, {
     message: 'Title contains invalid characters',
   })
   title: string;

@@ -8,13 +8,13 @@ import {
   UseGuards,
   Body,
 } from '@nestjs/common';
-import { OrgControlService } from './org-control.service';
+import { OrgControlService } from '../services/org-control.service';
 import {
   AuthenticatedRequest,
   AuthGuard,
 } from 'src/modules/token/guard/jwt.guard';
 import { SystemIntegrationCategory } from 'src/shared/db/typeorm/entities';
-import { UpsertControlWizardDocumentDto } from './dto/document/document.dto';
+import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/document.dto';
 
 @Controller('organization/control/wizard')
 @UseGuards(AuthGuard)

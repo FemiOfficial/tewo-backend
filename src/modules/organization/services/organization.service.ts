@@ -7,10 +7,10 @@ import {
   ControlCategory,
   OrganizationFrameworks,
   OrganizationControl,
-} from '../../shared/db/typeorm/entities';
+} from '../../../shared/db/typeorm/entities';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SelectOrganizationFrameworkDto } from './dto/organization.dto';
+import { SelectOrganizationFrameworkDto } from '../dto/organization.dto';
 
 @Injectable()
 export class OrganizationService {
