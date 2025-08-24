@@ -55,7 +55,7 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
       throw new BadRequestException('Invalid verification code');
     }
 
-    await this.userRepository.update(accessCode.id, {
+    await this.userRepository.update(user.id, {
       isEmailVerified: true,
       updatedAt: new Date(),
     });

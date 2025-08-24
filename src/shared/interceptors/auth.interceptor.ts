@@ -83,7 +83,7 @@ export class AuthInterceptor implements NestInterceptor {
             return {
               ...response,
               token,
-              tokenExpiry: process.env.JWT_EXPIRES_IN,
+              tokenExpiry: this.configService.getOrThrow('JWT_EXPIRES_IN'),
               data: tokenPayload,
             };
           }

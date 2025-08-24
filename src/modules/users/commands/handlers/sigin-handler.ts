@@ -1,6 +1,6 @@
 import { ICommandHandler } from '@nestjs/cqrs';
-import { generateSecret, totp } from 'speakeasy';
-import { BadRequestException } from '@nestjs/common';
+import * as speakeasy from 'speakeasy';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { SignInCommand } from '../impl/signin-command';
 import { CommandHandler } from '@nestjs/cqrs';
 import { AuthResponse } from '../../dto/types';
@@ -11,6 +11,8 @@ import bcrypt from 'bcrypt';
 
 @CommandHandler(SignInCommand)
 export class SignInHandler implements ICommandHandler<SignInCommand> {
+  private readonly logger = new Logger(SignInHandler.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -33,10 +35,6 @@ export class SignInHandler implements ICommandHandler<SignInCommand> {
         throw new BadRequestException('Invalid user email');
       }
 
-      if (!user.isEmailVerified) {
-        throw new BadRequestException('Email not verified');
-      }
-
       if (!bcrypt.compareSync(password, user.password)) {
         throw new BadRequestException('Invalid user password');
       }
@@ -46,7 +44,7 @@ export class SignInHandler implements ICommandHandler<SignInCommand> {
         await queryRunner.commitTransaction();
 
         return {
-          requiresEmailVerification: user.isEmailVerified,
+          requiresEmailVerification: user.isEmailVerified ? false : true,
           requiresMFA: false,
           data: {
             organization: user.organizationId,
@@ -68,7 +66,7 @@ export class SignInHandler implements ICommandHandler<SignInCommand> {
       await queryRunner.commitTransaction();
 
       return {
-        requiresEmailVerification: user.isEmailVerified,
+        requiresEmailVerification: user.isEmailVerified ? false : true,
         requiresMFA: true,
         data: {
           organization: user.organizationId,
@@ -108,16 +106,15 @@ export class SignInHandler implements ICommandHandler<SignInCommand> {
     secret: string;
     code: string;
   } {
-    const secret = generateSecret({
-      name: 'Tewo AI',
-      issuer: 'Tewo AI',
-    });
+    const secret = speakeasy.generateSecret();
 
-    const code = totp({
+    const code = speakeasy.totp({
       secret: secret.ascii,
       encoding: 'ascii',
       digits: 6,
     });
+
+    this.logger.log(`MFA code: ${code}`);
 
     return {
       secret: secret.ascii,
@@ -126,8 +123,12 @@ export class SignInHandler implements ICommandHandler<SignInCommand> {
   }
 
   private verifyMFA(user: User, token: string): boolean {
-    return totp.verify({
-      secret: user.mfaSecret!,
+    if (!user.mfaSecret) {
+      return false;
+    }
+
+    return speakeasy.totp.verify({
+      secret: user.mfaSecret,
       token,
       window: 10,
       encoding: 'ascii',
