@@ -16,6 +16,9 @@ import {
   ControlWizardForm,
   ControlWizardFormField,
   ControlWizardDocument,
+  Framework,
+  FrameworkStatus,
+  SystemIntegrationStatus,
 } from '../../../shared/db/typeorm/entities';
 
 import { CreateControlWizardDto } from '../dto/org-controls';
@@ -45,18 +48,27 @@ export class OrgControlService {
     private readonly controlWizardFormFieldRepository: Repository<ControlWizardFormField>,
     @InjectRepository(ControlWizardDocument)
     private readonly controlWizardDocumentRepository: Repository<ControlWizardDocument>,
+    @InjectRepository(Framework)
+    private readonly frameworkRepository: Repository<Framework>,
   ) {}
 
+  async getFrameworks(status?: FrameworkStatus) {
+    return this.frameworkRepository.find({
+      where: { status: status || FrameworkStatus.ACTIVE },
+      relations: ['controlCategories'],
+    });
+  }
+
   async getSystemIntegrationCategories(
-    active?: boolean,
+    status?: string,
   ): Promise<SystemIntegrationCategory[]> {
-    if (!active) return Object.values(SystemIntegrationCategory);
+    if (!status) return Object.values(SystemIntegrationCategory);
 
     // Use query builder to get unique categories
     const categories = await this.systemIntegrationRepository
       .createQueryBuilder('integration')
       .select('DISTINCT integration.category', 'category')
-      .where('integration.status = :status', { status: 'active' })
+      .where('integration.status = :status', { status })
       .getRawMany();
 
     return categories.map(
@@ -64,9 +76,12 @@ export class OrgControlService {
     );
   }
 
-  async getSystemIntegrations(category: SystemIntegrationCategory) {
+  async getSystemIntegrations(
+    category: SystemIntegrationCategory,
+    status?: SystemIntegrationStatus,
+  ) {
     const systemIntegrations = await this.systemIntegrationRepository.find({
-      where: { category, status: 'active' },
+      where: { category, status: status || SystemIntegrationStatus.ACTIVE },
     });
     return systemIntegrations;
   }

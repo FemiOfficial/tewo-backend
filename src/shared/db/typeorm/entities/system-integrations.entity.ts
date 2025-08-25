@@ -10,6 +10,12 @@ import { ObjectType, Field } from '@nestjs/graphql';
 
 import { registerEnumType } from '@nestjs/graphql';
 
+export enum SystemIntegrationStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DEPRECATED = 'deprecated',
+}
+
 export enum SystemIntegrationCategory {
   CodeRepository = 'code_repository',
   CI_CD = 'ci_cd',
@@ -61,8 +67,12 @@ export class SystemIntegration {
   description: string;
 
   @Field()
-  @Column({ type: 'varchar', length: 50, default: 'active' })
-  status: string;
+  @Column({
+    type: 'varchar',
+    length: 50,
+    default: SystemIntegrationStatus.ACTIVE,
+  })
+  status: SystemIntegrationStatus;
 
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })

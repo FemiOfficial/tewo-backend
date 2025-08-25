@@ -14,7 +14,7 @@ export {
 export { OrganizationFrameworks } from './organization-frameworks.entity';
 
 // Master library entities
-export { Framework } from './framework.entity';
+export { Framework, FrameworkStatus } from './framework.entity';
 export { ControlCategory } from './control-category.entity';
 export { Control } from './control.entity';
 
@@ -32,6 +32,7 @@ export { ScanResult } from './scan-result.entity';
 export {
   SystemIntegration,
   SystemIntegrationCategory,
+  SystemIntegrationStatus,
 } from './system-integrations.entity';
 
 // Policy and signature entities

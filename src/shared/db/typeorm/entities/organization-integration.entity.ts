@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Organization } from './organization.entity';
 import { ScanResult } from './scan-result.entity';
+import { SystemIntegration } from './system-integrations.entity';
 
 @Entity('organization_integrations')
 export class OrganizationIntegration {
@@ -20,7 +21,7 @@ export class OrganizationIntegration {
   organizationId: string;
 
   @Column({ type: 'varchar', length: 50 })
-  integrationType: string;
+  systemIntegrationId: string;
 
   @Column({ type: 'text' })
   encryptedCredentials: string;
@@ -43,6 +44,10 @@ export class OrganizationIntegration {
   })
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
+
+  @ManyToOne(() => SystemIntegration)
+  @JoinColumn({ name: 'systemIntegrationId' })
+  systemIntegration: SystemIntegration;
 
   @OneToMany(() => ScanResult, (scanResult) => scanResult.integration)
   scanResults: ScanResult[];

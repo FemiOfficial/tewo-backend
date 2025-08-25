@@ -4,6 +4,7 @@ import { ConsoleLogger, ValidationError, ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import { AllExceptionsFilter } from './shared';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -15,7 +16,6 @@ async function bootstrap() {
   const httpAdapterHost = app.get(HttpAdapterHost);
 
   app.enableCors();
-
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -44,7 +44,7 @@ async function bootstrap() {
   // transform true - @Transform decorator applied from dto
 
   app.use(urlencoded({ extended: true }));
-
+  app.use(cookieParser());
   app.use(json());
 
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost));

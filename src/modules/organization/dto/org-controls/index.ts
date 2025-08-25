@@ -11,7 +11,10 @@ import { AllowedCharacters, UniqueArray } from 'src/shared/validators';
 import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
 import { Field, InputType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
-import { SystemIntegrationCategory } from 'src/shared/db/typeorm/entities';
+import {
+  SystemIntegrationCategory,
+  SystemIntegrationStatus,
+} from 'src/shared/db/typeorm/entities';
 
 @InputType()
 export class GetAutomationIntegrationsInputDto {
@@ -20,6 +23,12 @@ export class GetAutomationIntegrationsInputDto {
   @IsOptional()
   @Expose()
   category: SystemIntegrationCategory;
+
+  @Field({ nullable: true })
+  @IsEnum(SystemIntegrationStatus)
+  @IsOptional()
+  @Expose()
+  status?: SystemIntegrationStatus;
 }
 
 @InputType()
@@ -28,7 +37,7 @@ export class GetAutomationIntegrationCategoriesInputDto {
   @IsBoolean()
   @IsOptional()
   @Expose()
-  active?: boolean;
+  status?: SystemIntegrationStatus;
 }
 
 export class CategorySpecificConfigDto {
