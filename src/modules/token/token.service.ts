@@ -1,30 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { OrganizationStatus } from '../../shared/db';
-
-export type TokenPayload = {
-  organization: {
-    id: string;
-    name: string;
-    subscriptionPlan: string;
-    status: OrganizationStatus;
-    serviceCountries: {
-      id: string;
-      code: string;
-      currency: string;
-      isActive: boolean;
-    }[];
-  };
-  user: {
-    id: string;
-    email: string;
-    roles: {
-      id: string;
-      name: string;
-    }[];
-  };
-};
+import { TokenPayload } from './guard/types';
 
 @Injectable()
 export class TokenService {

@@ -7,6 +7,7 @@ import {
   ControlCategory,
   OrganizationFrameworks,
   OrganizationControl,
+  OrganizationControlStatus,
 } from '../../../shared/db/typeorm/entities';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -113,7 +114,7 @@ export class OrganizationService {
             organizationId,
             controlId: control.id,
             categoryId: category.id,
-            status: 'to_do',
+            status: OrganizationControlStatus.TO_DO,
           });
         });
       });

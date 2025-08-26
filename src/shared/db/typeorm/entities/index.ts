@@ -19,7 +19,10 @@ export { ControlCategory } from './control-category.entity';
 export { Control } from './control.entity';
 
 // Organization-specific compliance entities
-export { OrganizationControl } from './organization-control.entity';
+export {
+  OrganizationControl,
+  OrganizationControlStatus,
+} from './organization-control.entity';
 export { ScheduledEvent } from './scheduled-event.entity';
 export { EventOccurrence } from './event-occurrence.entity';
 export { EventAttendee } from './event-attendee.entity';
@@ -27,7 +30,10 @@ export { Evidence } from './evidence.entity';
 export { AuditLog } from './audit-log.entity';
 
 // Integration and scanning entities
-export { OrganizationIntegration } from './organization-integration.entity';
+export {
+  OrganizationIntegration,
+  OrganizationIntegrationStatus,
+} from './organization-integration.entity';
 export { ScanResult } from './scan-result.entity';
 export {
   SystemIntegration,

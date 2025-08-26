@@ -15,8 +15,20 @@ import { User } from './user.entity';
 import { ScheduledEvent } from './scheduled-event.entity';
 import { Evidence } from './evidence.entity';
 import { ControlCategory } from './control-category.entity';
-import { ObjectType } from '@nestjs/graphql';
+import { ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Field } from '@nestjs/graphql';
+
+export enum OrganizationControlStatus {
+  DRAFT = 'draft',
+  TO_DO = 'to_do',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+}
+
+registerEnumType(OrganizationControlStatus, {
+  name: 'OrganizationControlStatus',
+  description: 'The status of the organization control',
+});
 
 @Entity('organization_controls')
 @ObjectType()
@@ -38,9 +50,13 @@ export class OrganizationControl {
   @Column({ type: 'int' })
   categoryId: number;
 
-  @Field()
-  @Column({ type: 'varchar', length: 50, default: 'to_do' })
-  status: string;
+  @Field(() => OrganizationControlStatus)
+  @Column({
+    type: 'varchar',
+    length: 50,
+    default: OrganizationControlStatus.DRAFT,
+  })
+  status: OrganizationControlStatus;
 
   @Field()
   @Column({ type: 'text', nullable: true })

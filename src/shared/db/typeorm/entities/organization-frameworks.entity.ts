@@ -32,7 +32,7 @@ export class OrganizationFrameworks {
   @Field()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
-  
+
   @Field()
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;

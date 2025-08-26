@@ -3,22 +3,8 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { GqlAuthError } from 'src/shared/exceptions/gql/gql-auth-error';
-// import { GqlAuthError } from 'src/shared/exceptions/gql/gql-auth-error';
-
-interface AuthenticatedRequest extends Request {
-  organization: TokenPayload['organization'];
-  user: TokenPayload['user'];
-  cookies: { access_token: string; refresh_token: string };
-}
-
-interface TokenPayload {
-  organization: {
-    id: string;
-  };
-  user: {
-    id: string;
-  };
-}
+import { AuthenticatedRequest } from './types';
+import { TokenPayload } from './types';
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {

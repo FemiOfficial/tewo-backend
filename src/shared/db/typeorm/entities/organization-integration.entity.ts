@@ -11,8 +11,19 @@ import {
 import { Organization } from './organization.entity';
 import { ScanResult } from './scan-result.entity';
 import { SystemIntegration } from './system-integrations.entity';
-import { ObjectType } from '@nestjs/graphql';
+import { ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Field } from '@nestjs/graphql';
+
+export enum OrganizationIntegrationStatus {
+  DISCONNECTED = 'disconnected',
+  CONNECTED = 'connected',
+  ERROR = 'error',
+}
+
+registerEnumType(OrganizationIntegrationStatus, {
+  name: 'OrganizationIntegrationStatus',
+  description: 'The status of the organization automation integration',
+});
 
 @Entity('organization_integrations')
 @ObjectType()
@@ -32,9 +43,9 @@ export class OrganizationIntegration {
   @Column({ type: 'text' })
   encryptedCredentials: string;
 
-  @Field()
+  @Field(() => OrganizationIntegrationStatus)
   @Column({ type: 'varchar', length: 50, default: 'disconnected' })
-  status: string;
+  status: OrganizationIntegrationStatus;
 
   @Field()
   @Column({ type: 'timestamptz', nullable: true })
