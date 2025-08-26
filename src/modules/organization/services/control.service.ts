@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import {
   ControlWizard,
   ControlWizardType,
@@ -56,15 +56,12 @@ export class ControlService {
   ) {}
 
   async getUniqueControlCategoriesByFrameworks(frameworkIds: number[]) {
-    const categories = await this.controlCategoryRepository
-      .createQueryBuilder('controlCategory')
-      .select('DISTINCT controlCategory.id', 'id')
-      .where('controlCategory.frameworks.id IN (:...frameworkIds)', {
-        frameworkIds,
-      })
-      .getRawMany();
-
-    return categories.map((result) => result as ControlCategory);
+    return this.controlCategoryRepository.find({
+      where: {
+        frameworks: { id: In(frameworkIds) },
+      },
+      relations: ['controls'],
+    });
   }
 
   async getFrameworks(status?: FrameworkStatus) {

@@ -49,19 +49,10 @@ export class ControlQueryResolver {
 
   @Query(() => [ControlCategory])
   async getUniqueControlCategoriesByFrameworks(
-    @Args('frameworkIds', { type: () => [Number] }) frameworkIds: number[],
+    @Args('frameworkIds', { type: () => [String] }) frameworkIds: string[],
   ) {
     return this.controlService.getUniqueControlCategoriesByFrameworks(
-      frameworkIds,
+      frameworkIds.map(Number),
     );
   }
-
-  // @Query(() => [ControlCategory])
-  // async getUniqueControlCategoriesByFramework(
-  //   @Args('frameworkId') frameworkId: string,
-  // ) {
-  //   return this.orgControlService.getUniqueControlCategoriesByFramework(
-  //     frameworkId,
-  //   );
-  // }
 }
