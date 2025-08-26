@@ -1,21 +1,24 @@
-import { Injectable } from '@nestjs/common';
 import { OrgControlService } from '../../services/org-control.service';
 import { ControlCategory } from 'src/shared/db/typeorm/entities';
 import { OrganizationControlStatus } from 'src/shared/db/typeorm/entities/organization-control.entity';
-import { Args, Query } from '@nestjs/graphql';
-import { CurrentOrganization } from 'src/shared/custom-decorators/auth-decorator';
+import { Args, Query, Resolver, Context } from '@nestjs/graphql';
 import { TokenPayload } from 'src/modules/token/guard/types';
+import { GqlAuthGuard } from 'src/modules/token/guard/gql.quard';
+import { UseGuards } from '@nestjs/common';
+import { CurrentOrganization } from 'src/shared/custom-decorators/auth-decorator';
 
-@Injectable()
+@Resolver()
+@UseGuards(GqlAuthGuard)
 export class OrgControlQueryResolver {
   constructor(private readonly orgControlService: OrgControlService) {}
 
   @Query(() => [ControlCategory])
   async getOrgControlCategories(
+    @Context() context: any,
     @CurrentOrganization() organization: TokenPayload['organization'],
-    @Args('status') status?: OrganizationControlStatus,
+    @Args('status', { type: () => OrganizationControlStatus, nullable: true })
+    status?: OrganizationControlStatus,
   ) {
-    console.log(organization);
     const { id: organizationId } = organization;
 
     return this.orgControlService.getOrgControlCategories(

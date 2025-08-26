@@ -7,14 +7,11 @@ import {
   User,
   Organization,
   OrganizationCountry,
+  OrganizationIntegration,
 } from '../../shared/db/typeorm/entities';
 import { TokenService } from '../token/token.service';
 import { JwtService } from '@nestjs/jwt';
 import { OrganizationController, OrgControlController } from './rest';
-import { OrganizationService } from './services/organization.service';
-import { ControlService } from './services/control.service';
-import { ControlQueryResolver } from './gql/query/control.query.resolver';
-import { ControlMutationResolver } from './gql/mutation/control.mutation.resolver';
 import {
   Framework,
   Control,
@@ -28,6 +25,8 @@ import {
   ControlWizardFormField,
   ControlWizardDocument,
 } from '../../shared/db/typeorm/entities';
+import { orgGqlResolvers } from './gql';
+import { orgServices } from './services';
 
 @Module({
   imports: [
@@ -50,17 +49,11 @@ import {
       ControlWizardDocument,
       OrganizationFrameworks,
       OrganizationControl,
+      OrganizationIntegration,
       SystemIntegration,
     ]),
   ],
   controllers: [OrganizationController, OrgControlController],
-  providers: [
-    OrganizationService,
-    ControlService,
-    TokenService,
-    JwtService,
-    ControlQueryResolver,
-    ControlMutationResolver,
-  ],
+  providers: [TokenService, JwtService, ...orgGqlResolvers, ...orgServices],
 })
 export class OrganizationModule {}
