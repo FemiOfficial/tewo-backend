@@ -7,7 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
-import { TokenPayload, TokenService } from '../../modules/token/token.service';
+import { TokenService } from '../../modules/token/token.service';
+import { TokenPayload } from 'src/modules/token/guard/types';
 import {
   Organization,
   OrganizationCountry,

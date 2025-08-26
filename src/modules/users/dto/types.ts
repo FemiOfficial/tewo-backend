@@ -1,4 +1,4 @@
-import { TokenPayload } from '../../token/token.service';
+import { TokenPayload } from '../../token/guard/types';
 
 export type AuthResponse = {
   requiresEmailVerification: boolean;

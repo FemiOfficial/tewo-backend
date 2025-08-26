@@ -9,10 +9,8 @@ import {
   Body,
 } from '@nestjs/common';
 import { ControlService } from '../services/control.service';
-import {
-  AuthenticatedRequest,
-  AuthGuard,
-} from 'src/modules/token/guard/jwt.guard';
+import { AuthGuard } from 'src/modules/token/guard/jwt.guard';
+import { AuthenticatedRequest } from 'src/modules/token/guard/types';
 import { SystemIntegrationCategory } from 'src/shared/db/typeorm/entities';
 import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/document.dto';
 

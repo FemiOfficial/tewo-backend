@@ -1,9 +1,10 @@
-import { Injectable, Req } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OrgControlService } from '../../services/org-control.service';
 import { ControlCategory } from 'src/shared/db/typeorm/entities';
 import { OrganizationControlStatus } from 'src/shared/db/typeorm/entities/organization-control.entity';
 import { Args, Query } from '@nestjs/graphql';
-import { AuthenticatedRequest } from 'src/shared/interfaces/authenticated-request.interface';
+import { CurrentOrganization } from 'src/shared/custom-decorators/auth-decorator';
+import { TokenPayload } from 'src/modules/token/guard/types';
 
 @Injectable()
 export class OrgControlQueryResolver {
@@ -11,10 +12,11 @@ export class OrgControlQueryResolver {
 
   @Query(() => [ControlCategory])
   async getOrgControlCategories(
+    @CurrentOrganization() organization: TokenPayload['organization'],
     @Args('status') status?: OrganizationControlStatus,
-    @Req() req: AuthenticatedRequest,
   ) {
-    const { organizationId } = req.user as { organizationId: string };
+    console.log(organization);
+    const { id: organizationId } = organization;
 
     return this.orgControlService.getOrgControlCategories(
       organizationId,

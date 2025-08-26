@@ -10,7 +10,8 @@ import {
 } from '@nestjs/common';
 import { OrganizationService } from '../services/organization.service';
 import { SelectOrganizationFrameworkDto } from '../dto/organization.dto';
-import { AuthGuard, AuthenticatedRequest } from '../../token/guard/jwt.guard';
+import { AuthGuard } from '../../token/guard/jwt.guard';
+import { AuthenticatedRequest } from 'src/modules/token/guard/types';
 
 @Injectable()
 @UseGuards(AuthGuard)
