@@ -60,8 +60,8 @@ export class OrgControlService {
     );
 
     queryBuilder
-      .select('DISTINCT organization_controls.category_id', 'category')
-      .where('organization_controls.organization_id = :organizationId', {
+      .select('DISTINCT organization_controls.categoryId', 'category')
+      .where('organization_controls.organizationId = :organizationId', {
         organizationId,
       });
 
