@@ -12,9 +12,9 @@ import { TokenService } from '../token/token.service';
 import { JwtService } from '@nestjs/jwt';
 import { OrganizationController, OrgControlController } from './rest';
 import { OrganizationService } from './services/organization.service';
-import { OrgControlService } from './services/org-control.service';
-import { OrgControlQueryResolver } from './gql/query/org-control.query.resolver';
-import { OrgControlMutationResolver } from './gql/mutation/org-control.mutation.resolver';
+import { ControlService } from './services/control.service';
+import { ControlQueryResolver } from './gql/query/control.query.resolver';
+import { ControlMutationResolver } from './gql/mutation/control.mutation.resolver';
 import {
   Framework,
   Control,
@@ -56,11 +56,11 @@ import {
   controllers: [OrganizationController, OrgControlController],
   providers: [
     OrganizationService,
-    OrgControlService,
+    ControlService,
     TokenService,
     JwtService,
-    OrgControlQueryResolver,
-    OrgControlMutationResolver,
+    ControlQueryResolver,
+    ControlMutationResolver,
   ],
 })
 export class OrganizationModule {}

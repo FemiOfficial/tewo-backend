@@ -96,7 +96,7 @@ export class SignInHandler implements ICommandHandler<SignInCommand> {
       User,
       { id: user.id },
       {
-        mfaSecret: null,
+        mfaSecret: undefined,
       },
     );
 

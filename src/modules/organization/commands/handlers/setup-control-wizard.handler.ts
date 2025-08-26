@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SetupControlWizardCommand } from '../impl/setup-control-wizard.command';
-import { OrgControlService } from '../../services/org-control.service';
+import { ControlService } from '../../services/control.service';
 import { DataSource } from 'typeorm';
 import {
   ControlWizard,
@@ -15,7 +15,7 @@ export class SetupControlWizardHandler
   implements ICommandHandler<SetupControlWizardCommand>
 {
   constructor(
-    private readonly orgControlService: OrgControlService,
+    private readonly orgControlService: ControlService,
     private readonly dataSource: DataSource,
   ) {}
 

@@ -8,7 +8,7 @@ import {
   JoinTable,
   OneToMany,
 } from 'typeorm';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ControlCategory } from './control-category.entity';
 import { OrganizationFrameworks } from './organization-frameworks.entity';
 
@@ -17,6 +17,11 @@ export enum FrameworkStatus {
   INACTIVE = 'inactive',
   DEPRECATED = 'deprecated',
 }
+
+registerEnumType(FrameworkStatus, {
+  name: 'FrameworkStatus',
+  description: 'The status of a framework',
+});
 
 @Entity('frameworks')
 @ObjectType()
@@ -29,7 +34,7 @@ export class Framework {
   @Column({ type: 'varchar', length: 255, unique: true })
   name: string;
 
-  @Field()
+  @Field(() => FrameworkStatus)
   @Column({ type: 'varchar', length: 255, default: FrameworkStatus.ACTIVE })
   status: FrameworkStatus;
 
@@ -37,7 +42,7 @@ export class Framework {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   shortCode: string;
 
-  @Field()
+  @Field(() => [String])
   @Column({ type: 'jsonb', default: [] })
   region: string[];
 

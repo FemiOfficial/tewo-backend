@@ -4,9 +4,9 @@ import {
   FrameworkStatus,
   SystemIntegration,
   SystemIntegrationCategory,
-  Control,
+  ControlCategory,
 } from '../../../../shared/db/typeorm/entities';
-import { OrgControlService } from '../../services/org-control.service';
+import { ControlService } from '../../services/control.service';
 import {
   GetAutomationIntegrationCategoriesInputDto,
   GetAutomationIntegrationsInputDto,
@@ -16,14 +16,14 @@ import { GqlAuthGuard } from 'src/modules/token/guard/gql.quard';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
-export class OrgControlQueryResolver {
-  constructor(private readonly orgControlService: OrgControlService) {}
+export class ControlQueryResolver {
+  constructor(private readonly controlService: ControlService) {}
   @Query(() => [SystemIntegration])
   async getAutomationIntegrations(
     @Args('getAutomationIntegrationsInput')
     getAutomationIntegrationsInput: GetAutomationIntegrationsInputDto,
   ) {
-    return this.orgControlService.getSystemIntegrations(
+    return this.controlService.getSystemIntegrations(
       getAutomationIntegrationsInput.category,
       getAutomationIntegrationsInput.status,
     );
@@ -34,22 +34,34 @@ export class OrgControlQueryResolver {
     @Args('getAutomationIntegrationCategoriesInput')
     getAutomationIntegrationCategoriesInput: GetAutomationIntegrationCategoriesInputDto,
   ) {
-    return this.orgControlService.getSystemIntegrationCategories(
+    return this.controlService.getSystemIntegrationCategories(
       getAutomationIntegrationCategoriesInput.status,
     );
   }
 
   @Query(() => [Framework])
   async getFrameworks(
-    @Args('status', { nullable: true }) status?: FrameworkStatus,
+    @Args('status', { type: () => FrameworkStatus, nullable: true })
+    status?: FrameworkStatus,
   ) {
-    return this.orgControlService.getFrameworks(
-      status || FrameworkStatus.ACTIVE,
+    return this.controlService.getFrameworks(status || FrameworkStatus.ACTIVE);
+  }
+
+  @Query(() => [ControlCategory])
+  async getUniqueControlCategoriesByFrameworks(
+    @Args('frameworkIds', { type: () => [Number] }) frameworkIds: number[],
+  ) {
+    return this.controlService.getUniqueControlCategoriesByFrameworks(
+      frameworkIds,
     );
   }
 
-  @Query(() => [Control])
-  async getControlsByFramework(@Args('frameworkId') frameworkId: string) {
-    return this.orgControlService.getControlsByFramework(frameworkId);
-  }
+  // @Query(() => [ControlCategory])
+  // async getUniqueControlCategoriesByFramework(
+  //   @Args('frameworkId') frameworkId: string,
+  // ) {
+  //   return this.orgControlService.getUniqueControlCategoriesByFramework(
+  //     frameworkId,
+  //   );
+  // }
 }

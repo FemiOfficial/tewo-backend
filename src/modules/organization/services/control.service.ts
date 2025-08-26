@@ -19,6 +19,7 @@ import {
   Framework,
   FrameworkStatus,
   SystemIntegrationStatus,
+  ControlCategory,
 } from '../../../shared/db/typeorm/entities';
 
 import { CreateControlWizardDto } from '../dto/org-controls';
@@ -32,7 +33,7 @@ import dayjs from 'dayjs';
 import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/document.dto';
 
 @Injectable()
-export class OrgControlService {
+export class ControlService {
   constructor(
     @InjectRepository(OrganizationControl)
     private readonly organizationControlRepository: Repository<OrganizationControl>,
@@ -50,7 +51,21 @@ export class OrgControlService {
     private readonly controlWizardDocumentRepository: Repository<ControlWizardDocument>,
     @InjectRepository(Framework)
     private readonly frameworkRepository: Repository<Framework>,
+    @InjectRepository(ControlCategory)
+    private readonly controlCategoryRepository: Repository<ControlCategory>,
   ) {}
+
+  async getUniqueControlCategoriesByFrameworks(frameworkIds: number[]) {
+    const categories = await this.controlCategoryRepository
+      .createQueryBuilder('controlCategory')
+      .select('DISTINCT controlCategory.id', 'id')
+      .where('controlCategory.frameworks.id IN (:...frameworkIds)', {
+        frameworkIds,
+      })
+      .getRawMany();
+
+    return categories.map((result) => result as ControlCategory);
+  }
 
   async getFrameworks(status?: FrameworkStatus) {
     return this.frameworkRepository.find({

@@ -8,7 +8,7 @@ import {
   UseGuards,
   Body,
 } from '@nestjs/common';
-import { OrgControlService } from '../services/org-control.service';
+import { ControlService } from '../services/control.service';
 import {
   AuthenticatedRequest,
   AuthGuard,
@@ -19,7 +19,7 @@ import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/doc
 @Controller('organization/control/wizard')
 @UseGuards(AuthGuard)
 export class OrgControlController {
-  constructor(private readonly orgControlService: OrgControlService) {}
+  constructor(private readonly orgControlService: ControlService) {}
 
   @Get('system-integrations/:category')
   getSystemIntegrations(

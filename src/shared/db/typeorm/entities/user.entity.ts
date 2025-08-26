@@ -18,29 +18,43 @@ import { AuditLog } from './audit-log.entity';
 import { PolicySignature } from './policy-signature.entity';
 import { DocumentRequest } from './document-request.entity';
 import { UserRoles } from './user-roles.entity';
+import { ObjectType } from '@nestjs/graphql';
+import { Field } from '@nestjs/graphql';
 
 export enum MFA_METHOD {
   EMAIL = 'email',
   AUTHENTICATOR = 'authenticator',
 }
 
+@ObjectType()
+export class UserMetadata {
+  @Field({ nullable: true })
+  refreshToken?: string;
+}
+
 @Entity('users')
+@ObjectType()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Field()
   @Column({ type: 'uuid' })
   organizationId: string;
 
+  @Field()
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
+  @Field()
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
+  @Field({ nullable: true })
   @Column({ type: 'varchar', length: 255, nullable: true })
-  mfaSecret: string | null;
+  mfaSecret?: string;
 
+  @Field()
   @Column({
     type: 'varchar',
     length: 255,
@@ -49,25 +63,29 @@ export class User {
   })
   mfaMethod: MFA_METHOD;
 
+  @Field()
   @Column({ type: 'boolean', default: false })
   isEmailVerified: boolean;
 
+  @Field()
   @Column({ type: 'varchar', length: 255, nullable: true })
   firstName: string;
 
+  @Field()
   @Column({ type: 'varchar', length: 255, nullable: true })
   lastName: string;
 
+  @Field()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Field()
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
+  @Field(() => UserMetadata, { nullable: true })
   @Column({ type: 'jsonb', nullable: true })
-  metadata: {
-    refreshToken?: string;
-  };
+  metadata: UserMetadata;
 
   // Relations
   @ManyToOne(() => Organization, (organization) => organization.users, {
@@ -76,6 +94,7 @@ export class User {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
+  @Field(() => [UserRoles])
   @OneToMany(() => UserRoles, (userRole) => userRole.user)
   userRoles: UserRoles[];
 
