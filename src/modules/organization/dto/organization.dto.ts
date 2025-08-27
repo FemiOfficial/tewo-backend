@@ -1,8 +1,9 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { OrganizationFrameworks } from 'src/shared/db/typeorm/entities';
+import { BaseMutationResult } from 'src/shared/types/gql/base-mutation-result.dto';
 
-export class SelectOrganizationFrameworkDto {
-  @IsNotEmpty()
-  @IsArray()
-  @IsString({ each: true })
-  frameworkIds: string[];
+@ObjectType()
+export class AddOrgFrameworksMutationResult extends BaseMutationResult {
+  @Field(() => [OrganizationFrameworks], { nullable: true })
+  data: OrganizationFrameworks[];
 }

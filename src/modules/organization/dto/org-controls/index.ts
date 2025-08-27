@@ -6,6 +6,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsNumber,
 } from 'class-validator';
 import { AllowedCharacters, UniqueArray } from 'src/shared/validators';
 import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
@@ -16,6 +17,14 @@ import {
   SystemIntegrationStatus,
 } from 'src/shared/db/typeorm/entities';
 
+@InputType()
+export class SelectOrganizationFrameworkDto {
+  @Field(() => [Number])
+  @IsNotEmpty()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  frameworkIds: number[];
+}
 @InputType()
 export class GetAutomationIntegrationsInputDto {
   @Field({ nullable: true })

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   ControlCategory,
   Framework,
+  FrameworkStatus,
   OrganizationControl,
   OrganizationControlStatus,
   OrganizationFrameworks,
@@ -10,7 +11,7 @@ import {
   SystemIntegration,
 } from 'src/shared/db/typeorm/entities';
 import { OrganizationIntegrationStatus } from 'src/shared/db/typeorm/entities/organization-integration.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class OrgControlService {
@@ -84,5 +85,85 @@ export class OrgControlService {
       },
       relations: ['control', 'control.category'],
     });
+  }
+
+  async addOrganizationFrameworks(
+    organizationId: string,
+    frameworkIds: number[],
+  ) {
+    const frameworks = await this.frameworkRepository.find({
+      where: {
+        id: In(frameworkIds),
+        status: FrameworkStatus.ACTIVE,
+      },
+      relations: ['controlCategories', 'controlCategories.controls'],
+    });
+
+    if (frameworks.length !== frameworkIds.length) {
+      throw new BadRequestException(
+        'Ensurre all frameworks selected are valid and active',
+      );
+    }
+
+    // filter out frameworks that are already added to the organization
+    const existingFrameworks = await this.orgFrameworkRepository.find({
+      where: {
+        organizationId,
+        frameworkId: In(frameworkIds),
+      },
+    });
+
+    const frameworksToAdd = frameworks.filter(
+      (framework) =>
+        !existingFrameworks.some((f) => f.frameworkId === framework.id),
+    );
+
+    if (frameworksToAdd.length === 0) {
+      throw new BadRequestException(
+        'All frameworks selected are already added to the organization',
+      );
+    }
+
+    const orgFrameworks = frameworksToAdd.map((framework) => ({
+      organizationId,
+      frameworkId: framework.id,
+    }));
+
+    // save the controls for the frameworks selected
+    const uniqueControlsFromSelectedFrameworks = frameworks.flatMap(
+      (framework) => framework.controlCategories,
+    );
+
+    const uniqueControlCategories = [
+      ...new Set(uniqueControlsFromSelectedFrameworks),
+    ];
+
+    const orgControls = uniqueControlCategories.flatMap((controlCategory) =>
+      controlCategory.controls.map((control) => ({
+        organizationId,
+        controlId: control.id,
+        categoryId: controlCategory.id,
+      })),
+    );
+
+    const uniqueOrgControls = [...new Set(orgControls)];
+
+    await Promise.all([
+      this.orgFrameworkRepository.save(orgFrameworks),
+      this.orgControlRepository.save(uniqueOrgControls),
+    ]);
+
+    const allControlsSaved = await this.orgFrameworkRepository.find({
+      where: {
+        organizationId,
+      },
+      relations: [
+        'framework',
+        'framework.controlCategories',
+        'framework.controlCategories.controls',
+      ],
+    });
+
+    return allControlsSaved;
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import {
   Framework,
@@ -7,11 +7,9 @@ import {
   ControlCategory,
   OrganizationFrameworks,
   OrganizationControl,
-  OrganizationControlStatus,
 } from '../../../shared/db/typeorm/entities';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SelectOrganizationFrameworkDto } from '../dto/organization.dto';
 
 @Injectable()
 export class OrganizationService {
@@ -81,53 +79,6 @@ export class OrganizationService {
     });
 
     return result;
-  }
-
-  async selectOrganizationFramework(
-    selectOrganizationFrameworkDto: SelectOrganizationFrameworkDto,
-    organizationId: string,
-  ) {
-    const frameworks = await this.frameworkRepository.find({
-      where: {
-        id: In(selectOrganizationFrameworkDto.frameworkIds),
-      },
-      relations: ['controlCategories', 'controlCategories.controls'],
-    });
-
-    if (
-      frameworks.length !== selectOrganizationFrameworkDto.frameworkIds.length
-    ) {
-      throw new BadRequestException('Invalid framework ids');
-    }
-
-    const organizationFrameworks = frameworks.map((framework) => ({
-      organizationId,
-      frameworkId: framework.id,
-    }));
-
-    const orgControls: Partial<OrganizationControl>[] = [];
-
-    frameworks.map((framework) => {
-      const controls = framework.controlCategories.map((category) => {
-        return category.controls.map((control) => {
-          orgControls.push({
-            organizationId,
-            controlId: control.id,
-            categoryId: category.id,
-            status: OrganizationControlStatus.TO_DO,
-          });
-        });
-      });
-
-      return controls;
-    });
-
-    await Promise.all([
-      this.organizationFrameworkRepository.save(organizationFrameworks),
-      this.organizationControlRepository.save(orgControls),
-    ]);
-
-    return this.getOrgFrameworks(organizationId);
   }
 
   async getOrganizationControlCategories(organizationId: string) {

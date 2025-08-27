@@ -4,12 +4,10 @@ import {
   Get,
   Injectable,
   Param,
-  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { OrganizationService } from '../services/organization.service';
-import { SelectOrganizationFrameworkDto } from '../dto/organization.dto';
 import { RestAuthGuard } from '../../token/guard/jwt.guard';
 import { AuthenticatedRequest } from 'src/modules/token/guard/types';
 
@@ -18,17 +16,6 @@ import { AuthenticatedRequest } from 'src/modules/token/guard/types';
 @Controller('organization')
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
-
-  @Post('frameworks')
-  selectOrganizationFramework(
-    @Body() selectOrganizationFrameworkDto: SelectOrganizationFrameworkDto,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.organizationService.selectOrganizationFramework(
-      selectOrganizationFrameworkDto,
-      req.organization.id,
-    );
-  }
 
   @Get('frameworks/org')
   getOrgFrameworks(@Req() req: AuthenticatedRequest) {
