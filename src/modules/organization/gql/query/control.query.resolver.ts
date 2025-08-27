@@ -55,4 +55,12 @@ export class ControlQueryResolver {
       frameworkIds.map(Number),
     );
   }
+
+  // get control wizards by control id
+  // get control wizard forms [filters (controlwizardid, status, isDefault, formId)]
+  // get control wizard documents [filters (controlwizardid, status, isDefault, documentId)]
+  // get control wizard approvals [filters (controlwizardid, status, isDefault, approvalId)]
+  // get control wizard reports [filters (controlwizardid, status, isDefault, reportId)]
+  // get control wizard schedules [filters (controlwizardid, status, isDefault, scheduleId)]
+  // get control wizard schedules [filters (controlwizardid, status, isDefault)]
 }

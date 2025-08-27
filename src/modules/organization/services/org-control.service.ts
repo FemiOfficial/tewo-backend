@@ -85,23 +85,4 @@ export class OrgControlService {
       relations: ['control', 'control.category'],
     });
   }
-
-  // async getOrgAutomationIntegrationCategories(organizationId: string) {
-  //   return this.systemIntegrationRepository.find({
-  //     where: {
-  //       organizationId,
-  //     },
-  //     relations: ['systemIntegration'],
-  //   });
-  // }
-
-  // async getOrgAutomationIntegrationForms(organizationId: string) {}
-
-  // async getUniqueControlCategoriesByFrameworks(frameworkIds: number[]) {
-  //   return this.controlCategoryRepository.find({
-  //     where: {
-  //       frameworks: { id: In(frameworkIds) },
-  //     },
-  //   });
-  // }
 }

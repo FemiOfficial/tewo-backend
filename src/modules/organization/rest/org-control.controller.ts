@@ -9,13 +9,13 @@ import {
   Body,
 } from '@nestjs/common';
 import { ControlService } from '../services/control.service';
-import { AuthGuard } from 'src/modules/token/guard/jwt.guard';
+import { RestAuthGuard } from 'src/modules/token/guard/jwt.guard';
 import { AuthenticatedRequest } from 'src/modules/token/guard/types';
 import { SystemIntegrationCategory } from 'src/shared/db/typeorm/entities';
 import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/document.dto';
 
 @Controller('organization/control/wizard')
-@UseGuards(AuthGuard)
+@UseGuards(RestAuthGuard)
 export class OrgControlController {
   constructor(private readonly orgControlService: ControlService) {}
 

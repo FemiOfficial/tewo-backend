@@ -17,10 +17,17 @@ export class GqlAuthGuard implements CanActivate {
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req as AuthenticatedRequest;
 
+    console.log('making gql auth guard check')
+    console.log('request.cookies', request.cookies);
+
+    if (!request.cookies.access_token) {
+      throw new GqlAuthError();
+    }
+
     const jwtPayload: TokenPayload = this.jwtService.verify(
       request.cookies.access_token,
       {
-        secret: this.configService.get('JWT_SECRET'),
+        secret: this.configService.getOrThrow('JWT_SECRET'),
       },
     );
 

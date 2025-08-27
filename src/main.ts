@@ -15,7 +15,12 @@ async function bootstrap() {
   });
   const httpAdapterHost = app.get(HttpAdapterHost);
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.ALLOWED_ORIGINS?.split(','), // Add your frontend ports
+    credentials: true, // This is crucial for cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  });
   app.use(
     helmet({
       contentSecurityPolicy: {
