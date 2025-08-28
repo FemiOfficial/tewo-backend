@@ -26,6 +26,17 @@ import { join } from 'path';
       introspection: true,
       debug: true,
       sortSchema: true,
+      formatError: (error) => {
+        // Handle GraphQL errors properly
+        return {
+          message: error.message,
+          locations: error.locations,
+          path: error.path,
+          extensions: {
+            code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
+          },
+        };
+      },
     }),
   ],
   controllers: [AppController],

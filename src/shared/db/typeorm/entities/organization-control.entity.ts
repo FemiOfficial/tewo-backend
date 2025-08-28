@@ -58,11 +58,11 @@ export class OrganizationControl {
   })
   status: OrganizationControlStatus;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ type: 'text', nullable: true })
   notes: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ type: 'uuid', nullable: true })
   assignedUserId: string;
 
@@ -93,6 +93,7 @@ export class OrganizationControl {
   @JoinColumn({ name: 'categoryId' })
   category: ControlCategory;
 
+  @Field(() => User, { nullable: true })
   @ManyToOne(() => User, (user) => user.assignedControls)
   @JoinColumn({ name: 'assignedUserId' })
   assignedUser: User;

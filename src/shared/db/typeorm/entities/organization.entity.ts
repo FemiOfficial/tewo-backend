@@ -33,6 +33,7 @@ export enum OrganizationStatus {
 @Entity('organizations')
 @ObjectType()
 export class Organization {
+  @Field()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

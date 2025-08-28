@@ -42,7 +42,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const { httpAdapter } = this.httpAdapterHost;
     console.log('exception: ', exception);
 
-    const ctx = host.switchToHttp();
+    let ctx;
+    try {
+      ctx = host.switchToHttp();
+    } catch {
+      // If switchToHttp fails, we're likely in a GraphQL context
+      // Let GraphQL handle the error
+      this.logger.error('GraphQL error caught in exception filter:', exception);
+      return;
+    }
 
     let statusCode =
       exception instanceof HttpException
@@ -114,6 +122,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error_details: errorDetails,
     };
 
-    httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
+    try {
+      httpAdapter.reply(ctx.getResponse(), responseBody, statusCode);
+    } catch (error) {
+      this.logger.error('Failed to send HTTP response:', error);
+    }
   }
 }

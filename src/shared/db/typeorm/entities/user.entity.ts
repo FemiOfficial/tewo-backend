@@ -35,6 +35,7 @@ export class UserMetadata {
 @Entity('users')
 @ObjectType()
 export class User {
+  @Field()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
