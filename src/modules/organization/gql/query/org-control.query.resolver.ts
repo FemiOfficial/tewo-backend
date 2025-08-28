@@ -1,7 +1,6 @@
 import { OrgControlService } from '../../services/org-control.service';
 import {
   ControlCategory,
-  OrganizationFrameworks,
   OrganizationControl,
   ControlWizard,
 } from 'src/shared/db/typeorm/entities';
@@ -12,6 +11,7 @@ import { GqlAuthGuard } from 'src/modules/token/guard/gql.quard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentOrganization } from 'src/shared/custom-decorators/auth-decorator';
 import { ControlService } from '../../services/control.service';
+import { GetOrgFrameworksResultDto } from '../../dto/org-controls';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
@@ -35,13 +35,15 @@ export class OrgControlQueryResolver {
     );
   }
 
-  @Query(() => [OrganizationFrameworks])
+  @Query(() => GetOrgFrameworksResultDto)
   async getOrgFrameworks(
     @CurrentOrganization() organization: TokenPayload['organization'],
   ) {
     const { id: organizationId } = organization;
 
-    return this.orgControlService.getOrgFrameworks(organizationId);
+    const result =
+      await this.orgControlService.getOrgFrameworks(organizationId);
+    return { frameworks: result };
   }
 
   @Query(() => [OrganizationControl])

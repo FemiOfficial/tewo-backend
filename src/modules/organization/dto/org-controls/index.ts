@@ -7,14 +7,17 @@ import {
   IsOptional,
   IsString,
   IsNumber,
+  IsDate,
 } from 'class-validator';
 import { AllowedCharacters, UniqueArray } from 'src/shared/validators';
 import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
 import {
   SystemIntegrationCategory,
   SystemIntegrationStatus,
+  OrganizationControlStatus,
+  FrameworkStatus,
 } from 'src/shared/db/typeorm/entities';
 
 export * from './document/document.dto';
@@ -159,3 +162,173 @@ export class CreateControlWizardDto {
   @IsObject()
   categorySpecificConfig: CategorySpecificConfigDto;
 }
+
+@ObjectType()
+export class UserDto {
+  @Field()
+  @IsString()
+  id: string;
+
+  @Field()
+  @IsString()
+  email: string;
+
+  @Field()
+  @IsString()
+  firstName: string;
+
+  @Field()
+  @IsString()
+  lastName: string;
+}
+
+@ObjectType()
+export class ControlDto {
+  @Field()
+  @IsNumber()
+  id: number;
+
+  @Field()
+  @IsNumber()
+  categoryId: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  controlIdString?: string;
+
+  @Field()
+  @IsString()
+  title: string;
+
+  @Field()
+  @IsString()
+  description: string;
+
+  @Field()
+  @IsDate()
+  createdAt: Date;
+
+  @Field()
+  @IsDate()
+  updatedAt: Date;
+}
+
+@ObjectType()
+export class OrganizationControlDto {
+  @Field()
+  @IsString()
+  id: string;
+
+  @Field()
+  @IsString()
+  organizationId: string;
+
+  @Field()
+  @IsNumber()
+  controlId: number;
+
+  @Field()
+  @IsNumber()
+  categoryId: number;
+
+  @Field()
+  @IsEnum(OrganizationControlStatus)
+  status: OrganizationControlStatus;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  assignedUserId?: string;
+
+  @Field()
+  @IsDate()
+  createdAt: Date;
+
+  @Field()
+  @IsDate()
+  updatedAt: Date;
+
+  @Field(() => ControlDto)
+  @IsObject()
+  control: ControlDto;
+
+  @Field(() => UserDto, { nullable: true })
+  @IsOptional()
+  @IsObject()
+  assignedUser?: UserDto;
+}
+
+@ObjectType()
+export class ControlCategoryWithControlsDto {
+  @Field()
+  @IsNumber()
+  id: number;
+
+  @Field()
+  @IsString()
+  name: string;
+
+  @Field()
+  @IsDate()
+  createdAt: Date;
+
+  @Field()
+  @IsDate()
+  updatedAt: Date;
+
+  @Field(() => [OrganizationControlDto])
+  @IsArray()
+  controls: OrganizationControlDto[];
+}
+
+@ObjectType()
+export class OrgFrameworkWithCategoriesDto {
+  @Field()
+  @IsNumber()
+  id: number;
+
+  @Field()
+  @IsString()
+  name: string;
+
+  @Field(() => FrameworkStatus)
+  @IsEnum(FrameworkStatus)
+  status: FrameworkStatus;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  shortCode?: string;
+
+  @Field(() => [String])
+  @IsArray()
+  @IsString({ each: true })
+  region: string[];
+
+  @Field()
+  @IsDate()
+  createdAt: Date;
+
+  @Field()
+  @IsDate()
+  updatedAt: Date;
+
+  @Field(() => [ControlCategoryWithControlsDto])
+  @IsArray()
+  controlCategories: ControlCategoryWithControlsDto[];
+}
+
+@ObjectType()
+export class GetOrgFrameworksResultDto {
+  @Field(() => [OrgFrameworkWithCategoriesDto])
+  @IsArray()
+  frameworks: OrgFrameworkWithCategoriesDto[];
+}
+
+// DTO for User (simplified version for assignedUser)

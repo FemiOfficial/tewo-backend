@@ -12,6 +12,7 @@ import {
 } from 'src/shared/db/typeorm/entities';
 import { OrganizationIntegrationStatus } from 'src/shared/db/typeorm/entities/organization-integration.entity';
 import { DataSource, In, Repository } from 'typeorm';
+import { OrgFrameworkWithCategoriesDto } from '../dto/org-controls';
 
 @Injectable()
 export class OrgControlService {
@@ -31,17 +32,60 @@ export class OrgControlService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getOrgFrameworks(organizationId: string) {
-    const result = await this.orgFrameworkRepository.find({
+  async getOrgFrameworks(
+    organizationId: string,
+  ): Promise<OrgFrameworkWithCategoriesDto[]> {
+    const organizationFrameworks = await this.orgFrameworkRepository.find({
       where: {
         organizationId,
       },
       relations: [
-        'organization',
         'framework',
         'framework.controlCategories',
         'framework.controlCategories.controls',
       ],
+    });
+
+    const categoryIds = organizationFrameworks.flatMap((orgFramework) =>
+      orgFramework.framework.controlCategories.map(
+        (controlCategory) => controlCategory.id,
+      ),
+    );
+
+    const uniqueCategoryIds = [...new Set(categoryIds)];
+
+    const allControlCategories = await this.controlCategoryRepository.find({
+      where: {
+        id: In(uniqueCategoryIds),
+      },
+      relations: ['frameworks'],
+    });
+
+    const allOrganizationControls = await this.orgControlRepository.find({
+      where: {
+        organizationId,
+        categoryId: In(uniqueCategoryIds),
+      },
+      relations: ['control'],
+    });
+
+    const result = organizationFrameworks.map((framework) => {
+      // get categories for the framework
+      const categories = allControlCategories
+        .filter((category) =>
+          category.frameworks.some((f) => f.id === framework.frameworkId),
+        )
+        .map((category) => ({
+          ...category,
+          controls: allOrganizationControls.filter(
+            (control) => control.categoryId === category.id,
+          ),
+        }));
+
+      return {
+        ...framework.framework,
+        controlCategories: categories,
+      };
     });
 
     return result;
@@ -50,7 +94,7 @@ export class OrgControlService {
   async getOrgAutomationIntegrations(
     organizationId: string,
     status?: OrganizationIntegrationStatus,
-  ) {
+  ): Promise<OrganizationIntegration[]> {
     return this.orgIntegrationRepository.find({
       where: {
         organizationId,
@@ -63,7 +107,7 @@ export class OrgControlService {
   async getOrgControlCategories(
     organizationId: string,
     status?: OrganizationControlStatus,
-  ) {
+  ): Promise<ControlCategory[]> {
     const queryBuilder = this.orgControlRepository.createQueryBuilder(
       'organization_controls',
     );
@@ -85,7 +129,10 @@ export class OrgControlService {
     return results.map((orgControl) => orgControl.category as ControlCategory);
   }
 
-  async getOrgControls(organizationId: string, categoryId: number) {
+  async getOrgControls(
+    organizationId: string,
+    categoryId: number,
+  ): Promise<OrganizationControl[]> {
     const result = await this.orgControlRepository.find({
       where: {
         organizationId,
@@ -100,7 +147,7 @@ export class OrgControlService {
   async addOrganizationFrameworks(
     organizationId: string,
     frameworkIds: number[],
-  ) {
+  ): Promise<OrganizationFrameworks[]> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

@@ -472,7 +472,7 @@
         ]
       },
       "metadata": {
-        "tags": ["AWS",  "Access Control"],
+        "tags": ["AWS", "Access Control"],
         "integrationType": "Multi-Cloud",
         "automationLevel": "Medium"
       },
@@ -495,27 +495,25 @@
           "scoringEnabled": true,
           "passingScore": 85
         },
-        "fields": [
-          {
-            "fieldKey": "aws_access_review",
-            "label": "AWS Access Review Status",
-            "description": "Has AWS access been reviewed this month?",
-            "type": "select",
-            "options": {
-              "choices": ["Completed", "In Progress", "Not Started", "Issues Found"],
-              "default": "Not Started"
-            },
-            "validation": {
-              "rules": ["required"]
-            },
-            "isRequired": true,
-            "order": 1,
-            "scoring": {
-              "points": 25,
-              "weight": 1
-            }
+        "fields": [{
+          "fieldKey": "aws_access_review",
+          "label": "AWS Access Review Status",
+          "description": "Has AWS access been reviewed this month?",
+          "type": "select",
+          "options": {
+            "choices": ["Completed", "In Progress", "Not Started", "Issues Found"],
+            "default": "Not Started"
+          },
+          "validation": {
+            "rules": ["required"]
+          },
+          "isRequired": true,
+          "order": 1,
+          "scoring": {
+            "points": 25,
+            "weight": 1
           }
-        ]
+        }]
       },
       "approval": {
         "type": "parallel",
