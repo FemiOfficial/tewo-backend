@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardApprovalStage } from './control-wizard-approval-stage.entity';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum ApprovalType {
   SEQUENTIAL = 'sequential', // Approvers must approve in order
@@ -27,17 +28,30 @@ export enum ApprovalStatus {
   CANCELLED = 'cancelled',
 }
 
+registerEnumType(ApprovalType, {
+  name: 'ApprovalType',
+});
+
+registerEnumType(ApprovalStatus, {
+  name: 'ApprovalStatus',
+});
+
 @Entity('control_wizard_approvals')
+@ObjectType()
 export class ControlWizardApproval {
+  @Field(() => String)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Field(() => String)
   @Column({ type: 'uuid' })
   controlWizardId: string;
 
+  @Field(() => ApprovalType)
   @Column({ type: 'enum', enum: ApprovalType })
   type: ApprovalType;
 
+  @Field(() => ApprovalStatus)
   @Column({
     type: 'enum',
     enum: ApprovalStatus,
@@ -64,26 +78,33 @@ export class ControlWizardApproval {
     }[];
   };
 
+  @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
   currentStageId: string;
 
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   dueDate: Date;
 
+  @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   completedAt: Date;
 
+  @Field(() => Date)
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Field(() => Date)
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
   // Relations
+  @Field(() => ControlWizard)
   @ManyToOne(() => ControlWizard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'controlWizardId' })
   controlWizard: ControlWizard;
 
+  @Field(() => [ControlWizardApprovalStage])
   @OneToMany(() => ControlWizardApprovalStage, (stage) => stage.approval)
   stages: ControlWizardApprovalStage[];
 }

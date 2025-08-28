@@ -18,7 +18,7 @@ import { ControlWizardForm } from './control-wizard-form.entity';
 import { ControlWizardDocument } from './control-wizard-document.entity';
 import { ControlWizardApproval } from './control-wizard-approval.entity';
 import { ControlWizardReport } from './control-wizard-report.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum ControlWizardType {
   DEFAULT = 'default',
@@ -40,6 +40,63 @@ export enum ControlWizardMode {
   WORKFLOW = 'workflow', // For approval-based processes
 }
 
+registerEnumType(ControlWizardType, {
+  name: 'ControlWizardType',
+});
+
+registerEnumType(ControlWizardStatus, {
+  name: 'ControlWizardStatus',
+});
+
+registerEnumType(ControlWizardMode, {
+  name: 'ControlWizardMode',
+});
+
+@ObjectType()
+export class CategorySpecificConfig {
+  @Field(() => [String], { nullable: true })
+  incidentSeverityLevels?: string[];
+
+  responseTimeframes?: Record<string, number>;
+
+  @Field(() => [String], { nullable: true })
+  riskAssessmentCriteria?: string[];
+
+  @Field(() => String, { nullable: true })
+  riskScoringMethod?: string;
+
+  @Field(() => [String], { nullable: true })
+  securityControls?: string[];
+
+  @Field(() => [String], { nullable: true })
+  operationalProcedures?: string[];
+
+  @Field(() => [String], { nullable: true })
+  dataClassificationLevels?: string[];
+
+  retentionPolicies?: Record<string, number>;
+
+  @Field(() => [String], { nullable: true })
+  policyReviewCycles?: string[];
+
+  @Field(() => [String], { nullable: true })
+  complianceCheckpoints?: string[];
+
+  @Field(() => Boolean, { nullable: true })
+  privacyImpactAssessment?: boolean;
+
+  @Field(() => [String], { nullable: true })
+  dataSubjectRights?: string[];
+
+  @Field(() => [String], { nullable: true })
+  accessReviewIntervals?: string[];
+
+  @Field(() => [String], { nullable: true })
+  automationCapabilities?: string[];
+
+  @Field(() => [String], { nullable: true })
+  systemIntegrations?: string[];
+}
 @Entity('control_wizards')
 @ObjectType()
 export class ControlWizard {
@@ -75,16 +132,16 @@ export class ControlWizard {
   @Column({ type: 'enum', enum: ControlWizardType })
   type: ControlWizardType;
 
-  @Field(() => ControlWizardStatus)
   @Column({
     type: 'enum',
     enum: ControlWizardStatus,
     default: ControlWizardStatus.DRAFT,
   })
+  @Field(() => ControlWizardStatus)
   status: ControlWizardStatus;
 
-  @Field(() => ControlWizardMode)
   @Column({ type: 'enum', enum: ControlWizardMode })
+  @Field(() => ControlWizardMode)
   mode: ControlWizardMode;
 
   @Field(() => Boolean)
@@ -103,40 +160,10 @@ export class ControlWizard {
   @Column({ type: 'boolean', default: false })
   generatesReport: boolean;
 
-  @Field(() => JSON)
+  @Field(() => CategorySpecificConfig)
   @Column({ type: 'jsonb', nullable: true })
-  categorySpecificConfig: {
-    // Security & Incidents Management
-    incidentSeverityLevels?: string[];
-    responseTimeframes?: Record<string, number>;
+  categorySpecificConfig: CategorySpecificConfig;
 
-    // Risk Management
-    riskAssessmentCriteria?: string[];
-    riskScoringMethod?: string;
-
-    // IT & Operational Security
-    securityControls?: string[];
-    operationalProcedures?: string[];
-
-    // Information Management
-    dataClassificationLevels?: string[];
-    retentionPolicies?: Record<string, number>;
-
-    // Governance
-    policyReviewCycles?: string[];
-    complianceCheckpoints?: string[];
-
-    // Data Privacy
-    privacyImpactAssessment?: boolean;
-    dataSubjectRights?: string[];
-
-    // Access Controls
-    accessReviewIntervals?: string[];
-    automationCapabilities?: string[];
-    systemIntegrations?: string[];
-  };
-
-  @Field(() => JSON)
   @Column({ type: 'jsonb', nullable: true })
   metadata: Record<string, any>;
 

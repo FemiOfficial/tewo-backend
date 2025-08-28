@@ -47,7 +47,7 @@ export class OrgControlMutationResolver {
     @Args('upsertControlWizardDocumentInput')
     upsertControlWizardDocumentDto: UpsertControlWizardDocumentDto,
   ) {
-    return await this.controlService.upsertControlWizardDocument(
+    return this.controlService.upsertControlWizardDocument(
       organization.id,
       controlWizardId,
       upsertControlWizardDocumentDto,

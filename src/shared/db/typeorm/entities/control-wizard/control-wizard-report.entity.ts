@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardReportSchedule } from './control-wizard-report-schedule.entity';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum ReportType {
   COMPLIANCE_REPORT = 'compliance_report',
@@ -31,20 +32,34 @@ export enum ReportFormat {
   CSV = 'csv',
 }
 
+registerEnumType(ReportType, {
+  name: 'ReportType',
+});
+
+registerEnumType(ReportFormat, {
+  name: 'ReportFormat',
+});
+
 @Entity('control_wizard_reports')
+@ObjectType()
 export class ControlWizardReport {
+  @Field(() => String)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Field(() => String)
   @Column({ type: 'uuid' })
   controlWizardId: string;
 
+  @Field(() => ReportType)
   @Column({ type: 'enum', enum: ReportType })
   type: ReportType;
 
+  @Field(() => String)
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
+  @Field(() => String, { nullable: true })
   @Column({ type: 'text', nullable: true })
   description: string;
 
@@ -88,20 +103,25 @@ export class ControlWizardReport {
     sendOnCompletion: boolean;
   };
 
+  @Field(() => Boolean)
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  @Field(() => Date)
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Field(() => Date)
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
   // Relations
+  @Field(() => ControlWizard)
   @ManyToOne(() => ControlWizard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'controlWizardId' })
   controlWizard: ControlWizard;
 
+  @Field(() => [ControlWizardReportSchedule])
   @OneToMany(() => ControlWizardReportSchedule, (schedule) => schedule.report)
   schedules: ControlWizardReportSchedule[];
 }

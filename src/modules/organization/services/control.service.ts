@@ -122,6 +122,11 @@ export class ControlService {
         'reports',
       ],
     });
+
+    if (!controlWizard) {
+      throw new BadRequestException('Control wizard not found');
+    }
+
     return controlWizard;
   }
 
@@ -526,6 +531,12 @@ export class ControlService {
           where: { id: payload.documentId },
           relations: ['controlWizard', 'versions'],
         });
+
+      if (!updatedDocument) {
+        throw new InternalServerErrorException(
+          'Failed to update control wizard document',
+        );
+      }
 
       return updatedDocument;
     }

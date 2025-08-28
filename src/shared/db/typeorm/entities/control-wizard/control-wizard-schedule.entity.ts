@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardExecution } from './control-wizard-execution.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum ScheduleInterval {
   DAILY = 'daily',
@@ -26,6 +26,32 @@ export enum ExecutionMethod {
   AUTOMATED = 'automated',
   MANUAL = 'manual',
   HYBRID = 'hybrid',
+}
+
+registerEnumType(ScheduleInterval, {
+  name: 'ScheduleInterval',
+});
+
+registerEnumType(ExecutionMethod, {
+  name: 'ExecutionMethod',
+});
+
+@ObjectType()
+export class ScheduleConfig {
+  @Field(() => Number)
+  @Column({ type: 'int', nullable: true })
+  dayOfWeek?: number;
+
+  @Column({ type: 'int', nullable: true })
+  dayOfMonth?: number;
+
+  @Field(() => Number)
+  @Column({ type: 'int', nullable: true })
+  monthOfYear?: number;
+
+  @Field(() => Number)
+  @Column({ type: 'int', nullable: true })
+  weekOfMonth?: number;
 }
 
 @Entity('control_wizard_schedules')
@@ -63,14 +89,9 @@ export class ControlWizardSchedule {
   @Column({ type: 'time', nullable: true })
   preferredTime: string; // Time of day for execution
 
-  @Field(() => JSON)
+  @Field(() => ScheduleConfig)
   @Column({ type: 'jsonb', nullable: true })
-  scheduleConfig: {
-    dayOfWeek?: number; // 0-6 for weekly
-    dayOfMonth?: number; // 1-31 for monthly
-    monthOfYear?: number; // 1-12 for quarterly/semi-annually
-    weekOfMonth?: number; // 1-5 for monthly
-  };
+  scheduleConfig: ScheduleConfig;
 
   @Field(() => Boolean)
   @Column({ type: 'boolean', default: true })

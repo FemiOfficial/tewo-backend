@@ -26,6 +26,10 @@ import { join } from 'path';
       introspection: true,
       debug: true,
       sortSchema: true,
+      buildSchemaOptions: {
+        orphanedTypes: [],
+        skipCheck: true,
+      },
       formatError: (error) => {
         // Handle GraphQL errors properly
         return {

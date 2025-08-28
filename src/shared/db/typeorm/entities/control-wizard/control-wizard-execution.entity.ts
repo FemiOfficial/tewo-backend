@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { ControlWizardSchedule } from './control-wizard-schedule.entity';
 import { User } from '../user.entity';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum ExecutionStatus {
   PENDING = 'pending',
@@ -23,6 +23,27 @@ export enum ExecutionType {
   SCHEDULED = 'scheduled',
   MANUAL = 'manual',
   ON_DEMAND = 'on_demand',
+}
+
+registerEnumType(ExecutionStatus, {
+  name: 'ExecutionStatus',
+});
+
+registerEnumType(ExecutionType, {
+  name: 'ExecutionType',
+});
+
+@ObjectType()
+export class ExecutionResult {
+  @Field(() => Boolean)
+  success: boolean;
+
+  data?: Record<string, any>;
+
+  @Field(() => [String])
+  errors?: string[];
+
+  metrics?: Record<string, any>;
 }
 
 @Entity('control_wizard_executions')
@@ -56,7 +77,7 @@ export class ControlWizardExecution {
   @Column({ type: 'timestamp', nullable: true })
   completedAt: Date;
 
-  @Field(() => JSON)
+  @Field(() => ExecutionResult)
   @Column({ type: 'jsonb', nullable: true })
   executionResult: {
     success: boolean;

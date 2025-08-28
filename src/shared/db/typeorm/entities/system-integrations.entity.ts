@@ -43,6 +43,8 @@ registerEnumType(SystemIntegrationCategory, {
   name: 'SystemIntegrationCategory',
   description: 'The category of system integration',
 });
+
+registerEnumType(SystemIntegrationStatus, { name: 'SystemIntegrationStatus' });
 @Entity('system_integrations')
 @ObjectType()
 export class SystemIntegration {
@@ -66,7 +68,7 @@ export class SystemIntegration {
   @Column({ type: 'varchar', length: 255 })
   description: string;
 
-  @Field()
+  @Field(() => SystemIntegrationStatus)
   @Column({
     type: 'varchar',
     length: 50,

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardDocumentVersion } from './control-wizard-document-version.entity';
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum DocumentType {
   POLICY = 'policy',
@@ -33,23 +34,38 @@ export enum DocumentStatus {
   EXPIRED = 'expired',
 }
 
+registerEnumType(DocumentType, {
+  name: 'DocumentType',
+});
+
+registerEnumType(DocumentStatus, {
+  name: 'DocumentStatus',
+});
+
 @Entity('control_wizard_documents')
+@ObjectType()
 export class ControlWizardDocument {
+  @Field(() => String)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Field(() => String)
   @Column({ type: 'uuid' })
   controlWizardId: string;
 
   @Column({ type: 'enum', enum: DocumentType })
+  @Field(() => DocumentType)
   type: DocumentType;
 
+  @Field(() => String)
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
+  @Field(() => String, { nullable: true })
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Field(() => DocumentStatus)
   @Column({ type: 'enum', enum: DocumentStatus, default: DocumentStatus.DRAFT })
   status: DocumentStatus;
 
@@ -78,20 +94,25 @@ export class ControlWizardDocument {
     confidentiality?: string;
   };
 
+  @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
   assignedUserId: string;
 
+  @Field(() => Date)
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Field(() => Date)
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
   // Relations
+  @Field(() => ControlWizard)
   @ManyToOne(() => ControlWizard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'controlWizardId' })
   controlWizard: ControlWizard;
 
+  @Field(() => [ControlWizardDocumentVersion])
   @OneToMany(() => ControlWizardDocumentVersion, (version) => version.document)
   versions: ControlWizardDocumentVersion[];
 }

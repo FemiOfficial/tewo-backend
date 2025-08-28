@@ -19,7 +19,7 @@ import { OrganizationCountry } from './organization-country.entity';
 import { Invite } from './invites.entity';
 import { UserRoles } from './user-roles.entity';
 import { OrganizationFrameworks } from './organization-frameworks.entity';
-import { ObjectType } from '@nestjs/graphql';
+import { ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Field } from '@nestjs/graphql';
 
 export enum OrganizationStatus {
@@ -29,6 +29,10 @@ export enum OrganizationStatus {
   SUSPENDED = 'suspended',
   INACTIVE = 'inactive',
 }
+
+registerEnumType(OrganizationStatus, {
+  name: 'OrganizationStatus',
+});
 
 @Entity('organizations')
 @ObjectType()
@@ -54,7 +58,7 @@ export class Organization {
   updatedAt: Date;
 
   @Column({ type: 'varchar', length: 50, default: OrganizationStatus.PENDING })
-  @Field()
+  @Field(() => OrganizationStatus)
   status: OrganizationStatus;
 
   @Column({ type: 'uuid', nullable: true })
