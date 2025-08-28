@@ -17,6 +17,10 @@ import {
   SystemIntegrationStatus,
 } from 'src/shared/db/typeorm/entities';
 
+export * from './document/document.dto';
+export * from './forms/forms.dto';
+export * from './schedules/schedules.dto';
+
 @InputType()
 export class SelectOrganizationFrameworkDto {
   @Field(() => [Number])

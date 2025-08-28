@@ -3,14 +3,22 @@ import { CurrentOrganization } from 'src/shared/custom-decorators/auth-decorator
 import { TokenPayload } from 'src/modules/token/guard/types';
 import { OrgControlService } from '../../services/org-control.service';
 import { AddOrgFrameworksMutationResult } from '../../dto/organization.dto';
-import { SelectOrganizationFrameworkDto } from '../../dto/org-controls';
+import {
+  SelectOrganizationFrameworkDto,
+  UpsertControlWizardDocumentDto,
+} from '../../dto/org-controls';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/modules/token/guard/gql.quard';
+import { ControlWizardDocument } from 'src/shared/db/typeorm/entities';
+import { ControlService } from '../../services/control.service';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
 export class OrgControlMutationResolver {
-  constructor(private readonly orgControlService: OrgControlService) {}
+  constructor(
+    private readonly orgControlService: OrgControlService,
+    private readonly controlService: ControlService,
+  ) {}
 
   @Mutation(() => AddOrgFrameworksMutationResult)
   async addOrganizationFrameworks(
@@ -30,5 +38,19 @@ export class OrgControlMutationResolver {
       message: 'Organization Frameworks added successfully',
       data: result,
     };
+  }
+
+  @Mutation(() => ControlWizardDocument)
+  async upsertControlWizardDocument(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('controlWizardId') controlWizardId: string,
+    @Args('upsertControlWizardDocumentInput')
+    upsertControlWizardDocumentDto: UpsertControlWizardDocumentDto,
+  ) {
+    return await this.controlService.upsertControlWizardDocument(
+      organization.id,
+      controlWizardId,
+      upsertControlWizardDocumentDto,
+    );
   }
 }

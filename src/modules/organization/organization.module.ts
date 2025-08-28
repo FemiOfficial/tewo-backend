@@ -11,7 +11,7 @@ import {
 } from '../../shared/db/typeorm/entities';
 import { TokenService } from '../token/token.service';
 import { JwtService } from '@nestjs/jwt';
-import { OrganizationController, OrgControlController } from './rest';
+import { OrganizationController } from './rest';
 import {
   Framework,
   Control,
@@ -53,7 +53,7 @@ import { orgServices } from './services';
       SystemIntegration,
     ]),
   ],
-  controllers: [OrganizationController, OrgControlController],
+  controllers: [OrganizationController],
   providers: [TokenService, JwtService, ...orgGqlResolvers, ...orgServices],
 })
 export class OrganizationModule {}

@@ -3,6 +3,11 @@ import {
   ControlCategory,
   OrganizationFrameworks,
   OrganizationControl,
+  ControlWizardDocument,
+  ControlWizardSchedule,
+  ControlWizardForm,
+  ControlWizardFormField,
+  ControlWizard,
 } from 'src/shared/db/typeorm/entities';
 import { OrganizationControlStatus } from 'src/shared/db/typeorm/entities/organization-control.entity';
 import { Args, Query, Resolver } from '@nestjs/graphql';
@@ -10,11 +15,15 @@ import { TokenPayload } from 'src/modules/token/guard/types';
 import { GqlAuthGuard } from 'src/modules/token/guard/gql.quard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentOrganization } from 'src/shared/custom-decorators/auth-decorator';
+import { ControlService } from '../../services/control.service';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
 export class OrgControlQueryResolver {
-  constructor(private readonly orgControlService: OrgControlService) {}
+  constructor(
+    private readonly orgControlService: OrgControlService,
+    private readonly controlService: ControlService,
+  ) {}
 
   @Query(() => [ControlCategory])
   async getOrgControlCategories(
@@ -49,6 +58,73 @@ export class OrgControlQueryResolver {
     return this.orgControlService.getOrgControls(
       organizationId,
       Number(categoryId),
+    );
+  }
+
+  @Query(() => ControlWizard, { nullable: true })
+  async getControlWizardByControlId(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('controlId') controlId: string,
+    @Args('isDefault') isDefault: boolean,
+  ) {
+    return await this.controlService.getControlWizardByControlId(
+      controlId,
+      isDefault,
+      organization.id,
+    );
+  }
+
+  @Query(() => [ControlWizardSchedule])
+  async getControlWizardSchedules(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('controlWizardId') controlWizardId: string,
+    @Args('isDefault') isDefault: boolean,
+  ) {
+    return await this.controlService.getControlWizardSchedules(
+      controlWizardId,
+      isDefault,
+      organization.id,
+    );
+  }
+
+  @Query(() => [ControlWizardForm])
+  async getControlWizardForms(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('controlWizardId') controlWizardId: string,
+    @Args('isDefault') isDefault: boolean,
+  ) {
+    return await this.controlService.getControlWizardForms(
+      controlWizardId,
+      isDefault,
+      organization.id,
+    );
+  }
+
+  @Query(() => [ControlWizardFormField])
+  async getControlWizardFormFields(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('controlWizardId') controlWizardId: string,
+    @Args('formId') formId: string,
+    @Args('isDefault') isDefault: boolean,
+  ) {
+    return await this.controlService.getControlWizardFormFields(
+      controlWizardId,
+      formId,
+      isDefault,
+      organization.id,
+    );
+  }
+
+  @Query(() => [ControlWizardDocument])
+  async getControlWizardDocuments(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('controlWizardId') controlWizardId: string,
+    @Args('isDefault') isDefault: boolean,
+  ) {
+    return await this.controlService.getControlWizardDocuments(
+      controlWizardId,
+      isDefault,
+      organization.id,
     );
   }
 }

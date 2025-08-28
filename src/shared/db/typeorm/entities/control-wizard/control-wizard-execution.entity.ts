@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { ControlWizardSchedule } from './control-wizard-schedule.entity';
 import { User } from '../user.entity';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 export enum ExecutionStatus {
   PENDING = 'pending',
@@ -25,28 +26,37 @@ export enum ExecutionType {
 }
 
 @Entity('control_wizard_executions')
+@ObjectType()
 export class ControlWizardExecution {
+  @Field(() => String)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Field(() => String)
   @Column({ type: 'uuid' })
   scheduleId: string;
 
+  @Field(() => ExecutionStatus)
   @Column({ type: 'enum', enum: ExecutionStatus })
   status: ExecutionStatus;
 
+  @Field(() => ExecutionType)
   @Column({ type: 'enum', enum: ExecutionType })
   type: ExecutionType;
 
+  @Field(() => Date)
   @Column({ type: 'timestamp' })
   scheduledAt: Date;
 
+  @Field(() => Date)
   @Column({ type: 'timestamp', nullable: true })
   startedAt: Date;
 
+  @Field(() => Date)
   @Column({ type: 'timestamp', nullable: true })
   completedAt: Date;
 
+  @Field(() => JSON)
   @Column({ type: 'jsonb', nullable: true })
   executionResult: {
     success: boolean;
@@ -55,23 +65,29 @@ export class ControlWizardExecution {
     metrics?: Record<string, any>;
   };
 
+  @Field(() => String)
   @Column({ type: 'uuid', nullable: true })
   executedByUserId: string;
 
+  @Field(() => String)
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @Field(() => Date)
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Field(() => Date)
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
   // Relations
+  @Field(() => ControlWizardSchedule)
   @ManyToOne(() => ControlWizardSchedule, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'scheduleId' })
   schedule: ControlWizardSchedule;
 
+  @Field(() => User)
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'executedByUserId' })
   executedByUser: User;

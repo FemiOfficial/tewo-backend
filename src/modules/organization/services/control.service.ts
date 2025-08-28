@@ -98,15 +98,15 @@ export class ControlService {
     return systemIntegrations;
   }
 
-  // get control wizard by category
-  async getControlWizardByCategory(
-    categoryId: string,
+  // get control wizard by controlId
+  async getControlWizardByControlId(
+    controlId: string,
     isDefault = false,
     organizationId?: string,
   ) {
     const controlWizard = await this.controlWizardRepository.findOne({
       where: {
-        categoryId: parseInt(categoryId),
+        controlId: parseInt(controlId),
         type: isDefault ? ControlWizardType.DEFAULT : ControlWizardType.CUSTOM,
         organizationId: isDefault ? IsNull() : organizationId,
       },
