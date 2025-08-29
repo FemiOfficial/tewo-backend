@@ -54,4 +54,13 @@ export { PublicTrustPage } from './public-trust-page.entity';
 export { DocumentRequest } from './document-request.entity';
 
 // Control Wizard entities
-export * from './control-wizard';
+export * from './control-wizard.entity';
+export * from './control-wizard-approval.entity';
+export * from './control-wizard-approval-stage.entity';
+export * from './control-wizard-report.entity';
+export * from './control-wizard-report-schedule.entity';
+export * from './control-wizard-schedule.entity';
+export * from './control-wizard-form.entity';
+export * from './control-wizard-form-field.entity';
+export * from './control-wizard-document.entity';
+export * from './control-wizard-document-version.entity';

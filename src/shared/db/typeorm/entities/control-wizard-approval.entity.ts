@@ -47,6 +47,14 @@ export class ControlWizardApproval {
   @Column({ type: 'uuid' })
   controlWizardId: string;
 
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  formId: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  reportId: string;
+
   @Field(() => ApprovalType)
   @Column({ type: 'enum', enum: ApprovalType })
   type: ApprovalType;

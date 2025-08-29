@@ -1,8 +1,8 @@
-import { FormType } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-form.entity';
+import { FormType } from 'src/shared/db/typeorm/entities/control-wizard-form.entity';
 import {
   FieldType,
   FieldValidation,
-} from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-form-field.entity';
+} from 'src/shared/db/typeorm/entities/control-wizard-form-field.entity';
 import {
   IsBoolean,
   IsEnum,

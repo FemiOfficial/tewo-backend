@@ -11,8 +11,8 @@ import {
   ValidateNested,
   IsObject,
 } from 'class-validator';
-import { DocumentType } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-document.entity';
-import { DocumentChangeLogImpact } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-document-version.entity';
+import { DocumentType } from 'src/shared/db/typeorm/entities/control-wizard-document.entity';
+import { DocumentChangeLogImpact } from 'src/shared/db/typeorm/entities/control-wizard-document-version.entity';
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()

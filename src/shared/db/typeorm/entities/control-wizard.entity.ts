@@ -8,11 +8,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Organization } from '../organization.entity';
-import { Control } from '../control.entity';
-import { ControlCategory } from '../control-category.entity';
-import { Framework } from '../framework.entity';
-import { User } from '../user.entity';
+import { Organization } from './organization.entity';
+import { Control } from './control.entity';
+import { ControlCategory } from './control-category.entity';
+import { Framework } from './framework.entity';
+import { User } from './user.entity';
 import { ControlWizardSchedule } from './control-wizard-schedule.entity';
 import { ControlWizardForm } from './control-wizard-form.entity';
 import { ControlWizardDocument } from './control-wizard-document.entity';
@@ -116,10 +116,6 @@ export class ControlWizard {
   @Column({ type: 'int' })
   categoryId: number;
 
-  @Field(() => Number)
-  @Column({ type: 'int' })
-  frameworkId: number;
-
   @Field(() => String)
   @Column({ type: 'varchar', length: 255 })
   title: string;
@@ -162,12 +158,28 @@ export class ControlWizard {
 
   @Field(() => CategorySpecificConfig)
   @Column({ type: 'jsonb', nullable: true })
-  categorySpecificConfig: CategorySpecificConfig;
+  categorySpecificConfig: {
+    incidentSeverityLevels?: string[];
+    responseTimeframes?: Record<string, number>;
+    riskAssessmentCriteria?: string[];
+    riskScoringMethod?: string;
+    securityControls?: string[];
+    operationalProcedures?: string[];
+    dataClassificationLevels?: string[];
+    retentionPolicies?: Record<string, number>;
+    policyReviewCycles?: string[];
+    complianceCheckpoints?: string[];
+    privacyImpactAssessment?: boolean;
+    dataSubjectRights?: string[];
+    accessReviewIntervals?: string[];
+    automationCapabilities?: string[];
+    systemIntegrations?: string[];
+  };
 
   @Column({ type: 'jsonb', nullable: true })
   metadata: Record<string, any>;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
   createdByUserId: string;
 

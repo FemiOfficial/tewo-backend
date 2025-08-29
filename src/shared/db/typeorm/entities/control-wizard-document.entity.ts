@@ -69,6 +69,10 @@ export class ControlWizardDocument {
   @Column({ type: 'enum', enum: DocumentStatus, default: DocumentStatus.DRAFT })
   status: DocumentStatus;
 
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  templateId: string; // ID of an existing document template
+
   @Column({ type: 'jsonb', nullable: true })
   documentConfig: {
     requireApproval: boolean;

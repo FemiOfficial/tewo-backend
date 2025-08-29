@@ -51,6 +51,10 @@ export class ControlWizardReport {
   @Column({ type: 'uuid' })
   controlWizardId: string;
 
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  templateId: string; // ID of an existing document template
+
   @Field(() => ReportType)
   @Column({ type: 'enum', enum: ReportType })
   type: ReportType;

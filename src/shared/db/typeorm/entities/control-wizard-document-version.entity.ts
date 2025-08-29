@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ControlWizardDocument } from './control-wizard-document.entity';
-import { User } from '../user.entity';
+import { User } from './user.entity';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 export enum DocumentChangeLogImpact {

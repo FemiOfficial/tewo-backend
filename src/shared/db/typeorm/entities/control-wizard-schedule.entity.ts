@@ -91,7 +91,12 @@ export class ControlWizardSchedule {
 
   @Field(() => ScheduleConfig)
   @Column({ type: 'jsonb', nullable: true })
-  scheduleConfig: ScheduleConfig;
+  scheduleConfig: {
+    dayOfWeek?: number;
+    dayOfMonth?: number;
+    monthOfYear?: number;
+    weekOfMonth?: number;
+  };
 
   @Field(() => Boolean)
   @Column({ type: 'boolean', default: true })

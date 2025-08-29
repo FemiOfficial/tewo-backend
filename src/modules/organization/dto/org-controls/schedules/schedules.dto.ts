@@ -14,7 +14,7 @@ import { IsFutureDate } from 'src/shared/validators';
 import {
   ExecutionMethod,
   ScheduleInterval,
-} from 'src/shared/db/typeorm/entities/control-wizard/control-wizard-schedule.entity';
+} from 'src/shared/db/typeorm/entities/control-wizard-schedule.entity';
 
 @InputType()
 export class ScheduleConfigDto {

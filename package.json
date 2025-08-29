@@ -26,7 +26,7 @@
     "seed:roles": "ts-node -r tsconfig-paths/register scripts/seed-roles-permissions.ts",
     "seed:controls": "ts-node -r tsconfig-paths/register scripts/seed-controls.ts",
     "seed:integrations": "ts-node -r tsconfig-paths/register scripts/seed-system-integrations.ts",
-    "seed:wizards": "ts-node -r tsconfig-paths/register scripts/seed-control-wizards.ts",
+    "seed:control-wizards": "ts-node -r tsconfig-paths/register scripts/seed-control-wizards.ts",
     "seed:countries": "ts-node -r tsconfig-paths/register scripts/seed-service-countries.ts"
   },
   "dependencies": {

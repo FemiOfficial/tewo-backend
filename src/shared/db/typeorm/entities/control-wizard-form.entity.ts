@@ -29,6 +29,18 @@ registerEnumType(FormType, {
 });
 
 @ObjectType()
+export class FormAssessmentConfig {
+  @Field(() => String, { nullable: true })
+  generatesReportTitle?: string; // Title of the report to generate
+
+  @Field(() => [String], { nullable: true })
+  passingActions?: string[]; // Names of approval workflows to trigger on pass
+
+  @Field(() => [String], { nullable: true })
+  failingActions?: string[]; // Names of approval workflows to trigger on fail
+}
+
+@ObjectType()
 export class FormConfig {
   @Field(() => Boolean)
   allowPartialSave: boolean;
@@ -75,6 +87,10 @@ export class ControlWizardForm {
   @Field(() => FormConfig)
   @Column({ type: 'jsonb', nullable: true })
   formConfig: FormConfig;
+
+  @Field(() => FormAssessmentConfig, { nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
+  assessmentConfig: FormAssessmentConfig;
 
   @Field(() => Boolean)
   @Column({ type: 'boolean', default: true })

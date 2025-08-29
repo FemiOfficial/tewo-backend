@@ -10,7 +10,7 @@ import {
   IsDate,
 } from 'class-validator';
 import { AllowedCharacters, UniqueArray } from 'src/shared/validators';
-import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard/control-wizard.entity';
+import { ControlWizardMode } from 'src/shared/db/typeorm/entities/control-wizard.entity';
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
 import {

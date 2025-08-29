@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { QueryRunner } from 'typeorm';
 import {
   ControlWizard,
   ControlWizardSchedule,
@@ -21,7 +21,7 @@ import {
   ApprovalStatus,
   ReportType,
   ReportFormat,
-} from '../src/shared/db/typeorm/entities/control-wizard';
+} from '../src/shared/db/typeorm/entities';
 import {
   Organization,
   Control,
@@ -30,79 +30,81 @@ import {
   User,
 } from '../src/shared/db/typeorm/entities';
 import dataSource from '../typeorm.config';
-import * as wizardConfigs from './control-wizard-configs.json';
+
+// Import the JSON config
+
+const wizardConfigs = require('./control-wizard-configs.json');
 
 interface WizardConfig {
   title: string;
   description: string;
-  type: string;
-  status: string;
   mode: string;
   isRecurring: boolean;
   requiresApproval: boolean;
   requiresEvidence: boolean;
   generatesReport: boolean;
   categorySpecificConfig: Record<string, any>;
-  metadata: Record<string, any>;
-  schedule?: {
+  schedules: Array<{
+    title: string;
     interval: string;
     method: string;
-    startDate: string;
-    preferredTime: string;
-    scheduleConfig: Record<string, any>;
-  };
-  form?: {
-    type: string;
+    preferredTime?: string;
+  }>;
+  forms: Array<{
     title: string;
+    type: string;
     description: string;
-    config: Record<string, any>;
+    assessmentConfig?: Record<string, any>;
     fields: Array<{
       fieldKey: string;
       label: string;
-      description: string;
       type: string;
-      options: Record<string, any>;
-      validation: Record<string, any>;
       isRequired: boolean;
-      order: number;
-      scoring?: Record<string, any>;
+      isConditional?: boolean;
+      options?: Record<string, any>;
     }>;
-  };
-  document?: {
-    type: string;
+  }>;
+  approvals: Array<{
     title: string;
-    description: string;
-    status: string;
-    config: Record<string, any>;
-    metadata: Record<string, any>;
-  };
-  approval?: {
     type: string;
-    config: Record<string, any>;
-    escalationConfig: Record<string, any>;
-  };
-  report?: {
-    type: string;
+    stages: Array<{
+      stageNumber: number;
+      title: string;
+    }>;
+  }>;
+  reports: Array<{
     title: string;
+    type: string;
+    templateId: string;
     description: string;
-    config: Record<string, any>;
-    contentConfig: Record<string, any>;
-    distributionConfig: Record<string, any>;
-  };
+  }>;
 }
 
 async function seedControlWizards() {
+  await dataSource.initialize();
+  console.log('✅ Database connection established');
+
+  const queryRunner = dataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
   try {
-    await dataSource.initialize();
-    console.log('✅ Database connection established');
-
     // Get existing data
-    const organizations = await getOrganizations(dataSource);
-    const frameworks = await getFrameworks(dataSource);
-    const controlCategories = await getControlCategories(dataSource);
-    const users = await getUsers(dataSource);
+    const organizations = await getOrganizations(queryRunner);
+    const frameworks = await getFrameworks(queryRunner);
+    const controlCategories = await getControlCategories(queryRunner);
+    const controls = await getControls(queryRunner);
+    const users = await getUsers(queryRunner);
 
-    if (!frameworks.length || !controlCategories.length || !users.length) {
+    const existingWizards = await getWizards(queryRunner);
+
+    console.log('🔍 Found existing wizards:', existingWizards.length);
+
+    if (
+      !frameworks.length ||
+      !controlCategories.length ||
+      !controls.length ||
+      !users.length
+    ) {
       throw new Error(
         'Required data not found. Please run other seed files first.',
       );
@@ -112,277 +114,364 @@ async function seedControlWizards() {
     console.log(`- Organizations: ${organizations.length}`);
     console.log(`- Frameworks: ${frameworks.length}`);
     console.log(`- Control Categories: ${controlCategories.length}`);
+    console.log(`- Controls: ${controls.length}`);
     console.log(`- Users: ${users.length}`);
 
-    // Create Data Privacy Wizards
-    const dataPrivacyWizards = await createWizardsFromConfig(
-      dataSource,
-      wizardConfigs.dataPrivacyWizards,
-      'Data Privacy',
-      frameworks,
+    // Create wizards for all controls
+    const createdWizards = await createWizardsForAllControls(
+      queryRunner,
+      controls,
       controlCategories,
-      users[0], // Use first user as creator
-      organizations.length > 0 ? organizations[0] : null, // Optional organization
-    );
-    console.log('✅ Data Privacy wizards created');
-
-    // Create Access Controls Wizards
-    const accessControlWizards = await createWizardsFromConfig(
-      dataSource,
-      wizardConfigs.accessControlWizards,
-      'Access Controls',
       frameworks,
-      controlCategories,
-      users[0], // Use first user as creator
-      organizations.length > 0 ? organizations[0] : null, // Optional organization
+      null, // Use first user as creator
+      null, // Optional organization
+      wizardConfigs as WizardConfig[],
     );
-    console.log('✅ Access Controls wizards created');
 
     console.log('🎉 Control Wizard seeding completed successfully!');
 
     // Display summary
     console.log('\n📊 Summary:');
-    console.log(`- Created ${dataPrivacyWizards.length} Data Privacy wizards`);
-    console.log(
-      `- Created ${accessControlWizards.length} Access Controls wizards`,
+    console.log(`- Created ${createdWizards.length} control wizards`);
+
+    // Group wizards by category for better display
+    const wizardsByCategory = createdWizards.reduce(
+      (acc, wizard) => {
+        const category = controlCategories.find(
+          (cat) => cat.id === wizard.categoryId,
+        );
+        const categoryName = category?.name || 'Unknown';
+        if (!acc[categoryName]) acc[categoryName] = [];
+        acc[categoryName].push(wizard);
+        return acc;
+      },
+      {} as Record<string, ControlWizard[]>,
     );
 
-    dataPrivacyWizards.forEach((wizard) => {
-      console.log(`  - Data Privacy: ${wizard.title}`);
-    });
-
-    accessControlWizards.forEach((wizard) => {
-      console.log(`  - Access Controls: ${wizard.title}`);
+    Object.entries(wizardsByCategory).forEach(([category, wizards]) => {
+      console.log(`\n${category}:`);
+      wizards.forEach((wizard) => {
+        console.log(`  - ${wizard.title}`);
+      });
     });
   } catch (error) {
+    await queryRunner.rollbackTransaction();
     console.error('❌ Error during seeding:', error);
     throw error;
   } finally {
-    await dataSource.destroy();
+    await queryRunner.release();
     console.log('🔌 Database connection closed');
   }
 }
 
 async function getOrganizations(
-  dataSource: DataSource,
+  queryRunner: QueryRunner,
 ): Promise<Organization[]> {
-  const orgRepository = dataSource.getRepository(Organization);
+  const orgRepository = queryRunner.manager.getRepository(Organization);
   return await orgRepository.find();
 }
 
-async function getFrameworks(dataSource: DataSource): Promise<Framework[]> {
-  const frameworkRepository = dataSource.getRepository(Framework);
+async function getFrameworks(queryRunner: QueryRunner): Promise<Framework[]> {
+  const frameworkRepository = queryRunner.manager.getRepository(Framework);
   return await frameworkRepository.find();
 }
 
 async function getControlCategories(
-  dataSource: DataSource,
+  queryRunner: QueryRunner,
 ): Promise<ControlCategory[]> {
-  const categoryRepository = dataSource.getRepository(ControlCategory);
+  const categoryRepository = queryRunner.manager.getRepository(ControlCategory);
   return await categoryRepository.find();
 }
 
-async function getUsers(dataSource: DataSource): Promise<User[]> {
-  const userRepository = dataSource.getRepository(User);
+async function getControls(queryRunner: QueryRunner): Promise<Control[]> {
+  const controlRepository = queryRunner.manager.getRepository(Control);
+  return await controlRepository.find({
+    relations: ['category'],
+  });
+}
+
+async function getWizards(
+  queryRunner: QueryRunner,
+): Promise<ControlWizardForm[]> {
+  const wizardRepository = queryRunner.manager.getRepository(ControlWizardForm);
+  return await wizardRepository.find();
+}
+
+async function getUsers(queryRunner: QueryRunner): Promise<User[]> {
+  const userRepository = queryRunner.manager.getRepository(User);
   return await userRepository.find();
 }
 
-async function createWizardsFromConfig(
-  dataSource: DataSource,
-  wizardConfigs: WizardConfig[],
-  categoryName: string,
-  frameworks: Framework[],
+async function createWizardsForAllControls(
+  queryRunner: QueryRunner,
+  controls: Control[],
   controlCategories: ControlCategory[],
-  creator: User,
+  frameworks: Framework[],
+  creator: User | null,
   organization: Organization | null,
+  wizardConfigs: WizardConfig[],
 ): Promise<ControlWizard[]> {
-  const wizardRepository = dataSource.getRepository(ControlWizard);
-  const scheduleRepository = dataSource.getRepository(ControlWizardSchedule);
-  const formRepository = dataSource.getRepository(ControlWizardForm);
-  const fieldRepository = dataSource.getRepository(ControlWizardFormField);
-  const documentRepository = dataSource.getRepository(ControlWizardDocument);
-  const approvalRepository = dataSource.getRepository(ControlWizardApproval);
-  const reportRepository = dataSource.getRepository(ControlWizardReport);
-
-  const category = controlCategories.find((cat) => cat.name === categoryName);
-  if (!category) {
-    throw new Error(`Category '${categoryName}' not found`);
-  }
-
-  // Determine framework based on category
-  let framework: Framework;
-  if (categoryName === 'Data Privacy') {
-    framework =
-      frameworks.find((fw) => fw.shortCode === 'GDPR') ||
-      frameworks.find((fw) => fw.shortCode === 'SOC2') ||
-      frameworks[0];
-  } else if (categoryName === 'Access Controls') {
-    framework =
-      frameworks.find((fw) => fw.shortCode === 'SOC2') ||
-      frameworks.find((fw) => fw.shortCode === 'ISO27001') ||
-      frameworks[0];
-  } else {
-    framework = frameworks[0];
-  }
-
-  if (!framework) {
-    throw new Error('No suitable framework found');
-  }
+  const wizardRepository = queryRunner.manager.getRepository(ControlWizard);
+  const scheduleRepository = queryRunner.manager.getRepository(
+    ControlWizardSchedule,
+  );
+  const formRepository = queryRunner.manager.getRepository(ControlWizardForm);
+  const fieldRepository = queryRunner.manager.getRepository(
+    ControlWizardFormField,
+  );
+  const documentRepository = queryRunner.manager.getRepository(
+    ControlWizardDocument,
+  );
+  const approvalRepository = queryRunner.manager.getRepository(
+    ControlWizardApproval,
+  );
+  const reportRepository =
+    queryRunner.manager.getRepository(ControlWizardReport);
 
   const wizards: ControlWizard[] = [];
 
-  for (const config of wizardConfigs) {
-    // Create the main wizard
-    const wizardData: any = {
-      categoryId: category.id,
-      frameworkId: framework.id,
-      title: config.title,
-      description: config.description,
-      type: mapWizardType(config.type),
-      status: mapWizardStatus(config.status),
-      mode: mapWizardMode(config.mode),
-      isRecurring: config.isRecurring,
-      requiresApproval: config.requiresApproval,
-      requiresEvidence: config.requiresEvidence,
-      generatesReport: config.generatesReport,
-      categorySpecificConfig: config.categorySpecificConfig,
-      metadata: config.metadata,
-      createdByUserId: creator.id,
-    };
-
-    // Only set organizationId if organization exists
-    if (organization) {
-      wizardData.organizationId = organization.id;
+  for (const control of controls) {
+    const category = controlCategories.find(
+      (cat) => cat.id === control.categoryId,
+    );
+    if (!category) {
+      console.warn(`⚠️  Control ${control.title} has no category, skipping...`);
+      continue;
     }
+
+    // Find matching wizard config by title similarity
+    const matchingConfig = findMatchingWizardConfig(
+      control.title,
+      wizardConfigs,
+    );
+
+    if (!matchingConfig) {
+      console.warn(
+        `⚠️  No matching wizard config found for control ${control.title}, using default...`,
+      );
+      continue;
+    }
+
+    // Determine framework based on category
+    let framework: Framework;
+    if (category.name === 'Data Privacy') {
+      framework =
+        frameworks.find((fw) => fw.shortCode === 'GDPR') ||
+        frameworks.find((fw) => fw.shortCode === 'NDPR') ||
+        frameworks[0];
+    } else if (category.name === 'Access Controls') {
+      framework =
+        frameworks.find((fw) => fw.shortCode === 'SOC2') ||
+        frameworks.find((fw) => fw.shortCode === 'ISO27001') ||
+        frameworks[0];
+    } else {
+      framework = frameworks[0];
+    }
+
+    if (!framework) {
+      console.warn(
+        `⚠️  No suitable framework found for category ${category.name}, skipping...`,
+      );
+      continue;
+    }
+
+    // // Create wizard title and description based on control
+    const wizardTitle = `${control.title} - Compliance Wizard`;
+    const wizardDescription = `Automated compliance wizard for ${control.title.toLowerCase()}. ${control.description}`;
+
+    // // Create the main wizard
+    const wizardData = {
+      controlId: control.id,
+      categoryId: category.id,
+      title: wizardTitle,
+      description: wizardDescription,
+      type: ControlWizardType.SYSTEM_DEFINED,
+      status: ControlWizardStatus.ACTIVE,
+      mode: mapWizardMode(matchingConfig.mode),
+      isRecurring: matchingConfig.isRecurring,
+      requiresApproval: matchingConfig.requiresApproval,
+      requiresEvidence: matchingConfig.requiresEvidence,
+      generatesReport: matchingConfig.generatesReport,
+      categorySpecificConfig: matchingConfig.categorySpecificConfig,
+      metadata: {
+        tags: [category.name, framework.shortCode, 'Compliance', 'Automated'],
+        complianceLevel: 'Standard',
+        riskLevel: 'Medium',
+        controlMapping: {
+          controlId: control.id,
+          controlIdString: control.controlIdString,
+        },
+      },
+      ...(creator && { createdByUserId: creator.id }),
+      ...(organization && { organizationId: organization.id }),
+    };
 
     const wizard = wizardRepository.create(wizardData);
     const savedWizard = await wizardRepository.save(wizard);
     wizards.push(savedWizard);
 
-    // Create schedule if specified
-    if (config.schedule) {
-      const schedule = scheduleRepository.create({
-        controlWizardId: savedWizard.id,
-        interval: mapScheduleInterval(config.schedule.interval),
-        method: mapExecutionMethod(config.schedule.method),
-        startDate: new Date(config.schedule.startDate),
-        preferredTime: config.schedule.preferredTime,
-        scheduleConfig: config.schedule.scheduleConfig,
-        isActive: true,
-      });
-      await scheduleRepository.save(schedule);
-    }
-
-    // Create form if specified
-    if (config.form) {
-      const form = formRepository.create({
-        controlWizardId: savedWizard.id,
-        type: mapFormType(config.form.type),
-        title: config.form.title,
-        description: config.form.description,
-        formConfig: config.form.config,
-        isActive: true,
-        version: 1,
-      });
-      const savedForm = await formRepository.save(form);
-
-      // Create form fields
-      for (const fieldConfig of config.form.fields) {
-        const field = fieldRepository.create({
-          formId: savedForm.id,
-          fieldKey: fieldConfig.fieldKey,
-          label: fieldConfig.label,
-          description: fieldConfig.description,
-          type: mapFieldType(fieldConfig.type),
-          options: fieldConfig.options,
-          validation: mapValidation(fieldConfig.validation),
-          isRequired: fieldConfig.isRequired,
-          order: fieldConfig.order,
-          scoring: fieldConfig.scoring,
+    if (matchingConfig?.schedules?.length > 0 && matchingConfig.isRecurring) {
+      // // Create schedules
+      for (const scheduleConfig of matchingConfig.schedules) {
+        const schedule = scheduleRepository.create({
+          controlWizardId: savedWizard.id,
+          interval: mapScheduleInterval(scheduleConfig.interval),
+          method: mapExecutionMethod(scheduleConfig.method),
+          startDate: new Date(),
+          preferredTime: scheduleConfig.preferredTime || '09:00:00',
+          scheduleConfig: {},
+          isActive: true,
         });
-        await fieldRepository.save(field);
+        await scheduleRepository.save(schedule);
       }
     }
 
-    // Create document if specified
-    if (config.document) {
-      const document = documentRepository.create({
-        controlWizardId: savedWizard.id,
-        type: mapDocumentType(config.document.type),
-        title: config.document.title,
-        description: config.document.description,
-        status: mapDocumentStatus(config.document.status),
-        documentConfig: config.document.config,
-        metadata: config.document.metadata,
-        assignedUserId: creator.id,
-      });
-      await documentRepository.save(document);
+    if (matchingConfig?.forms?.length > 0) {
+      // // Create forms
+      for (const formConfig of matchingConfig.forms) {
+        const form = formRepository.create({
+          controlWizardId: savedWizard.id,
+          type: mapFormType(formConfig.type),
+          title: formConfig.title,
+          description: formConfig.description,
+          formConfig: {
+            allowPartialSave: true,
+            requireCompletion: true,
+            scoringEnabled: true,
+            passingScore: 80,
+            ...formConfig.assessmentConfig,
+          },
+          isActive: true,
+          version: 1,
+        });
+        const savedForm = await formRepository.save(form);
+
+        // Create form fields
+        for (const fieldConfig of formConfig.fields) {
+          const field = fieldRepository.create({
+            formId: savedForm.id,
+            fieldKey: fieldConfig.fieldKey,
+            label: fieldConfig.label,
+            description: '',
+            type: mapFieldType(fieldConfig.type),
+            options: fieldConfig.options || {},
+            validation: {
+              rules: fieldConfig.isRequired ? [FieldValidation.REQUIRED] : [],
+            },
+            isRequired: fieldConfig.isRequired,
+            order: 1,
+            scoring: { points: 10, weight: 1 },
+          });
+          await fieldRepository.save(field);
+        }
+      }
     }
 
-    // Create approval if specified
-    if (config.approval) {
-      const approval = approvalRepository.create({
-        controlWizardId: savedWizard.id,
-        type: mapApprovalType(config.approval.type),
-        status: ApprovalStatus.PENDING,
-        approvalConfig: config.approval.config,
-        escalationConfig: config.approval.escalationConfig,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      });
-      await approvalRepository.save(approval);
+    // // Create document
+    const document = documentRepository.create({
+      controlWizardId: savedWizard.id,
+      type: DocumentType.POLICY,
+      title: `${control.title} Compliance Document`,
+      description: `Compliance documentation for ${control.title.toLowerCase()}`,
+      status: DocumentStatus.DRAFT,
+      documentConfig: {
+        requireApproval: true,
+        autoExpiry: true,
+        expiryDays: 365,
+        versioningEnabled: true,
+      },
+      metadata: {
+        tags: [category.name, 'Policy', 'Compliance'],
+        department: 'Compliance',
+        owner: 'Compliance Team',
+        classification: 'Internal',
+      },
+    });
+    await documentRepository.save(document);
+
+    if (
+      matchingConfig?.approvals?.length > 0 &&
+      matchingConfig.requiresApproval
+    ) {
+      // // Create approvals
+      for (const approvalConfig of matchingConfig.approvals) {
+        const approval = approvalRepository.create({
+          controlWizardId: savedWizard.id,
+          type: mapApprovalType(approvalConfig.type),
+          status: ApprovalStatus.PENDING,
+          approvalConfig: {
+            requireComments: true,
+            allowDelegation: true,
+            autoEscalation: true,
+            escalationHours: 48,
+          },
+          escalationConfig: {},
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        });
+        await approvalRepository.save(approval);
+      }
     }
 
-    // Create report if specified
-    if (config.report) {
-      const report = reportRepository.create({
-        controlWizardId: savedWizard.id,
-        type: mapReportType(config.report.type),
-        title: config.report.title,
-        description: config.report.description,
-        reportConfig: config.report.config,
-        contentConfig: config.report.contentConfig,
-        distributionConfig: {
-          recipients: [creator.id],
-          ccRecipients: [],
-          bccRecipients: [],
-          ...config.report.distributionConfig,
-        },
-        isActive: true,
-      });
-      await reportRepository.save(report);
+    if (matchingConfig?.reports?.length > 0 && matchingConfig.generatesReport) {
+      for (const reportConfig of matchingConfig.reports) {
+        const reportData = {
+          controlWizardId: savedWizard.id,
+          title: reportConfig.title,
+          description: reportConfig.description,
+          type: mapReportType(reportConfig.type),
+          templateId: reportConfig.templateId,
+          reportConfig: {
+            formats: ['pdf', 'excel'] as ReportFormat[],
+            includeCharts: true,
+            includeTables: true,
+            includeAttachments: false,
+          },
+          contentConfig: {
+            sections: [
+              { title: 'Executive Summary', type: 'summary', required: true },
+              { title: 'Compliance Score', type: 'metrics', required: true },
+              { title: 'Action Items', type: 'actions', required: true },
+            ],
+          },
+          distributionConfig: {
+            recipients: [],
+            ccRecipients: [],
+            bccRecipients: [],
+            autoSend: false,
+            sendOnCompletion: false,
+          },
+          isActive: true,
+        };
+        const report = reportRepository.create(reportData);
+        await reportRepository.save(report);
+      }
     }
+
+    // // Create reports
+
+    // console.log(`✅ Created wizard for control: ${control.title}`);
   }
+
+  await queryRunner.commitTransaction();
 
   return wizards;
 }
 
+function findMatchingWizardConfig(
+  controlTitle: string,
+  wizardConfigs: WizardConfig[],
+): WizardConfig | null {
+  // Simple matching logic - you can enhance this
+  const controlLower = controlTitle.toLowerCase();
+
+  return (
+    wizardConfigs.find((config) =>
+      config.title.toLowerCase().includes(controlLower),
+    ) || null
+  );
+}
+
 // Mapping functions
-function mapWizardType(type: string): ControlWizardType {
-  switch (type) {
-    case 'system_defined':
-      return ControlWizardType.SYSTEM_DEFINED;
-    case 'custom':
-      return ControlWizardType.CUSTOM;
-    default:
-      return ControlWizardType.CUSTOM;
-  }
-}
-
-function mapWizardStatus(status: string): ControlWizardStatus {
-  switch (status) {
-    case 'active':
-      return ControlWizardStatus.ACTIVE;
-    case 'draft':
-      return ControlWizardStatus.DRAFT;
-    case 'paused':
-      return ControlWizardStatus.PAUSED;
-    case 'archived':
-      return ControlWizardStatus.ARCHIVED;
-    default:
-      return ControlWizardStatus.DRAFT;
-  }
-}
-
 function mapWizardMode(mode: string): ControlWizardMode {
   switch (mode) {
     case 'automated':
@@ -394,7 +483,7 @@ function mapWizardMode(mode: string): ControlWizardMode {
     case 'workflow':
       return ControlWizardMode.WORKFLOW;
     default:
-      return ControlWizardMode.MANUAL;
+      return ControlWizardMode.HYBRID;
   }
 }
 
@@ -446,8 +535,10 @@ function mapFormType(type: string): FormType {
       return FormType.RISK_ASSESSMENT;
     case 'compliance_review':
       return FormType.COMPLIANCE_REVIEW;
-    default:
+    case 'custom':
       return FormType.QUESTIONNAIRE;
+    default:
+      return FormType.ASSESSMENT;
   }
 }
 
@@ -486,89 +577,6 @@ function mapFieldType(type: string): FieldType {
   }
 }
 
-function mapValidation(validation: Record<string, any>): Record<string, any> {
-  if (!validation) return {};
-
-  const mappedValidation: Record<string, any> = { ...validation };
-
-  if (validation.rules) {
-    mappedValidation.rules = validation.rules.map((rule: string) => {
-      switch (rule) {
-        case 'required':
-          return FieldValidation.REQUIRED;
-        case 'email':
-          return FieldValidation.EMAIL;
-        case 'url':
-          return FieldValidation.URL;
-        case 'phone':
-          return FieldValidation.PHONE;
-        case 'min_length':
-          return FieldValidation.MIN_LENGTH;
-        case 'max_length':
-          return FieldValidation.MAX_LENGTH;
-        case 'min_value':
-          return FieldValidation.MIN_VALUE;
-        case 'max_value':
-          return FieldValidation.MAX_VALUE;
-        case 'pattern':
-          return FieldValidation.PATTERN;
-        case 'custom':
-          return FieldValidation.CUSTOM;
-        default:
-          return FieldValidation.REQUIRED;
-      }
-    });
-  }
-
-  return mappedValidation;
-}
-
-function mapDocumentType(type: string): DocumentType {
-  switch (type) {
-    case 'policy':
-      return DocumentType.POLICY;
-    case 'procedure':
-      return DocumentType.PROCEDURE;
-    case 'standard':
-      return DocumentType.STANDARD;
-    case 'guideline':
-      return DocumentType.GUIDELINE;
-    case 'template':
-      return DocumentType.TEMPLATE;
-    case 'checklist':
-      return DocumentType.CHECKLIST;
-    case 'report':
-      return DocumentType.REPORT;
-    case 'certificate':
-      return DocumentType.CERTIFICATE;
-    case 'contract':
-      return DocumentType.CONTRACT;
-    case 'audit_trail':
-      return DocumentType.AUDIT_TRAIL;
-    default:
-      return DocumentType.POLICY;
-  }
-}
-
-function mapDocumentStatus(status: string): DocumentStatus {
-  switch (status) {
-    case 'draft':
-      return DocumentStatus.DRAFT;
-    case 'under_review':
-      return DocumentStatus.UNDER_REVIEW;
-    case 'approved':
-      return DocumentStatus.APPROVED;
-    case 'published':
-      return DocumentStatus.PUBLISHED;
-    case 'archived':
-      return DocumentStatus.ARCHIVED;
-    case 'expired':
-      return DocumentStatus.EXPIRED;
-    default:
-      return DocumentStatus.DRAFT;
-  }
-}
-
 function mapApprovalType(type: string): ApprovalType {
   switch (type) {
     case 'sequential':
@@ -604,6 +612,8 @@ function mapReportType(type: string): ReportType {
       return ReportType.PERFORMANCE_METRICS;
     case 'executive_summary':
       return ReportType.EXECUTIVE_SUMMARY;
+    case 'security_report':
+      return ReportType.COMPLIANCE_REPORT; // Fallback
     default:
       return ReportType.COMPLIANCE_REPORT;
   }
