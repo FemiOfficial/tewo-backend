@@ -11,7 +11,6 @@ import {
 import { Organization } from './organization.entity';
 import { Control } from './control.entity';
 import { ControlCategory } from './control-category.entity';
-import { Framework } from './framework.entity';
 import { User } from './user.entity';
 import { ControlWizardSchedule } from './control-wizard-schedule.entity';
 import { ControlWizardForm } from './control-wizard-form.entity';
@@ -97,6 +96,13 @@ export class CategorySpecificConfig {
   @Field(() => [String], { nullable: true })
   systemIntegrations?: string[];
 }
+
+@ObjectType()
+export class ControlMetadata {
+  @Field(() => String, { nullable: true })
+  default?: string;
+}
+
 @Entity('control_wizards')
 @ObjectType()
 export class ControlWizard {
@@ -104,7 +110,7 @@ export class ControlWizard {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
   organizationId: string; // Null for default/system wizards
 
@@ -156,7 +162,7 @@ export class ControlWizard {
   @Column({ type: 'boolean', default: false })
   generatesReport: boolean;
 
-  @Field(() => CategorySpecificConfig)
+  @Field(() => CategorySpecificConfig, { nullable: true })
   @Column({ type: 'jsonb', nullable: true })
   categorySpecificConfig: {
     incidentSeverityLevels?: string[];
@@ -176,8 +182,9 @@ export class ControlWizard {
     systemIntegrations?: string[];
   };
 
+  @Field(() => ControlMetadata, { nullable: true })
   @Column({ type: 'jsonb', nullable: true })
-  metadata: Record<string, any>;
+  metadata: ControlMetadata;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
@@ -194,7 +201,7 @@ export class ControlWizard {
   // Relations
   @ManyToOne(() => Organization, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'organizationId' })
-  @Field(() => Organization)
+  @Field(() => Organization, { nullable: true })
   organization: Organization;
 
   @ManyToOne(() => Control, { nullable: true })
@@ -207,28 +214,28 @@ export class ControlWizard {
   @Field(() => ControlCategory)
   category: ControlCategory;
 
-  @ManyToOne(() => Framework)
-  @JoinColumn({ name: 'frameworkId' })
-  @Field(() => Framework)
-  framework: Framework;
-
   @ManyToOne(() => User)
   @JoinColumn({ name: 'createdByUserId' })
-  @Field(() => User)
+  @Field(() => User, { nullable: true })
   createdByUser: User;
 
   @OneToMany(() => ControlWizardSchedule, (schedule) => schedule.controlWizard)
+  @Field(() => [ControlWizardSchedule], { nullable: true })
   schedules: ControlWizardSchedule[];
 
+  @Field(() => [ControlWizardForm], { nullable: true })
   @OneToMany(() => ControlWizardForm, (form) => form.controlWizard)
   forms: ControlWizardForm[];
 
+  @Field(() => [ControlWizardDocument], { nullable: true })
   @OneToMany(() => ControlWizardDocument, (document) => document.controlWizard)
   documents: ControlWizardDocument[];
 
+  @Field(() => [ControlWizardApproval], { nullable: true })
   @OneToMany(() => ControlWizardApproval, (approval) => approval.controlWizard)
   approvals: ControlWizardApproval[];
 
+  @Field(() => [ControlWizardReport], { nullable: true })
   @OneToMany(() => ControlWizardReport, (report) => report.controlWizard)
   reports: ControlWizardReport[];
 }

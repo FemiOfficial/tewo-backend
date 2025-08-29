@@ -64,7 +64,8 @@ export class FieldOptions {
   @Field(() => [String], { nullable: true })
   choices?: string[];
 
-  default?: any;
+  @Field(() => String, { nullable: true })
+  default?: string;
 
   @Field(() => String, { nullable: true })
   placeholder?: string;

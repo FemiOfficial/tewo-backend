@@ -36,6 +36,45 @@ registerEnumType(ApprovalStatus, {
   name: 'ApprovalStatus',
 });
 
+@ObjectType()
+export class ApprovalConfig {
+  @Field(() => Boolean)
+  requireComments: boolean;
+
+  @Field(() => Boolean)
+  allowDelegation: boolean;
+
+  @Field(() => Boolean)
+  autoEscalation: boolean;
+
+  @Field(() => Number, { nullable: true })
+  escalationHours?: number;
+
+  @Field(() => [Number], { nullable: true })
+  reminderIntervals?: number[]; // hours
+
+  @Field(() => Number, { nullable: true })
+  maxRevisions?: number;
+}
+
+@ObjectType()
+export class ApprovalEscalationConfig {
+  @Field(() => [ApprovalEscalationLevel])
+  escalationLevels: ApprovalEscalationLevel[];
+}
+
+@ObjectType()
+export class ApprovalEscalationLevel {
+  @Field(() => Number)
+  level: number;
+
+  @Field(() => [String])
+  approvers: string[];
+
+  @Field(() => Number)
+  timeframe: number; // hours
+}
+
 @Entity('control_wizard_approvals')
 @ObjectType()
 export class ControlWizardApproval {
@@ -67,6 +106,7 @@ export class ControlWizardApproval {
   })
   status: ApprovalStatus;
 
+  @Field(() => ApprovalConfig)
   @Column({ type: 'jsonb', nullable: true })
   approvalConfig: {
     requireComments: boolean;
@@ -77,6 +117,7 @@ export class ControlWizardApproval {
     maxRevisions?: number;
   };
 
+  @Field(() => [ApprovalEscalationConfig])
   @Column({ type: 'jsonb', nullable: true })
   escalationConfig: {
     escalationLevels: {

@@ -42,6 +42,45 @@ registerEnumType(DocumentStatus, {
   name: 'DocumentStatus',
 });
 
+@ObjectType()
+export class DocumentConfig {
+  @Field(() => Boolean, { nullable: true })
+  requireApproval: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  autoExpiry?: boolean;
+
+  @Field(() => Number, { nullable: true })
+  expiryDays?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  versioningEnabled: boolean;
+
+  @Field(() => Number, { nullable: true })
+  maxVersions?: number;
+}
+
+@ObjectType()
+export class DocumentMetadata {
+  @Field(() => [String], { nullable: true })
+  tags?: string[];
+
+  @Field(() => [String], { nullable: true })
+  keywords?: string[];
+
+  @Field(() => String, { nullable: true })
+  department?: string;
+
+  @Field(() => String, { nullable: true })
+  owner?: string;
+
+  @Field(() => String, { nullable: true })
+  classification?: string;
+
+  @Field(() => String, { nullable: true })
+  confidentiality?: string;
+}
+
 @Entity('control_wizard_documents')
 @ObjectType()
 export class ControlWizardDocument {
@@ -73,10 +112,11 @@ export class ControlWizardDocument {
   @Column({ type: 'uuid', nullable: true })
   templateId: string; // ID of an existing document template
 
+  @Field(() => DocumentConfig)
   @Column({ type: 'jsonb', nullable: true })
   documentConfig: {
     requireApproval: boolean;
-    autoExpiry: boolean;
+    autoExpiry?: boolean;
     expiryDays?: number;
     versioningEnabled: boolean;
     maxVersions?: number;
@@ -88,15 +128,9 @@ export class ControlWizardDocument {
     // };
   };
 
+  @Field(() => DocumentMetadata)
   @Column({ type: 'jsonb', nullable: true })
-  metadata: {
-    tags?: string[];
-    keywords?: string[];
-    department?: string;
-    owner?: string;
-    classification?: string;
-    confidentiality?: string;
-  };
+  metadata: DocumentMetadata;
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })

@@ -40,6 +40,111 @@ registerEnumType(ReportFormat, {
   name: 'ReportFormat',
 });
 
+@ObjectType()
+export class ReportConfig {
+  @Field(() => [ReportFormat])
+  formats: ReportFormat[];
+
+  @Field(() => Boolean)
+  includeCharts: boolean;
+
+  @Field(() => Boolean)
+  includeTables: boolean;
+
+  @Field(() => Boolean)
+  includeAttachments: boolean;
+
+  @Field(() => Number, { nullable: true })
+  maxFileSize?: number;
+
+  @Field(() => [String], { nullable: true })
+  customTemplates?: string[];
+}
+
+@ObjectType()
+export class ReportContentConfig {
+  @Field(() => [ReportContentSection])
+  sections: ReportContentSection[];
+
+  @Field(() => [ReportContentFilter])
+  filters: ReportContentFilter[];
+
+  @Field(() => [ReportContentSorting])
+  sorting: ReportContentSorting[];
+}
+
+@ObjectType()
+export class ReportContentSection {
+  @Field(() => String)
+  title: string;
+
+  @Field(() => String)
+  type: string;
+
+  @Field(() => Boolean)
+  required: boolean;
+
+  @Field(() => String, { nullable: true })
+  dataSource?: string;
+}
+
+@ObjectType()
+export class ReportContentFilter {
+  @Field(() => String)
+  field: string;
+
+  @Field(() => String)
+  type: string;
+
+  @Field(() => String, { nullable: true })
+  defaultValue?: any;
+
+  @Field(() => String, { nullable: true })
+  dataSource?: string;
+
+  @Field(() => Boolean)
+  required: boolean;
+}
+
+@ObjectType()
+export class ReportContentSorting {
+  @Field(() => String)
+  field: string;
+
+  @Field(() => String)
+  type: string;
+
+  @Field(() => String, { nullable: true })
+  defaultValue?: any;
+
+  @Field(() => String, { nullable: true })
+  dataSource?: string;
+}
+
+@ObjectType()
+export class ReportDistributionConfig {
+  @Field(() => [String])
+  recipients: string[];
+
+  @Field(() => [String], { nullable: true })
+  ccRecipients?: string[];
+
+  @Field(() => [String], { nullable: true })
+  bccRecipients?: string[];
+
+  @Field(() => String, { nullable: true })
+  subjectTemplate?: string;
+
+  @Field(() => String, { nullable: true })
+  bodyTemplate?: string;
+
+  @Field(() => Boolean)
+  autoSend: boolean;
+
+  @Field(() => Boolean)
+  sendOnCompletion: boolean;
+}
+
 @Entity('control_wizard_reports')
 @ObjectType()
 export class ControlWizardReport {
@@ -67,45 +172,17 @@ export class ControlWizardReport {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Field(() => ReportConfig)
   @Column({ type: 'jsonb' })
-  reportConfig: {
-    formats: ReportFormat[];
-    includeCharts: boolean;
-    includeTables: boolean;
-    includeAttachments: boolean;
-    maxFileSize?: number;
-    customTemplates?: string[];
-  };
+  reportConfig: ReportConfig;
 
+  @Field(() => ReportContentConfig)
   @Column({ type: 'jsonb', nullable: true })
-  contentConfig: {
-    sections: {
-      title: string;
-      type: string;
-      required: boolean;
-      dataSource?: string;
-    }[];
-    filters: {
-      field: string;
-      type: string;
-      defaultValue?: any;
-    }[];
-    sorting: {
-      field: string;
-      direction: 'asc' | 'desc';
-    }[];
-  };
+  contentConfig: ReportContentConfig;
 
+  @Field(() => ReportDistributionConfig)
   @Column({ type: 'jsonb', nullable: true })
-  distributionConfig: {
-    recipients: string[];
-    ccRecipients?: string[];
-    bccRecipients?: string[];
-    subjectTemplate?: string;
-    bodyTemplate?: string;
-    autoSend: boolean;
-    sendOnCompletion: boolean;
-  };
+  distributionConfig: ReportDistributionConfig;
 
   @Field(() => Boolean)
   @Column({ type: 'boolean', default: true })

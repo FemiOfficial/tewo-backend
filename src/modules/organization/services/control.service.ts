@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -34,6 +35,7 @@ import { UpsertControlWizardDocumentDto } from '../dto/org-controls/document/doc
 
 @Injectable()
 export class ControlService {
+  private readonly logger = new Logger(ControlService.name);
   constructor(
     @InjectRepository(OrganizationControl)
     private readonly organizationControlRepository: Repository<OrganizationControl>,
@@ -54,6 +56,21 @@ export class ControlService {
     @InjectRepository(ControlCategory)
     private readonly controlCategoryRepository: Repository<ControlCategory>,
   ) {}
+
+  async getControlWizardSetupStatus(organizationId: string, controlId: string) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: {
+        organizationId,
+        controlId: parseInt(controlId),
+      },
+    });
+
+    if (!controlWizard) {
+      return null;
+    }
+
+    return controlWizard.status;
+  }
 
   async getUniqueControlCategoriesByFrameworks(frameworkIds: number[]) {
     return this.controlCategoryRepository.find({
@@ -107,7 +124,9 @@ export class ControlService {
     const controlWizard = await this.controlWizardRepository.findOne({
       where: {
         controlId: parseInt(controlId),
-        type: isDefault ? ControlWizardType.DEFAULT : ControlWizardType.CUSTOM,
+        type: isDefault
+          ? ControlWizardType.SYSTEM_DEFINED
+          : ControlWizardType.CUSTOM,
         organizationId: isDefault ? IsNull() : organizationId,
       },
       relations: [
@@ -115,7 +134,6 @@ export class ControlService {
         'control',
         'forms',
         'forms.fields',
-        'forms.fields.options',
         'schedules',
         'approvals',
         'documents',
@@ -128,6 +146,37 @@ export class ControlService {
     }
 
     return controlWizard;
+  }
+
+  /**
+   * Smart control wizard retrieval that automatically determines whether to return
+   * a custom organization wizard or the default system wizard based on setup status
+   */
+  async getControlWizardSmart(controlId: string, organizationId: string) {
+    // First check if the organization already has a custom wizard for this control
+    this.logger.log(
+      `Getting control wizard smart for controlId: ${controlId} and organizationId: ${organizationId}`,
+    );
+    const setupStatus = await this.getControlWizardSetupStatus(
+      organizationId,
+      controlId,
+    );
+
+    // If organization has a custom wizard (any status), use it
+    if (setupStatus !== null) {
+      return await this.getControlWizardByControlId(
+        controlId,
+        false,
+        organizationId,
+      );
+    }
+
+    // If no custom wizard exists, return the default system wizard
+    return await this.getControlWizardByControlId(
+      controlId,
+      true,
+      organizationId,
+    );
   }
 
   async getControlWizardSchedules(

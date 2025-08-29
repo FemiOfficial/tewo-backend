@@ -77,12 +77,12 @@ export class ControlWizardSchedule {
   @Column({ type: 'enum', enum: ExecutionMethod })
   method: ExecutionMethod;
 
-  @Field(() => Date)
-  @Column({ type: 'date' })
+  @Field(() => Date, { nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   startDate: Date;
 
-  @Field(() => Date)
-  @Column({ type: 'date', nullable: true })
+  @Field(() => Date, { nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   endDate: Date;
 
   @Field(() => String)
@@ -102,7 +102,7 @@ export class ControlWizardSchedule {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
   assignedUserId: string; // For manual execution
 
@@ -120,7 +120,7 @@ export class ControlWizardSchedule {
   @JoinColumn({ name: 'controlWizardId' })
   controlWizard: ControlWizard;
 
-  @Field(() => [ControlWizardExecution])
+  @Field(() => [ControlWizardExecution], { nullable: true })
   @OneToMany(() => ControlWizardExecution, (execution) => execution.schedule)
   executions: ControlWizardExecution[];
 }
