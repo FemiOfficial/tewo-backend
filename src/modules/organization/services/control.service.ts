@@ -188,7 +188,7 @@ export class ControlService {
       where: {
         controlWizardId,
       },
-      relations: ['controlWizard'],
+      relations: ['controlWizard', 'assignedUsers'],
     });
 
     if (!schedules.length) {
@@ -315,7 +315,7 @@ export class ControlService {
       where: {
         id: payload.defaultControlWizardId,
         organizationId: IsNull(),
-        type: ControlWizardType.DEFAULT,
+        type: ControlWizardType.SYSTEM_DEFINED,
       },
     });
 
@@ -349,8 +349,11 @@ export class ControlService {
       requiresEvidence: payload.requiresEvidence,
       title: payload.title,
       description: payload.description,
+      id: undefined,
     });
     await this.controlWizardRepository.save(controlWizard);
+
+    // link forms to the control wizard
 
     return controlWizard;
   }
@@ -431,6 +434,8 @@ export class ControlService {
     controlWizardId: string,
     payload: UpsertControlWizardFormDto,
   ) {
+    // is default updated
+
     const controlWizard = await this.controlWizardRepository.findOne({
       where: {
         id: controlWizardId,
@@ -590,6 +595,20 @@ export class ControlService {
       return updatedDocument;
     }
   }
+
+  // assign user to a control via the wizard
+  // invite user to the portal if not exisiting
+  // list all users in the organization
+
+  // update form
+  // remove form field
+  // add form field
+  // add a form to the control
+
+  // update schedules
+  // add a schedule
+  // - link a schedule to a form and control wizard
+  // - assign a user to a schedule
 
   // generate control wizards for organization => simply map default wizards specific to the organization
   // update control wizard by category

@@ -23,6 +23,25 @@ registerEnumType(SubmissionStatus, {
   name: 'SubmissionStatus',
 });
 
+@ObjectType()
+export class FormData {
+  @Field(() => String)
+  @Column({ type: 'uuid' })
+  formFieldId: string;
+
+  @Field(() => String)
+  @Column({ type: 'varchar' })
+  value: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', nullable: true })
+  fileLocation?: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'text', nullable: true })
+  comments?: string;
+}
+
 @Entity('control_wizard_form_submissions')
 @ObjectType()
 export class ControlWizardFormSubmission {
@@ -38,6 +57,10 @@ export class ControlWizardFormSubmission {
   @Column({ type: 'uuid' })
   submittedByUserId: string;
 
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'varchar', nullable: true })
+  submittedByEmail: string;
+
   @Field(() => SubmissionStatus)
   @Column({
     type: 'enum',
@@ -46,8 +69,9 @@ export class ControlWizardFormSubmission {
   })
   status: SubmissionStatus;
 
+  @Field(() => [FormData])
   @Column({ type: 'jsonb' })
-  formData: Record<string, any>;
+  formData: FormData[];
 
   @Column({ type: 'jsonb', nullable: true })
   scoring: {

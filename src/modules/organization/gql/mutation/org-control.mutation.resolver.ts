@@ -6,10 +6,14 @@ import { AddOrgFrameworksMutationResult } from '../../dto/organization.dto';
 import {
   SelectOrganizationFrameworkDto,
   UpsertControlWizardDocumentDto,
+  CreateControlWizardDto,
 } from '../../dto/org-controls';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/modules/token/guard/gql.quard';
-import { ControlWizardDocument } from 'src/shared/db/typeorm/entities';
+import {
+  ControlWizard,
+  ControlWizardDocument,
+} from 'src/shared/db/typeorm/entities';
 import { ControlService } from '../../services/control.service';
 
 @Resolver()
@@ -38,6 +42,18 @@ export class OrgControlMutationResolver {
       message: 'Organization Frameworks added successfully',
       data: result,
     };
+  }
+
+  @Mutation(() => ControlWizard)
+  async createOrgControlWizard(
+    @CurrentOrganization() organization: TokenPayload['organization'],
+    @Args('createOrgControlWizardInput')
+    createOrgControlWizardInput: CreateControlWizardDto,
+  ) {
+    return this.controlService.createControlWizard(
+      organization.id,
+      createOrgControlWizardInput,
+    );
   }
 
   @Mutation(() => ControlWizardDocument)

@@ -11,6 +11,7 @@ import {
 import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardReportSchedule } from './control-wizard-report-schedule.entity';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { ControlWizardForm } from './control-wizard-form.entity';
 
 export enum ReportType {
   COMPLIANCE_REPORT = 'compliance_report',
@@ -158,6 +159,10 @@ export class ControlWizardReport {
 
   @Field(() => String, { nullable: true })
   @Column({ type: 'uuid', nullable: true })
+  formId: string;
+
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   templateId: string; // ID of an existing document template
 
   @Field(() => ReportType)
@@ -201,6 +206,11 @@ export class ControlWizardReport {
   @ManyToOne(() => ControlWizard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'controlWizardId' })
   controlWizard: ControlWizard;
+
+  @Field(() => ControlWizardForm)
+  @ManyToOne(() => ControlWizardForm, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'formId' })
+  form: ControlWizardForm;
 
   @Field(() => [ControlWizardReportSchedule])
   @OneToMany(() => ControlWizardReportSchedule, (schedule) => schedule.report)

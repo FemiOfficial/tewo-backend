@@ -56,95 +56,117 @@ export class GetAutomationIntegrationCategoriesInputDto {
   status?: SystemIntegrationStatus;
 }
 
+@InputType()
 export class CategorySpecificConfigDto {
   // Security & Incidents Management
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   @UniqueArray({ message: 'Incident severity levels must be unique' })
   incidentSeverityLevels?: string[];
 
   @IsOptional()
   @IsObject()
+  // @Field(() => Object)
   responseTimeframes?: Record<string, number>;
 
   // Risk Management
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   riskAssessmentCriteria?: string[];
 
   @IsOptional()
   @IsString()
+  @Field(() => String, { nullable: true })
   riskScoringMethod?: string;
 
   // IT & Operational Security
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   securityControls?: string[];
 
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   operationalProcedures?: string[];
 
   // Information Management
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   dataClassificationLevels?: string[];
 
   @IsOptional()
   @IsObject()
+  // @Field(() => Object)
   retentionPolicies?: Record<string, number>;
 
   // Governance
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   policyReviewCycles?: string[];
 
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   complianceCheckpoints?: string[];
 
   // Data Privacy
   @IsOptional()
   @IsBoolean()
+  @Field(() => Boolean, { nullable: true })
   privacyImpactAssessment?: boolean;
 
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   dataSubjectRights?: string[];
 
   // Access Controls
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   accessReviewIntervals?: string[];
 
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   automationCapabilities?: string[];
 
   @IsOptional()
   @IsArray()
+  @Field(() => [String], { nullable: true })
   systemIntegrations?: string[];
 }
 
+@InputType()
 export class CreateControlWizardDto {
   @IsNotEmpty()
   @IsString()
+  @Field(() => String)
   defaultControlWizardId: string;
 
   @IsOptional()
   @IsEnum(ControlWizardMode)
+  @Field(() => ControlWizardMode)
   mode: ControlWizardMode;
 
   @IsBoolean()
   @IsOptional()
+  @Field(() => Boolean)
   isRecurring: boolean;
 
   @IsBoolean()
   @IsOptional()
+  @Field(() => Boolean)
   requiresApproval: boolean;
 
   @IsBoolean()
   @IsOptional()
+  @Field(() => Boolean)
   requiresEvidence: boolean;
 
   @IsOptional()
@@ -152,14 +174,17 @@ export class CreateControlWizardDto {
   @AllowedCharacters(/^[a-zA-Z0-9\s\-_.]+$/, {
     message: 'Title contains invalid characters',
   })
+  @Field(() => String)
   title: string;
 
   @IsOptional()
   @IsString()
+  @Field(() => String)
   description: string;
 
   @IsOptional()
   @IsObject()
+  @Field(() => CategorySpecificConfigDto, { nullable: true })
   categorySpecificConfig: CategorySpecificConfigDto;
 }
 

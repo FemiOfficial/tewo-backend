@@ -6,6 +6,7 @@ import {
   ValidateIf,
   IsObject,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Field, InputType } from '@nestjs/graphql';
@@ -83,4 +84,10 @@ export class UpsertControlWizardScheduleDto {
   @IsBoolean()
   @Field(() => Boolean)
   isNew: boolean; // this is the flag to check if the schedule is new or not from the frontend
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Field(() => [String], { nullable: true })
+  assignedUsers?: string[]; // Array of user IDs to assign to this schedule
 }

@@ -12,6 +12,7 @@ import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardFormField } from './control-wizard-form-field.entity';
 import { ControlWizardFormSubmission } from './control-wizard-form-submission.entity';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { ControlWizardFormSchedule } from './control-form-wizard-schedule.entity';
 
 export enum FormType {
   ASSESSMENT = 'assessment',
@@ -53,12 +54,6 @@ export class FormConfig {
 
   @Field(() => Number, { nullable: true })
   timeLimit?: number; // in minutes
-
-  @Field(() => Boolean)
-  scoringEnabled: boolean;
-
-  @Field(() => Number, { nullable: true })
-  passingScore?: number;
 }
 
 @Entity('control_wizard_forms')
@@ -121,4 +116,11 @@ export class ControlWizardForm {
   @Field(() => [ControlWizardFormSubmission])
   @OneToMany(() => ControlWizardFormSubmission, (submission) => submission.form)
   submissions!: ControlWizardFormSubmission[];
+
+  @Field(() => [ControlWizardFormSchedule])
+  @OneToMany(
+    () => ControlWizardFormSchedule,
+    (schedule) => schedule.controlWizardForm,
+  )
+  schedules: ControlWizardFormSchedule[]; // schedule triggers
 }
