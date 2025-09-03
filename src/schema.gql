@@ -1,0 +1,51 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type SystemIntegration {
+  id: String!
+  name: String!
+  key: String!
+  category: SystemIntegrationCategory!
+  description: String!
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""The category of system integration"""
+enum SystemIntegrationCategory {
+  CodeRepository
+  CI_CD
+  ContainerRegistry
+  Database
+  DevOps
+  IdentityAndAccessManagement
+  CRM
+  Monitoring
+  Network
+  Security
+  Storage
+  WebApplication
+  Email
+  Chat
+  Document
+  Calendar
+  ProjectManagement
+  TimeTracking
+  Billing
+  Other
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  getAutomationIntegrations(getAutomationIntegrationsInput: GetAutomationIntegrationsInputDto!): [SystemIntegration!]!
+}
+
+input GetAutomationIntegrationsInputDto {
+  category: String
+}

@@ -1,0 +1,1286 @@
+[
+  {
+    "title": "User Access Management",
+    "description": "Manages the end-to-end lifecycle of user access through the Joiner, Mover, Leaver (JML) process, including onboarding, modifications, offboarding, and periodic audits.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "IT Service Management (ITSM) ticketing system",
+        "Human Resources (HR) Information System"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Periodic Access Reviews",
+        "interval": "quarterly",
+        "method": "manual",
+        "preferredTime": "09:00:00"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Quarterly Access Review Certification",
+        "type": "assessment",
+        "description": "Form for managers/system owners to recertify or revoke user access.",
+        "assessmentConfig": {
+          "generatesReportTitle": "Quarterly User Access Review Report",
+          "failingActions": ["IT Remediation of Revoked Access"]
+        },
+        "fields": [
+          {
+            "fieldKey": "userToReview",
+            "label": "User Being Reviewed",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "action",
+            "label": "Action",
+            "type": "select",
+            "isRequired": true,
+            "options": {
+              "choices": ["Recertify", "Revoke"]
+            }
+          },
+          {
+            "fieldKey": "revocationReason",
+            "label": "Reason for Revocation",
+            "type": "textarea",
+            "isConditional": true,
+            "options": {
+              "conditionalLogic": {
+                "dependsOn": "action",
+                "condition": "equals",
+                "value": "Revoke"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "title": "Employee Ad-Hoc Access Request",
+        "type": "custom",
+        "description": "For existing employees to request access to a new system, application, or resource.",
+        "fields": [
+          {
+            "fieldKey": "employeeName",
+            "label": "Your Full Name",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "requestedResource",
+            "label": "System, Application, or Resource",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "accessLevel",
+            "label": "Required Access Level (e.g., Read-only, Contributor)",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "businessJustification",
+            "label": "Business Justification",
+            "type": "textarea",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "managerEmail",
+            "label": "Manager Email",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "userEmail",
+            "label": "User Email",
+            "type": "text",
+            "isRequired": true
+          },
+           {
+            "fieldKey": "provisioningPersonelEmail",
+            "label": "Provisioning Email",
+            "type": "text",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Periodic Review Recertification",
+        "type": "parallel",
+        "stages": [
+          {
+            "stageNumber": 1,
+            "title": "Manager/Owner Recertification"
+          }
+        ]
+      },
+      {
+        "title": "IT Remediation of Revoked Access",
+        "type": "sequential",
+        "stages": [
+           {
+            "stageNumber": 1,
+            "title": "IT Remediation"
+          },
+            {
+            "stageNumber": 2,
+            "title": "Manager Approval"
+          }
+
+        ]
+      },
+      {
+        "title": "Ad-Hoc Access Approval Workflow",
+        "type": "sequential",
+        "stages": [
+          {
+            "stageNumber": 1,
+            "title": "Employee's Manager Approval"
+          },
+          {
+            "stageNumber": 2,
+            "title": "System/Resource Owner Approval"
+          },
+          {
+            "stageNumber": 3,
+            "title": "Employee Confirmation"
+          }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Quarterly User Access Review Report",
+        "type": "audit_report",
+        "templateId": null,
+        "description": "Generates a list of users and their access rights for managers to review."
+      }
+    ]
+  },
+  {
+    "title": "Privileged Access Control",
+    "description": "Manages the full lifecycle of privileged access based on Zero Trust principles, including discovery, just-in-time (JIT) access, credential vaulting, and session monitoring.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "PAM Solution (Credential Vault & Session Manager)",
+        "ITSM Ticketing System",
+        "SIEM for threat analytics"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Privileged Account Discovery",
+        "interval": "daily",
+        "method": "automated"
+      },
+      {
+        "title": "Privileged Access Audit",
+        "interval": "quarterly",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Just-in-Time (JIT) Privileged Access Request",
+        "type": "custom",
+        "fields": [
+          {
+            "fieldKey": "targetSystem",
+            "label": "Target System/Resource",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "reason",
+            "label": "Reason / ITSM Ticket Number",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "duration",
+            "label": "Access Duration (in hours)",
+            "type": "number",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "JIT Access Approval Workflow",
+        "type": "sequential",
+        "stages": [
+          {
+            "stageNumber": 1,
+            "title": "Manager Approval"
+          },
+          {
+            "stageNumber": 2,
+            "title": "Automated JIT Provisioning & Revocation"
+          }
+        ]
+      },
+      {
+        "title": "Privileged Access Audit Review",
+        "type": "sequential",
+        "stages": [
+          {
+            "stageNumber": 1,
+            "title": "Security Team Review"
+          },
+          {
+            "stageNumber": 2,
+            "title": "Recertification / Revocation"
+          }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Privileged Account Discovery Report",
+        "type": "audit_report"
+      },
+      {
+        "title": "Privileged Session Audit Report",
+        "type": "audit_report"
+      }
+    ]
+  },
+  {
+    "title": "Multi-Factor Authentication",
+    "description": "Manages the end-to-end lifecycle of MFA, from policy development and scoping to deployment, user enrollment, and ongoing monitoring.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "MFA Solution (e.g., Okta, Duo)",
+        "Active Directory",
+        "SIEM for log analysis"
+      ]
+    },
+    "documents": [
+      {
+        "title": "MFA Implementation Policy",
+        "type": "policy",
+        "description": "Formal policy that mandates the use of MFA, defines the scope, and outlines supported authentication methods."
+      }
+    ],
+    "forms": [
+      {
+        "title": "MFA Rollout Plan & Pilot Program",
+        "type": "checklist",
+        "description": "Checklist to manage the phased rollout of MFA, including pilot testing, user communication, and training.",
+        "fields": [
+          {
+            "fieldKey": "pilotGroup",
+            "label": "Pilot Group Identified (e.g., IT Department)",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "communicationPlan",
+            "label": "User Communication Plan Approved",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "enrollmentInstructions",
+            "label": "Enrollment Instructions Prepared",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "helpDeskTraining",
+            "label": "Help Desk Training Completed",
+            "type": "boolean",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "schedules": [
+      {
+        "title": "MFA Log Monitoring & Review",
+        "interval": "weekly",
+        "method": "automated",
+        "description": "Automated schedule to pull MFA authentication logs for regular review and threat analysis."
+      }
+    ],
+    "approvals": [
+      {
+        "title": "MFA Policy Approval",
+        "type": "all",
+        "stages": [
+          {
+            "stageNumber": 1,
+            "title": "CISO Approval"
+          },
+          {
+            "stageNumber": 2,
+            "title": "IT Management Approval"
+          }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "MFA Authentication Log Analysis",
+        "type": "audit_report",
+        "description": "Weekly report summarizing MFA activity, including successful authentications, failed attempts, and suspicious patterns."
+      }
+    ]
+  },
+  {
+    "title": "Data Classification",
+    "description": "Establish and maintain a data classification framework to categorize data based on sensitivity and business value, ensuring it is reviewed and updated annually.",
+    "mode": "manual",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": false,
+    "documents": [
+      {
+        "title": "Data Classification Standard",
+        "type": "standard"
+      }
+    ],
+    "schedules": [
+      {
+        "title": "Annual Review of Data Classification Standard",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Data Classification Policy Review",
+        "type": "checklist",
+        "fields": [
+          {
+            "fieldKey": "policyReviewed",
+            "label": "Policy reviewed for accuracy and relevance?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "changesNeeded",
+            "label": "Are changes required?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "summaryOfChanges",
+            "label": "Summary of Changes",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Data Classification Standard Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Data Protection Officer (DPO) Review" },
+          { "stageNumber": 2, "title": "CISO Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Data Retention Policy",
+    "description": "Implement and manage data retention policies to ensure compliance. Involves an automated process with a manual review to verify correct execution.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Annual Data Retention Process",
+        "interval": "annually",
+        "method": "hybrid",
+        "preferredTime": "10:00:00"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Annual Data Retention Process Review",
+        "type": "checklist",
+        "fields": [
+          {
+            "fieldKey": "automatedProcessConfirmation",
+            "label": "Automated data retention scripts ran successfully?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "exceptionReview",
+            "label": "Describe any exceptions or failures in the automated process.",
+            "type": "textarea"
+          },
+          {
+            "fieldKey": "manualDeletionConfirmation",
+            "label": "Manual data deletions completed as per policy?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "evidenceAttachment",
+            "label": "Attach logs or evidence of completion.",
+            "type": "file_upload"
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Data Protection Officer (DPO) Review" },
+          { "stageNumber": 2, "title": "Compliance Manager Approval" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Annual Data Retention Audit",
+        "type": "compliance_report"
+      }
+    ]
+  },
+  {
+    "title": "Data Subject Rights",
+    "description": "Establish and manage processes to handle data subject rights (DSR) requests including access, rectification, and deletion in a timely and compliant manner.",
+    "mode": "hybrid",
+    "isRecurring": false,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "forms": [
+      {
+        "title": "Data Subject Request Form",
+        "type": "custom",
+        "fields": [
+          {
+            "fieldKey": "requestorName",
+            "label": "Requestor's Full Name",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "requestType",
+            "label": "Type of Request",
+            "type": "select",
+            "isRequired": true,
+            "options": {
+              "choices": ["Access", "Rectification", "Deletion"]
+            }
+          },
+          {
+            "fieldKey": "requestDetails",
+            "label": "Details of the Request",
+            "type": "textarea",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "DSR Request Handling",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "DPO Review and Validation" },
+          { "stageNumber": 2, "title": "IT Action and Fulfillment" },
+          { "stageNumber": 3, "title": "Confirmation to Requestor" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "DSR Request Resolution Report",
+        "type": "audit_report"
+      }
+    ]
+  },
+  {
+    "title": "Information Security Policy",
+    "description": "Develop, maintain, and annually review the organization's comprehensive information security policies and procedures.",
+    "mode": "manual",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": false,
+    "generatesReport": false,
+    "documents": [
+      {
+        "title": "Information Security Policy",
+        "type": "policy"
+      }
+    ],
+    "schedules": [
+      {
+        "title": "Annual Policy Review",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Information Security Policy Approval",
+        "type": "all",
+        "stages": [
+          { "stageNumber": 1, "title": "CISO Approval" },
+          { "stageNumber": 2, "title": "Executive Management Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Risk Assessment Framework",
+    "description": "Establish and execute a risk assessment methodology, conducting regular assessments to identify, analyze, and mitigate risks.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "documents": [
+      {
+        "title": "Risk Assessment Framework Policy",
+        "type": "policy"
+      }
+    ],
+    "schedules": [
+      {
+        "title": "Semi-Annual Risk Assessment",
+        "interval": "semi_annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Semi-Annual Risk Assessment",
+        "type": "risk_assessment",
+        "assessmentConfig": {
+          "generatesReportTitle": "Risk Assessment Summary Report"
+        },
+        "fields": [
+          {
+            "fieldKey": "riskIdentified",
+            "label": "Identified Risk",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "riskLikelihood",
+            "label": "Likelihood (1-5)",
+            "type": "rating",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "riskImpact",
+            "label": "Impact (1-5)",
+            "type": "rating",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "mitigationPlan",
+            "label": "Mitigation Plan",
+            "type": "textarea",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Risk Assessment Review",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Risk Management Team Review" },
+          { "stageNumber": 2, "title": "Management Approval of Findings" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Risk Assessment Summary Report",
+        "type": "risk_assessment"
+      }
+    ]
+  },
+  {
+    "title": "Compliance Monitoring",
+    "description": "Implement automated processes to continuously monitor and ensure compliance with applicable regulations and standards, with a quarterly review of findings.",
+    "mode": "automated",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "SIEM",
+        "GRC platforms"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Quarterly Compliance Scan",
+        "interval": "quarterly",
+        "method": "automated"
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Compliance Report Review",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Compliance Team Review" },
+          { "stageNumber": 2, "title": "Management Acknowledgement" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Quarterly Compliance Monitoring Report",
+        "type": "compliance_report"
+      }
+    ]
+  },
+  {
+    "title": "Data Inventory and Mapping",
+    "description": "Maintain a comprehensive inventory of data assets and their locations across the organization through an annual review process.",
+    "mode": "manual",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Annual Data Inventory Review",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Annual Data Inventory",
+        "type": "questionnaire",
+        "fields": [
+          {
+            "fieldKey": "dataAsset",
+            "label": "Data Asset Name",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "dataLocation",
+            "label": "Location (System/Database)",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "dataOwner",
+            "label": "Data Owner",
+            "type": "text",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Data Inventory Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Data Owner Verification" },
+          { "stageNumber": 2, "title": "DPO Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Data Backup and Recovery",
+    "description": "Implement robust data backup procedures, with automated daily backups and quarterly recovery testing to ensure business continuity.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "Cloud storage services",
+        "Backup services"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Daily Automated Backups",
+        "interval": "daily",
+        "method": "automated"
+      },
+      {
+        "title": "Quarterly Recovery Test",
+        "interval": "quarterly",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Quarterly Backup Recovery Test",
+        "type": "checklist",
+        "fields": [
+          { "fieldKey": "systemTested", "label": "System Tested", "type": "text", "isRequired": true },
+          { "fieldKey": "testSuccessful", "label": "Recovery Successful?", "type": "boolean", "isRequired": true },
+          { "fieldKey": "recoveryTime", "label": "Time to Recover (minutes)", "type": "number", "isRequired": true }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Recovery Test Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "IT Manager Review" },
+          { "stageNumber": 2, "title": "System Owner Sign-off" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Daily Backup and Recovery Report",
+        "type": "performance_metrics"
+      },
+      {
+        "title": "Quarterly Recovery Test Report",
+        "type": "audit_report"
+      }
+    ]
+  },
+  {
+    "title": "Data Encryption",
+    "description": "Define and enforce standards for encrypting data at rest and in transit through a formal policy document.",
+    "mode": "workflow",
+    "isRecurring": false,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": false,
+    "documents": [
+      {
+        "title": "Data Encryption Standard",
+        "type": "standard"
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Data Encryption Standard Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Cryptography Team Review" },
+          { "stageNumber": 2, "title": "CISO Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Vulnerability Management",
+    "description": "Establish a program to identify, assess, and remediate security vulnerabilities through automated weekly scans and a formal remediation process.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "Vulnerability scanning tools (e.g., Nessus, Qualys)"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Weekly Vulnerability Scans",
+        "interval": "weekly",
+        "method": "automated"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Vulnerability Remediation Plan",
+        "type": "custom",
+        "fields": [
+          { "fieldKey": "vulnerabilityId", "label": "Vulnerability ID", "type": "text", "isRequired": true },
+          { "fieldKey": "remediationPlan", "label": "Remediation Plan", "type": "textarea", "isRequired": true },
+          { "fieldKey": "targetDate", "label": "Target Remediation Date", "type": "date", "isRequired": true }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Remediation Plan Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "System Owner Approval" },
+          { "stageNumber": 2, "title": "Security Team Verification" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Weekly Vulnerability Scan Report",
+        "type": "risk_assessment"
+      }
+    ]
+  },
+  {
+    "title": "Patch Management",
+    "description": "Implement a systematic patch management process to keep systems updated and secure, verified through a monthly checklist.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Monthly Patching Cycle",
+        "interval": "monthly",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Monthly Patch Management Checklist",
+        "type": "checklist",
+        "fields": [
+          {
+            "fieldKey": "systemPatched",
+            "label": "System/Application Patched",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "patchApplied",
+            "label": "Patch ID / Version",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "patchDate",
+            "label": "Date Applied",
+            "type": "date",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Patch Management Verification",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "System Administrator Submission" },
+          { "stageNumber": 2, "title": "IT Manager Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Network Security",
+    "description": "Implement and monitor network security controls, including daily automated monitoring and a quarterly review of firewall rules.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "Firewall management tools",
+        "Network monitoring tools"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Daily Network Monitoring",
+        "interval": "daily",
+        "method": "automated"
+      },
+      {
+        "title": "Quarterly Firewall Rule Review",
+        "interval": "quarterly",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Quarterly Firewall Rule Review",
+        "type": "checklist",
+        "fields": [
+          { "fieldKey": "ruleId", "label": "Rule ID Reviewed", "type": "text", "isRequired": true },
+          { "fieldKey": "isRuleStillNeeded", "label": "Is the rule still required?", "type": "boolean", "isRequired": true },
+          { "fieldKey": "justification", "label": "Justification", "type": "textarea", "isRequired": true }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Firewall Rule Review Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Network Admin Review" },
+          { "stageNumber": 2, "title": "Security Manager Approval" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Daily Network Security Monitoring Report",
+        "type": "performance_metrics"
+      }
+    ]
+  },
+  {
+    "title": "System Integration Security",
+    "description": "Ensure all system integrations (APIs, third-party connections) are securely configured and reviewed annually.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Annual Integration Review",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Annual System Integration Security Review",
+        "type": "checklist",
+        "fields": [
+          {
+            "fieldKey": "integrationName",
+            "label": "Integration/API Name",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "authMethod",
+            "label": "Authentication Method Secure?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "dataEncrypted",
+            "label": "Data Encrypted in Transit?",
+            "type": "boolean",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "System Owner Review" },
+          { "stageNumber": 2, "title": "IT Security Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Third-Party Risk Management",
+    "description": "Establish and execute processes to assess and manage risks associated with third-party vendors and partners through an annual assessment.",
+    "mode": "manual",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Annual Vendor Risk Assessment",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Annual Third-Party Risk Assessment",
+        "type": "assessment",
+        "assessmentConfig": {
+          "generatesReportTitle": "Third-Party Risk Assessment Report"
+        },
+        "fields": [
+          {
+            "fieldKey": "vendorName",
+            "label": "Vendor Name",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "serviceProvided",
+            "label": "Service Provided",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "riskRating",
+            "label": "Overall Risk Rating",
+            "type": "select",
+            "options": {
+              "choices": ["Low", "Medium", "High"]
+            },
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Third-Party Risk Assessment Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Vendor Management Office Review" },
+          { "stageNumber": 2, "title": "Security Team Approval" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Third-Party Risk Assessment Report",
+        "type": "risk_assessment"
+      }
+    ]
+  },
+  {
+    "title": "Business Continuity Planning",
+    "description": "Develop, maintain, and annually review business continuity and disaster recovery plans to ensure organizational resilience.",
+    "mode": "manual",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": false,
+    "documents": [
+      {
+        "title": "Business Continuity Plan",
+        "type": "procedure",
+        "templateId": "EXISTING_BCP_TEMPLATE_UUID_HERE"
+      }
+    ],
+    "schedules": [
+      {
+        "title": "Annual BCP Review",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "approvals": [
+      {
+        "title": "BCP Approval",
+        "type": "all",
+        "stages": [
+          { "stageNumber": 1, "title": "Department Head Review" },
+          { "stageNumber": 2, "title": "Executive Management Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Incident Response Planning",
+    "description": "Establish and test incident response procedures through semi-annual drills to ensure effective handling of security incidents.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Semi-Annual Incident Response Drill",
+        "interval": "semi_annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Semi-Annual Incident Response Drill",
+        "type": "checklist",
+        "fields": [
+          {
+            "fieldKey": "scenarioTested",
+            "label": "Scenario Tested",
+            "type": "text",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "participants",
+            "label": "Participants",
+            "type": "textarea",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "lessonsLearned",
+            "label": "Lessons Learned",
+            "type": "textarea",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Incident Response Drill Review",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Incident Response Team Lead Review" },
+          { "stageNumber": 2, "title": "CISO Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Security Monitoring and Logging",
+    "description": "Implement comprehensive, automated security monitoring and logging to detect and respond to security events, with a workflow for critical alert review.",
+    "mode": "automated",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "categorySpecificConfig": {
+      "systemIntegrations": [
+        "Log management platforms",
+        "SIEM"
+      ]
+    },
+    "schedules": [
+      {
+        "title": "Continuous Security Monitoring",
+        "interval": "daily",
+        "method": "automated"
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Critical Alert Review",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "SOC Analyst Triage" },
+          { "stageNumber": 2, "title": "Security Engineer Investigation" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Daily Security Monitoring Report",
+        "type": "performance_metrics"
+      }
+    ]
+  },
+  {
+    "title": "Security Incident Response",
+    "description": "Establish and annually review formal incident response procedures and escalation processes.",
+    "mode": "manual",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "documents": [
+      {
+        "title": "Incident Response Plan",
+        "type": "procedure"
+      }
+    ],
+    "schedules": [
+      {
+        "title": "Annual IRP Review",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Incident Response Plan Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Incident Response Team Review" },
+          { "stageNumber": 2, "title": "CISO Approval" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Forensic Readiness",
+    "description": "Implement and annually assess forensic readiness capabilities to support incident investigation and legal requirements.",
+    "mode": "hybrid",
+    "isRecurring": true,
+    "requiresApproval": true,
+    "requiresEvidence": true,
+    "generatesReport": true,
+    "schedules": [
+      {
+        "title": "Annual Forensic Readiness Assessment",
+        "interval": "annually",
+        "method": "manual"
+      }
+    ],
+    "forms": [
+      {
+        "title": "Annual Forensic Readiness Assessment",
+        "type": "assessment",
+        "assessmentConfig": {
+          "generatesReportTitle": "Forensic Readiness Assessment Report"
+        },
+        "fields": [
+          {
+            "fieldKey": "logRetentionVerified",
+            "label": "Log Retention Policies Verified?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "forensicToolsTested",
+            "label": "Forensic Tools Tested?",
+            "type": "boolean",
+            "isRequired": true
+          },
+          {
+            "fieldKey": "chainOfCustodyProcedure",
+            "label": "Chain of Custody Procedure Documented?",
+            "type": "boolean",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "approvals": [
+      {
+        "title": "Forensic Readiness Assessment Approval",
+        "type": "sequential",
+        "stages": [
+          { "stageNumber": 1, "title": "Security Team Review" },
+          { "stageNumber": 2, "title": "Legal Team Approval" }
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "title": "Forensic Readiness Assessment Report",
+        "type": "audit_report"
+      }
+    ]
+  }
+]
