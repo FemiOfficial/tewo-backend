@@ -12,7 +12,7 @@ import { ControlWizard } from './control-wizard.entity';
 import { ControlWizardFormField } from './control-wizard-form-field.entity';
 import { ControlWizardFormSubmission } from './control-wizard-form-submission.entity';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { ControlWizardFormSchedule } from './control-form-wizard-schedule.entity';
+import { ControlWizardFormSchedule } from './control-wizard-form-schedule.entity';
 
 export enum FormType {
   ASSESSMENT = 'assessment',

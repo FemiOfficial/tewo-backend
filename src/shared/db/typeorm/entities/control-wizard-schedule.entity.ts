@@ -71,16 +71,16 @@ export class NotificationRecipients {
 
 @ObjectType()
 export class NotificationConfig {
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true, defaultValue: true })
   notifyOnCompletion: boolean;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true, defaultValue: true })
   notifyOnFailure: boolean;
 
   @Field(() => NotificationRecipients, { nullable: true })
   recipients: NotificationRecipients;
 
-  @Field(() => Boolean, { nullable: true })
+  @Field(() => Boolean, { nullable: true, defaultValue: true })
   notifyOnProgress: boolean;
 
   @Field(() => String, { nullable: true })
@@ -122,7 +122,7 @@ export class ReminderConfig {
 @ObjectType()
 export class ScheduleConfig {
   @Field(() => Number)
-  @Column({ type: 'boolean', nullable: true })
+  @Column({ type: 'boolean', nullable: true, default: false })
   instant?: boolean;
 
   @Field(() => Number)
@@ -182,7 +182,7 @@ export class ControlWizardSchedule {
 
   @Field(() => ScheduleConfig)
   @Column({ type: 'jsonb', nullable: true })
-  scheduleConfig: ReminderConfig;
+  scheduleConfig: ScheduleConfig;
 
   @Field(() => ReminderConfig)
   @Column({ type: 'jsonb', nullable: true })
@@ -201,6 +201,10 @@ export class ControlWizardSchedule {
   })
   assignedUsers: User[]; // this users can also manually trigger the schedule
 
+  @Field(() => String, { nullable: true })
+  @Column({ type: 'uuid', nullable: true })
+  createdByUserId: string;
+
   @Field(() => NotificationConfig)
   @Column({ type: 'jsonb', nullable: true })
   notificationConfig?: NotificationConfig;
@@ -214,6 +218,11 @@ export class ControlWizardSchedule {
   updatedAt: Date;
 
   // Relations
+  @Field(() => User, { nullable: true })
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'createdByUserId' })
+  createdByUser: User;
+
   @Field(() => ControlWizard)
   @ManyToOne(() => ControlWizard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'controlWizardId' })
