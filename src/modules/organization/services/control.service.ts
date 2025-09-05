@@ -32,6 +32,8 @@ import {
   ReportConfig,
   ControlWizardApprovalStage,
   ControlWizardApproval,
+  ControlWizardDocumentVersion,
+  ControlWizardEntityScheduleStatus,
 } from '../../../shared/db/typeorm/entities';
 
 import { CreateControlWizardDto } from '../dto/org-controls';
@@ -58,12 +60,13 @@ import {
   ControlApprovalStageSubmission,
   StageStatus,
 } from 'src/shared/db/typeorm/entities/control-approval-stage-submission.entity';
-import { AssignUserToControlDto } from '../dto/org-controls/users/users.dto';
-// import { InviteUserToPortalDto } from '../dto/org-controls/users/users.dto';
-// import { RemoveFormFieldDto } from '../dto/org-controls/forms/forms.dto';
-// import { RemoveFormDto } from '../dto/org-controls/forms/forms.dto';
-// import { RemoveDocumentDto } from '../dto/org-controls/document/document.dto';
-// import { RemoveScheduleDto } from '../dto/org-controls/schedules/schedules.dto';
+import { RemoveFormFieldDto } from '../dto/org-controls/forms/forms.dto';
+import { RemoveDocumentVersionDto } from '../dto/org-controls/document/document.dto';
+import {
+  RemoveControlWizardScheduleDto,
+  UnassignControlWizardScheduleFromReportDto,
+  UnassignControlWizardScheduleFromFormDto,
+} from '../dto/org-controls/schedules/schedules.dto';
 // import { RemoveReportDto } from '../dto/org-controls/report/report.dto';
 // import { RemoveApprovalDto } from '../dto/org-controls/approvals/approvals.dto';
 // import { RemoveApprovalStageDto } from '../dto/org-controls/approvals/approvals.dto';
@@ -92,6 +95,8 @@ export class ControlService {
     private readonly controlWizardFormFieldRepository: Repository<ControlWizardFormField>,
     @InjectRepository(ControlWizardDocument)
     private readonly controlWizardDocumentRepository: Repository<ControlWizardDocument>,
+    @InjectRepository(ControlWizardDocumentVersion)
+    private readonly controlWizardDocumentVersionRepository: Repository<ControlWizardDocumentVersion>,
     @InjectRepository(Framework)
     private readonly frameworkRepository: Repository<Framework>,
     @InjectRepository(ControlWizardApproval)
@@ -1156,103 +1161,223 @@ export class ControlService {
     return approvals;
   }
 
-  // async inviteUserToPortal(
-  //   organizationId: string,
-  //   payload: InviteUserToPortalDto,
-  // ) {
-  //   // Check if user already exists
-  //   const existingUser = await this.userRepository.findOne({
-  //     where: { email: payload.email, organizationId },
-  //   });
+  async unassignControlWizardScheduleFromForm(
+    organizationId: string,
+    controlWizardId: string,
+    payload: UnassignControlWizardScheduleFromFormDto,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: { id: controlWizardId, organizationId },
+      relations: ['forms', 'forms.schedules'],
+    });
 
-  //   if (existingUser) {
-  //     throw new BadRequestException('User already exists in the organization');
-  //   }
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
 
-  //   // Create user invitation (you might want to use a separate invitation entity)
-  //   const newUser = this.userRepository.create({
-  //     organizationId,
-  //     email: payload.email,
-  //     firstName: payload.firstName,
-  //     lastName: payload.lastName,
-  //     isEmailVerified: false,
-  //     invitedAt: new Date(),
-  //     // Add other required fields based on your User entity
-  //   });
+    const form = controlWizard.forms.find((f) => f.id === payload.formId);
+    if (!form) {
+      throw new BadRequestException('Invalid form id');
+    }
 
-  //   await this.userRepository.save(newUser);
+    const formSchedule = form.schedules.find(
+      (s) => s.id === payload.scheduleId,
+    );
+    if (!formSchedule) {
+      throw new BadRequestException('Invalid schedule id');
+    }
 
-  //   // TODO: Send invitation email
-  //   // TODO: Create user roles if provided
+    if (formSchedule.status === ControlWizardEntityScheduleStatus.IN_PROGRESS) {
+      throw new BadRequestException(
+        'You cannot unassign the schedule from the form because it is currently in progress',
+      );
+    }
 
-  //   return newUser;
-  // }
+    await this.controlWizardFormScheduleRepository.delete({
+      id: formSchedule.id,
+    });
 
-  // async getOrganizationUsers(organizationId: string) {
-  //   return await this.userRepository.find({
-  //     where: { organizationId },
-  //     select: ['id', 'email', 'firstName', 'lastName', 'createdAt', 'isActive'],
-  //   });
-  // }
+    return {
+      success: true,
+      message: 'Schedule unassigned from form successfully',
+    };
+  }
 
-  // async removeFormField(
-  //   organizationId: string,
-  //   controlWizardId: string,
-  //   fieldId: string,
-  // ) {
-  //   const controlWizard = await this.controlWizardRepository.findOne({
-  //     where: {
-  //       id: controlWizardId,
-  //       organizationId,
-  //       type: ControlWizardType.CUSTOM,
-  //     },
-  //   });
+  async unassignControlWizardScheduleFromReport(
+    organizationId: string,
+    controlWizardId: string,
+    payload: UnassignControlWizardScheduleFromReportDto,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: { id: controlWizardId, organizationId },
+      relations: ['reports', 'reports.schedules'],
+    });
 
-  //   if (!controlWizard) {
-  //     throw new BadRequestException('Invalid control wizard id');
-  //   }
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
 
-  //   const field = await this.controlWizardFormFieldRepository.findOne({
-  //     where: { id: fieldId },
-  //     relations: ['form'],
-  //   });
+    const report = controlWizard.reports.find((r) => r.id === payload.reportId);
+    if (!report) {
+      throw new BadRequestException('Invalid report id');
+    }
 
-  //   if (!field || field.form.controlWizardId !== controlWizardId) {
-  //     throw new BadRequestException('Invalid form field id');
-  //   }
+    const reportSchedule = report.schedules.find(
+      (s) => s.id === payload.scheduleId,
+    );
+    if (!reportSchedule) {
+      throw new BadRequestException('Invalid schedule id');
+    }
 
-  //   await this.controlWizardFormFieldRepository.delete({ id: fieldId });
+    if (
+      reportSchedule.status === ControlWizardEntityScheduleStatus.IN_PROGRESS
+    ) {
+      throw new BadRequestException(
+        'You cannot unassign the schedule from the report because it is currently in progress',
+      );
+    }
 
-  //   return { success: true, message: 'Form field removed successfully' };
-  // }
+    await this.controlWizardReportScheduleRepository.delete({
+      id: reportSchedule.id,
+    });
 
-  // async removeForm(
-  //   organizationId: string,
-  //   controlWizardId: string,
-  //   formId: string,
-  // ) {
-  //   const controlWizard = await this.controlWizardRepository.findOne({
-  //     where: {
-  //       id: controlWizardId,
-  //       organizationId,
-  //       type: ControlWizardType.CUSTOM,
-  //     },
-  //   });
+    return {
+      success: true,
+      message: 'Schedule unassigned from report successfully',
+    };
+  }
 
-  //   if (!controlWizard) {
-  //     throw new BadRequestException('Invalid control wizard id');
-  //   }
+  async removeControlWizardSchedule(
+    organizationId: string,
+    controlWizardId: string,
+    payload: RemoveControlWizardScheduleDto,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: { id: controlWizardId, organizationId },
+      relations: ['forms', 'forms.schedules', 'reports', 'reports.schedules'],
+    });
 
-  //   const form = await this.controlWizardFormRepository.findOne({
-  //     where: { id: formId, controlWizardId },
-  //   });
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
 
-  //   if (!form) {
-  //     throw new BadRequestException('Invalid form id');
-  //   }
+    const formSchedule = controlWizard.forms.find((f) => f.schedules.find((s) => s.id === payload.scheduleId));
+    if (formSchedule) {
+      throw new BadRequestException('Invalid form schedule id, it is still assigned to a form');
+    }
 
-  //   await this.controlWizardFormRepository.delete({ id: formId });
+    const reportSchedule = controlWizard.reports.find((r) => r.schedules.find((s) => s.id === payload.scheduleId));
+    if (reportSchedule) {
+      throw new BadRequestException('Invalid report schedule id, it is still assigned to a report');
+    }
+    
+    await this.controlWizardScheduleRepository.delete({ id: payload.scheduleId });
 
-  //   return { success: true, message: 'Form removed successfully' };
-  // }
+    return {
+      success: true,
+      message: 'Schedule removed successfully',
+    };
+  }
+
+  async removeDocumentVersion(
+    organizationId: string,
+    controlWizardId: string,
+    payload: RemoveDocumentVersionDto,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: { id: controlWizardId, organizationId },
+      relations: ['documents', 'documents.versions'],
+    });
+
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
+
+    const document = controlWizard.documents.find(
+      (d) => d.id === payload.documentId,
+    );
+    if (!document) {
+      throw new BadRequestException('Invalid document id');
+    }
+
+    if (payload.allVersions) {
+      await this.controlWizardDocumentVersionRepository.delete({
+        documentId: document.id,
+      });
+    } else {
+      const version = document.versions.find((v) => v.id === payload.versionId);
+      if (!version) {
+        throw new BadRequestException('Invalid document version id');
+      }
+      await this.controlWizardDocumentVersionRepository.delete({
+        id: payload.versionId,
+      });
+    }
+
+    return {
+      success: true,
+      message: `Document version ${payload.allVersions ? 'versions' : 'version'} removed successfully`,
+    };
+  }
+
+  async removeFormField(
+    organizationId: string,
+    controlWizardId: string,
+    payload: RemoveFormFieldDto,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: {
+        id: controlWizardId,
+        organizationId,
+        type: ControlWizardType.CUSTOM,
+      },
+      relations: ['forms', 'forms.fields'],
+    });
+
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
+
+    const form = controlWizard.forms.find((f) => f.id === payload.formId);
+    if (!form) {
+      throw new BadRequestException('Invalid form id');
+    }
+
+    const field = form.fields.find((f) => f.id === payload.fieldId);
+    if (!field) {
+      throw new BadRequestException('Invalid form field id');
+    }
+
+    await this.controlWizardFormFieldRepository.delete({ id: payload.fieldId });
+
+    return { success: true, message: 'Form field removed successfully' };
+  }
+
+  async removeForm(
+    organizationId: string,
+    controlWizardId: string,
+    formId: string,
+  ) {
+    const controlWizard = await this.controlWizardRepository.findOne({
+      where: {
+        id: controlWizardId,
+        organizationId,
+        type: ControlWizardType.CUSTOM,
+      },
+      relations: ['forms'],
+    });
+
+    if (!controlWizard) {
+      throw new BadRequestException('Invalid control wizard id');
+    }
+
+    const form = controlWizard.forms.find((f) => f.id === formId);
+    if (!form) {
+      throw new BadRequestException('Invalid form id');
+    }
+
+    await this.controlWizardFormRepository.delete({ id: formId });
+
+    return { success: true, message: 'Form removed successfully' };
+  }
 }

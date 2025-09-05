@@ -1,4 +1,4 @@
-import { Field } from '@nestjs/graphql';
+import { Field, registerEnumType } from '@nestjs/graphql';
 import {
   Column,
   CreateDateColumn,
@@ -11,7 +11,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { PrimaryGeneratedColumn } from 'typeorm';
 import { ControlWizardForm } from './control-wizard-form.entity';
 import { ControlWizardSchedule } from './control-wizard-schedule.entity';
-
+import { ControlWizardEntityScheduleStatus } from './control-wizard-schedule.entity';
 @Entity('control_wizard_form_schedules')
 @ObjectType()
 export class ControlWizardFormSchedule {
@@ -26,6 +26,10 @@ export class ControlWizardFormSchedule {
   @Field(() => String)
   @Column({ type: 'uuid' })
   scheduleId: string;
+
+  @Field(() => ControlWizardEntityScheduleStatus)
+  @Column({ type: 'enum', enum: ControlWizardEntityScheduleStatus })
+  status: ControlWizardEntityScheduleStatus;
 
   @Field(() => Date)
   @Column({ type: 'timestamptz', nullable: true })

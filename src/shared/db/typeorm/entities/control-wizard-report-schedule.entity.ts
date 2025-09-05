@@ -9,7 +9,10 @@ import {
 } from 'typeorm';
 import { ControlWizardReport } from './control-wizard-report.entity';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { ControlWizardSchedule } from './control-wizard-schedule.entity';
+import {
+  ControlWizardEntityScheduleStatus,
+  ControlWizardSchedule,
+} from './control-wizard-schedule.entity';
 
 export enum ReportScheduleType {
   DAILY = 'daily',
@@ -48,6 +51,10 @@ export class ControlWizardReportSchedule {
   @Field(() => String)
   @Column({ type: 'uuid' })
   scheduleId: string;
+
+  @Field(() => ControlWizardEntityScheduleStatus)
+  @Column({ type: 'enum', enum: ControlWizardEntityScheduleStatus })
+  status: ControlWizardEntityScheduleStatus;
 
   @Field(() => Boolean)
   @Column({ type: 'boolean', default: false })

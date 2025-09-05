@@ -240,3 +240,41 @@ export class AssignControlWizardScheduleToFormDto {
   @Field(() => String)
   scheduleId: string;
 }
+@InputType()
+export class UnassignControlWizardScheduleFromFormDto {
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  formId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  scheduleId: string;
+}
+
+@InputType()
+export class UnassignControlWizardScheduleFromReportDto {
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  reportId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  scheduleId: string;
+}
+
+@InputType()
+export class RemoveControlWizardScheduleDto {
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  scheduleId: string;
+
+  @IsOptional()
+  @IsString()
+  @Field(() => Boolean, { nullable: true })
+  unassignAllEntities?: boolean;
+}

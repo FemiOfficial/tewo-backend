@@ -44,6 +44,17 @@ export enum ReminderTimeUnitBeforeTrigger {
   MINUTE = 'minute',
 }
 
+export enum ControlWizardEntityScheduleStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  EXECUTED = 'executed',
+  FAILED = 'failed',
+}
+
+registerEnumType(ControlWizardEntityScheduleStatus, {
+  name: 'ControlWizardEntityScheduleStatus',
+});
+
 registerEnumType(ScheduleInterval, {
   name: 'ScheduleInterval',
 });

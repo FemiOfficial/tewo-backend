@@ -302,3 +302,17 @@ export class UpsertControlWizardFormFieldDto {
   @Field(() => FormFieldScoringDto, { nullable: true })
   scoring?: FormFieldScoringDto;
 }
+
+@InputType()
+export class RemoveFormFieldDto {
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  formId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  fieldId: string;
+}
+

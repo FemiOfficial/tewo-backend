@@ -58,6 +58,13 @@ export class DocumentConfig {
 
   @Field(() => Number, { nullable: true })
   maxVersions?: number;
+
+  // allowComments: boolean;
+  // allowAnnotations: boolean;
+  // retentionPolicy?: {
+  //   activeRetention: number; // days
+  //   archivalRetention: number; // days
+  // };
 }
 
 @ObjectType()
@@ -114,19 +121,7 @@ export class ControlWizardDocument {
 
   @Field(() => DocumentConfig)
   @Column({ type: 'jsonb', nullable: true })
-  documentConfig: {
-    requireApproval: boolean;
-    autoExpiry?: boolean;
-    expiryDays?: number;
-    versioningEnabled: boolean;
-    maxVersions?: number;
-    // allowComments: boolean;
-    // allowAnnotations: boolean;
-    // retentionPolicy?: {
-    //   activeRetention: number; // days
-    //   archivalRetention: number; // days
-    // };
-  };
+  documentConfig: DocumentConfig;
 
   @Field(() => DocumentMetadata)
   @Column({ type: 'jsonb', nullable: true })

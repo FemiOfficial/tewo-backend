@@ -218,3 +218,21 @@ export class PublishDocumentVersionDto {
   @Field(() => String, { nullable: true })
   versionId?: string; // if this is not provided, the latest version will be published
 }
+
+@InputType()
+export class RemoveDocumentVersionDto {
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  documentId: string;
+
+  @IsOptional()
+  @IsString()
+  @Field(() => String)
+  versionId: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Field(() => Boolean, { nullable: true })
+  allVersions?: boolean;
+}
