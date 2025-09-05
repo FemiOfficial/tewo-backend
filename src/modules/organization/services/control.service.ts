@@ -904,7 +904,7 @@ export class ControlService {
         for (const stageDto of payload.stages) {
           await this.upsertControlWizardApprovalStage(
             organizationId,
-            approval.id,
+            approval!.id,
             stageDto,
           );
         }
