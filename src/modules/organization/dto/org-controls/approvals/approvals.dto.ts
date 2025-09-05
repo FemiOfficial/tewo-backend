@@ -15,6 +15,7 @@ import {
 import { Field, InputType } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
 import { ApprovalType } from 'src/shared/db/typeorm/entities';
+import { StageStatus } from 'src/shared/db/typeorm/entities/control-approval-stage-submission.entity';
 
 @InputType()
 export class ApprovalConfigDto {
@@ -241,20 +242,20 @@ export class SubmitApprovalDecisionDto {
   @Field(() => String)
   approvalId: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   @Field(() => String)
-  stageId: string;
+  stageId?: string;
 
   @IsNotEmpty()
-  @IsEnum(['approve', 'reject'])
+  @IsEnum([StageStatus.APPROVED, StageStatus.REJECTED, StageStatus.SKIPPED])
   @Field(() => String)
-  decision: 'approve' | 'reject';
+  decision: StageStatus;
 
   @IsOptional()
   @IsString()
   @Field(() => String, { nullable: true })
-  comments?: string;
+  comment?: string;
 
   @IsOptional()
   @IsArray()

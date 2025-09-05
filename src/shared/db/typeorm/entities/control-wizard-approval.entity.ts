@@ -127,10 +127,6 @@ export class ControlWizardApproval {
     }[];
   };
 
-  @Field(() => String, { nullable: true })
-  @Column({ type: 'uuid', nullable: true })
-  currentStageId: string;
-
   @Field(() => Date, { nullable: true })
   @Column({ type: 'timestamp', nullable: true })
   dueDate: Date;

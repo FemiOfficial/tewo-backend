@@ -52,7 +52,13 @@ import { AssignControlWizardReportToScheduleDto } from '../dto/org-controls/repo
 import { UpsertControlWizardApprovalDto } from '../dto/org-controls/approvals/approvals.dto';
 import { UpsertControlWizardApprovalStageDto } from '../dto/org-controls/approvals/approvals.dto';
 import { SubmitApprovalDecisionDto } from '../dto/org-controls/approvals/approvals.dto';
-// import { AssignUserToControlDto } from '../dto/org-controls/users/users.dto';
+import { ControlApprovalSubmission } from 'src/shared/db/typeorm/entities/control-approval-submission.entity';
+import { ApprovalSubmissionStatus } from 'src/shared/db/typeorm/entities/control-approval-submission.entity';
+import {
+  ControlApprovalStageSubmission,
+  StageStatus,
+} from 'src/shared/db/typeorm/entities/control-approval-stage-submission.entity';
+import { AssignUserToControlDto } from '../dto/org-controls/users/users.dto';
 // import { InviteUserToPortalDto } from '../dto/org-controls/users/users.dto';
 // import { RemoveFormFieldDto } from '../dto/org-controls/forms/forms.dto';
 // import { RemoveFormDto } from '../dto/org-controls/forms/forms.dto';
@@ -96,6 +102,10 @@ export class ControlService {
     private readonly controlCategoryRepository: Repository<ControlCategory>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(ControlApprovalSubmission)
+    private readonly controlApprovalSubmissionRepository: Repository<ControlApprovalSubmission>,
+    @InjectRepository(ControlApprovalStageSubmission)
+    private readonly controlApprovalStageSubmissionRepository: Repository<ControlApprovalStageSubmission>,
   ) {}
 
   async getControlWizardSetupStatus(organizationId: string, controlId: string) {
@@ -982,6 +992,58 @@ export class ControlService {
       throw new BadRequestException('Invalid approval id');
     }
 
+    let approvalSubmission: ControlApprovalSubmission | null = null;
+    // if no stage id, this is processed as a new submission
+    if (!payload.stageId) {
+      // this is processed as a new submission but first validate if there is a pending submission
+      // where the user is the approver
+      const isAnySubmissionPending =
+        await this.controlApprovalSubmissionRepository.findOne({
+          where: {
+            status: ApprovalSubmissionStatus.PENDING,
+            approval: {
+              stages: {
+                approvers: {
+                  userId: userId,
+                  isRequired: true,
+                },
+              },
+            },
+          },
+          relations: ['approval', 'approval.stages'],
+        });
+
+      if (isAnySubmissionPending) {
+        throw new BadRequestException(
+          'You have a pending submission for your approval. Please decide on the pending submission first.',
+        );
+      }
+
+      const newSubmission = this.controlApprovalSubmissionRepository.create({
+        approvalId: payload.approvalId,
+        controlWizardId: approval.controlWizardId,
+        status: ApprovalSubmissionStatus.PENDING,
+      });
+
+      approvalSubmission =
+        await this.controlApprovalSubmissionRepository.save(newSubmission);
+
+      return this.controlApprovalSubmissionRepository.findOne({
+        where: { id: approvalSubmission.id },
+        relations: ['stagesSubmissions'],
+      });
+    }
+
+    approvalSubmission = await this.controlApprovalSubmissionRepository.findOne(
+      {
+        where: { approvalId: payload.approvalId },
+      },
+    );
+
+    if (!approvalSubmission) {
+      throw new BadRequestException('Invalid approval id');
+    }
+
     const stage = approval.stages.find((s) => s.id === payload.stageId);
     if (!stage) {
       throw new BadRequestException('Invalid stage id');
@@ -991,142 +1053,86 @@ export class ControlService {
     const userApprover = stage.approvers.find((a) => a.userId === userId);
     if (!userApprover) {
       throw new BadRequestException(
-        'User not authorized to approve this stage',
+        'You are not authorized to approve this stage, please contact the administrator.',
       );
     }
 
-    // Update stage result
-    const currentResult = stage.stageResult || {
-      approvedBy: [],
-      rejectedBy: [],
-      comments: {},
-    };
-
-    if (payload.decision === 'approve') {
-      if (!currentResult.approvedBy.includes(userId)) {
-        currentResult.approvedBy.push(userId);
-      }
-      currentResult.rejectedBy = currentResult.rejectedBy.filter(
-        (id) => id !== userId,
-      );
-    } else {
-      if (!currentResult.rejectedBy.includes(userId)) {
-        currentResult.rejectedBy.push(userId);
-      }
-      currentResult.approvedBy = currentResult.approvedBy.filter(
-        (id) => id !== userId,
+    if (payload.decision === StageStatus.SKIPPED && userApprover.isRequired) {
+      throw new BadRequestException(
+        'You cannot skip this stage, it is required for the approval process.',
       );
     }
 
-    if (payload.comments) {
-      currentResult.comments[userId] = payload.comments;
-    }
+    const approvalStageSubmission =
+      await this.controlApprovalStageSubmissionRepository.findOne({
+        where: { approvalStageId: stage.id, userId: userId },
+      });
 
-    if (payload.attachments?.length) {
-      currentResult.attachments = payload.attachments;
-    }
+    if (!approvalStageSubmission) {
+      const newApprovalStageSubmission =
+        this.controlApprovalStageSubmissionRepository.create({
+          approvalStageId: stage.id,
+          userId: userId,
+          status: payload.decision,
+          comments: payload.comment ? [payload.comment] : [],
+          attachments: payload.attachments,
+          decidedAt: [StageStatus.APPROVED, StageStatus.REJECTED].includes(
+            payload.decision,
+          )
+            ? new Date()
+            : undefined,
+          approvalSubmissionId: approvalSubmission.id,
+        });
 
-    // Update stage status based on approval logic
-    let newStageStatus = stage.status as StageStatus;
-    const requiredApprovals = stage.requiredApprovals || 1;
-
-    if (payload.decision === 'reject') {
-      newStageStatus = StageStatus.REJECTED;
-    } else if (currentResult.approvedBy.length >= requiredApprovals) {
-      newStageStatus = StageStatus.APPROVED;
+      await this.controlApprovalStageSubmissionRepository.save(
+        newApprovalStageSubmission,
+      );
     } else {
-      newStageStatus = StageStatus.IN_PROGRESS;
+      await this.controlApprovalStageSubmissionRepository.update(
+        { id: approvalStageSubmission.id },
+        {
+          status: payload.decision,
+          decidedAt: [StageStatus.APPROVED, StageStatus.REJECTED].includes(
+            payload.decision,
+          )
+            ? new Date()
+            : undefined,
+          comments: payload.comment
+            ? [...(approvalStageSubmission.comments || []), payload.comment]
+            : [],
+          attachments: payload.attachments
+            ? [
+                ...(approvalStageSubmission.attachments || []),
+                ...payload.attachments,
+              ]
+            : [],
+        },
+      );
+
+      await this.controlApprovalStageSubmissionRepository.save(
+        approvalStageSubmission,
+      );
     }
 
-    await this.controlWizardApprovalStageRepository.update(
-      { id: payload.stageId },
-      {
-        status: newStageStatus,
-        stageResult: currentResult,
-        ...((newStageStatus === StageStatus.APPROVED ||
-          newStageStatus === StageStatus.REJECTED) && {
-          completedAt: new Date(),
-        }),
-      },
-    );
+    const currentSubmissionState =
+      await this.controlApprovalSubmissionRepository.findOne({
+        where: { id: approvalSubmission.id },
+        relations: ['stagesSubmissions'],
+      });
 
-    // Update overall approval status if needed
-    await this.updateApprovalStatus(approval.id);
-
-    return await this.controlWizardApprovalRepository.findOne({
-      where: { id: payload.approvalId },
-      relations: ['controlWizard', 'stages'],
-    });
-  }
-
-  private async updateApprovalStatus(approvalId: string) {
-    const approval = await this.controlWizardApprovalRepository.findOne({
-      where: { id: approvalId },
-      relations: ['stages'],
-    });
-
-    if (!approval) return;
-
-    const stages = approval.stages.sort(
-      (a, b) => a.stageNumber - b.stageNumber,
-    );
-    let overallStatus = ApprovalStatus.IN_PROGRESS;
-
-    // Check if any stage is rejected
-    if (stages.some((stage) => stage.status === StageStatus.REJECTED)) {
-      overallStatus = ApprovalStatus.REJECTED;
-    } else {
-      // Check approval logic based on type
-      switch (approval.type) {
-        case ApprovalType.SEQUENTIAL:
-          // All stages must be approved in order
-          const allCompleted = stages.every(
-            (stage) =>
-              stage.status === StageStatus.APPROVED ||
-              stage.status === StageStatus.SKIPPED,
-          );
-          if (allCompleted) {
-            overallStatus = ApprovalStatus.APPROVED;
-          }
-          break;
-
-        case ApprovalType.PARALLEL:
-        case ApprovalType.ALL:
-          // All stages must be approved
-          if (stages.every((stage) => stage.status === StageStatus.APPROVED)) {
-            overallStatus = ApprovalStatus.APPROVED;
-          }
-          break;
-
-        case ApprovalType.ANY_ONE:
-          // Any one stage approved is sufficient
-          if (stages.some((stage) => stage.status === StageStatus.APPROVED)) {
-            overallStatus = ApprovalStatus.APPROVED;
-          }
-          break;
-
-        case ApprovalType.MAJORITY:
-          // Majority of stages must be approved
-          const approvedCount = stages.filter(
-            (stage) => stage.status === StageStatus.APPROVED,
-          ).length;
-          if (approvedCount > stages.length / 2) {
-            overallStatus = ApprovalStatus.APPROVED;
-          }
-          break;
-      }
+    if (
+      currentSubmissionState &&
+      currentSubmissionState.stagesSubmissions.every(
+        (s) => s.status === StageStatus.APPROVED,
+      )
+    ) {
+      await this.controlApprovalSubmissionRepository.update(
+        { id: approvalSubmission.id },
+        { status: ApprovalSubmissionStatus.COMPLETED, completedAt: new Date() },
+      );
     }
 
-    await this.controlWizardApprovalRepository.update(
-      { id: approvalId },
-      {
-        status: overallStatus,
-        ...((overallStatus === ApprovalStatus.APPROVED ||
-          overallStatus === ApprovalStatus.REJECTED) && {
-          completedAt: new Date(),
-        }),
-      },
-    );
+    return currentSubmissionState;
   }
 
   async getControlWizardApprovals(
@@ -1149,42 +1155,6 @@ export class ControlService {
 
     return approvals;
   }
-
-  // async assignUserToControl(
-  //   organizationId: string,
-  //   payload: AssignUserToControlDto,
-  // ) {
-  //   const controlWizard = await this.controlWizardRepository.findOne({
-  //     where: {
-  //       id: payload.controlWizardId,
-  //       organizationId,
-  //       type: ControlWizardType.CUSTOM,
-  //     },
-  //   });
-
-  //   if (!controlWizard) {
-  //     throw new BadRequestException('Invalid control wizard id');
-  //   }
-
-  //   const user = await this.userRepository.findOne({
-  //     where: { id: payload.userId, organizationId },
-  //   });
-
-  //   if (!user) {
-  //     throw new BadRequestException('Invalid user id');
-  //   }
-
-  //   // Update control wizard with assigned user
-  //   await this.controlWizardRepository.update(
-  //     { id: payload.controlWizardId },
-  //     { assignedUserId: payload.userId },
-  //   );
-
-  //   return await this.controlWizardRepository.findOne({
-  //     where: { id: payload.controlWizardId },
-  //     relations: ['assignedUser'],
-  //   });
-  // }
 
   // async inviteUserToPortal(
   //   organizationId: string,

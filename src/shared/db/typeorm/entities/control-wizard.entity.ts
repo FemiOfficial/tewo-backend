@@ -18,6 +18,7 @@ import { ControlWizardDocument } from './control-wizard-document.entity';
 import { ControlWizardApproval } from './control-wizard-approval.entity';
 import { ControlWizardReport } from './control-wizard-report.entity';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { ControlApprovalSubmission } from './control-approval-submission.entity';
 
 export enum ControlWizardType {
   DEFAULT = 'default',
@@ -238,4 +239,8 @@ export class ControlWizard {
   @Field(() => [ControlWizardReport], { nullable: true })
   @OneToMany(() => ControlWizardReport, (report) => report.controlWizard)
   reports: ControlWizardReport[];
+
+  @Field(() => [ControlApprovalSubmission], { nullable: true })
+  @OneToMany(() => ControlApprovalSubmission, (submission) => submission.controlWizard)
+  submissions: ControlApprovalSubmission[];
 }
