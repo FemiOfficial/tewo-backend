@@ -1261,17 +1261,27 @@ export class ControlService {
       throw new BadRequestException('Invalid control wizard id');
     }
 
-    const formSchedule = controlWizard.forms.find((f) => f.schedules.find((s) => s.id === payload.scheduleId));
+    const formSchedule = controlWizard.forms.find((f) =>
+      f.schedules.find((s) => s.id === payload.scheduleId),
+    );
     if (formSchedule) {
-      throw new BadRequestException('Invalid form schedule id, it is still assigned to a form');
+      throw new BadRequestException(
+        'Invalid form schedule id, it is still assigned to a form',
+      );
     }
 
-    const reportSchedule = controlWizard.reports.find((r) => r.schedules.find((s) => s.id === payload.scheduleId));
+    const reportSchedule = controlWizard.reports.find((r) =>
+      r.schedules.find((s) => s.id === payload.scheduleId),
+    );
     if (reportSchedule) {
-      throw new BadRequestException('Invalid report schedule id, it is still assigned to a report');
+      throw new BadRequestException(
+        'Invalid report schedule id, it is still assigned to a report',
+      );
     }
-    
-    await this.controlWizardScheduleRepository.delete({ id: payload.scheduleId });
+
+    await this.controlWizardScheduleRepository.delete({
+      id: payload.scheduleId,
+    });
 
     return {
       success: true,
