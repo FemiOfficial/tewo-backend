@@ -288,3 +288,11 @@ export class AssignControlWizardReportToScheduleDto {
   @Field(() => Boolean, { nullable: true })
   autoDistribute?: boolean;
 }
+
+@InputType()
+export class RemoveReportDto {
+  @IsNotEmpty()
+  @IsString()
+  @Field(() => String)
+  reportId: string;
+}
